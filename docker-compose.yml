@@ -1,0 +1,73 @@
+version: '2'
+
+services:
+  nginx-php-fpm:
+    image: "ahpiri/tankhah-production:4"
+    volumes:
+      - ./:/usr/share/nginx/html/home
+    ports:
+      - "8181:80"
+    networks:
+      vpcbr:
+        ipv4_address: 10.4.0.5
+    restart: always
+  mysql:
+    image: "mysql/mysql-server:5.7"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_ROOT_HOST=%
+    volumes:
+      - /opt/mysql_${APP_NAME}:/var/lib/mysql
+    networks:
+      vpcbr:
+        ipv4_address: 10.4.0.7
+    ports:
+      - 3306:3306
+    restart: always
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+      - MYSQL_USERNAME=root
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+    networks:
+      vpcbr:
+        ipv4_address: 10.4.0.8
+    restart: always
+    ports:
+      - 82:80
+  redis:
+    build:
+      context: ./
+      dockerfile: docker/redis.docker
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - /opt/redis_${APP_NAME}:/data
+    networks:
+      vpcbr:
+        ipv4_address: 10.4.0.9
+  backup:
+    build:
+      context: ./
+      dockerfile: docker/backup.docker
+    volumes:
+    - ./:/usr/share/nginx/html/home
+    networks:
+      vpcbr:
+        ipv4_address: 10.4.0.10
+    restart: always
+
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.4.0.0/16
+         gateway: 10.4.0.1
+
+

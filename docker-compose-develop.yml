@@ -1,0 +1,23 @@
+version: '2'
+
+services:
+  nginx-php-fpm:
+    image: "ahpiri/nginx-php-develop:7"
+    volumes:
+      - ./:/usr/share/nginx/html/home
+    ports:
+      - "8000:80"
+    networks:
+      vpcbr:
+        ipv4_address: 10.25.0.5
+  #    restart: always
+
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.25.0.0/16
+          gateway: 10.25.0.1
+
+
