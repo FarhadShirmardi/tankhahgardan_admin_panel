@@ -11,6 +11,7 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::prefix('dashboard')->name('dashboard.')->group(function () {
+    Route::get('login', 'Dashboard\AuthController@login')->name('login');
+    Route::post('authenticate', 'Dashboard\AuthController@authenticate')->name('authenticate');
 });

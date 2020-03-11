@@ -1,0 +1,193 @@
+.top-list-container {
+    float: right;
+}
+
+.top-list-category-text-input {
+    height: 36px;
+    margin-right: 10px;
+}
+
+.product-attribute-value-form {
+    border-top: #d107b2 dashed 2px;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+.product-attribute-value-text-box {
+    width: 50% !important;
+    float: right;
+}
+
+.attribute-value-edit-btn {
+    float: right;
+    height: 46px;
+    margin-right: 10px;
+}
+
+.attribute-value-container {
+    margin-bottom: 10px;
+    display: flex;
+}
+
+.btn {
+    border-radius: 2px;
+}
+
+input, button, select, optgroup, textarea {
+    border-radius: 2px !important;
+}
+
+.product-attribute-txt {
+    width: 85%;
+    float: right;
+}
+
+.attribute-container {
+    display: flex;
+}
+
+.new-value-input {
+    display: inline-block;
+    width: 100%;
+}
+
+.product-attribute {
+    background-color: #1b4b72;
+    color: whitesmoke;
+    padding: 10px;
+    border-radius: 5px;
+    display: inline-block;
+    width: 100%;
+    line-height: 33px;
+    margin-top: 3px;
+
+    .btn {
+        float: left;
+        margin-left: 10px;
+    }
+}
+
+.product-attribute-value-container {
+    display: flex;
+    flex-direction: column;
+
+    div {
+        &:hover {
+            border: thin solid #dbdee0;
+            border-right: thick solid #1b4b72;
+            border-left: thick solid #1b4b72;
+        }
+
+        line-height: 33px;
+        padding: 5px;
+
+        .btn {
+            float: left;
+        }
+    }
+}
+
+.advantages-ul {
+    display: none;
+    list-style: none;
+    border: 1px solid #4dbd74;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    li {
+        margin: 0 20px;
+        color: green;
+    }
+}
+
+.disadvantages-ul {
+    display: none;
+    list-style: none;
+    border: 1px solid #f86c6b;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    li {
+        margin: 0 20px;
+        color: red;
+    }
+}
+
+.feature-header {
+    color: whitesmoke;
+    background-color: #20a8d8;;
+    border-radius: 2px;
+}
+
+.product-data {
+    padding: 1.25rem;
+}
+
+.error {
+    padding: 0 10px;
+    color: red;
+    line-height: $input-btn-line-height;
+}
+
+.product-image {
+    width: 100px;
+    height: 100px;
+}
+
+.shippment-title {
+    border-top: solid;
+    border-bottom: solid;
+    margin-top: 10px;
+}
+
+.shippment-variations-live-price-header {
+    border-bottom: 3px solid;
+    background-color: #0a6aa1;
+    color: whitesmoke;
+}
+
+.shippment-variations-live-price {
+    border-bottom: 1px solid;
+}
+
+.modal {
+    &.fade {
+        display: none;
+    }
+}
+
+.table-row-clickable {
+    cursor: pointer;
+    &:hover {
+        background-color: #1b4b72 !important;
+        color: white;
+    }
+}
+
+.dropzone {
+    border: 3px dashed #1b4b72;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.dropzone div span {
+    pointer-events: none;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+}
+
+.center-cropped {
+    width: auto;
+    height: 200px;
+    background-position: center;
+    background-size: 400px;
+    background-repeat: no-repeat;
+    border-radius: 2px;
+}
+
+.delete-btn-for-accountant-image {
+    position: relative;
+    bottom: 200px;
+}
