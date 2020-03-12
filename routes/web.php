@@ -15,3 +15,7 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('login', 'Dashboard\AuthController@login')->name('login');
     Route::post('authenticate', 'Dashboard\AuthController@authenticate')->name('authenticate');
 });
+
+Route::prefix('jobs')->name('jobs.')->group(function () {
+    Route::get('users/activations/24/hour', 'Job\UserActivationController@UserActivation24HDispatcher');
+});

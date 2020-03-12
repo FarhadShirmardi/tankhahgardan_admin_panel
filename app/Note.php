@@ -40,6 +40,8 @@ class Note extends Model
 {
     use SoftDeletes;
 
+    protected $connection = 'mysql';
+
     protected $fillable = [
         'text',
         'project_id',
