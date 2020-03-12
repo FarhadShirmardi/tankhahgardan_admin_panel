@@ -26,7 +26,7 @@
             <a class="nav-link dropdown-toggle nav-link" data-toggle="dropdown" href="#" role="button"
                aria-haspopup="true" aria-expanded="false">
                 <img src="" class="img-avatar" alt="">
-                <span class="d-md-down-none">{{ Auth::user()->full_name }}</span>
+                <span class="d-md-down-none">{{ Auth::user()->name }}</span>
             </a>
             <div class="dropdown-menu dropdown-menu-right">
                 {{--<div class="dropdown-header text-center">--}}
@@ -42,7 +42,7 @@
 {{--                <div class="dropdown-header text-center">--}}
 {{--                    <strong>تنظیمات</strong>--}}
 {{--                </div>--}}
-                <a class="dropdown-item" href="{{ route('dashboard.profile.edit') }}"><i
+                <a class="dropdown-item" href="#"><i
                         class="fa fa-user"></i> پروفایل</a>
 {{--                <a class="dropdown-item" href="#"><i class="fa fa-wrench"></i>--}}
 {{--                    تنظیمات</a>--}}

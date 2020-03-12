@@ -14,6 +14,16 @@
 Route::prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('login', 'Dashboard\AuthController@login')->name('login');
     Route::post('authenticate', 'Dashboard\AuthController@authenticate')->name('authenticate');
+    Route::get('/', function () {
+        if (auth()-> guest()) {
+            return redirect(route('dashboard.login'));
+        }
+        return view('dashboard.home');
+    })->name('home');
+    Route::get('logout', function () {
+        auth()->logout();
+        return redirect(route('dashboard.login'));
+    })->name('logout');
 });
 
 Route::prefix('jobs')->name('jobs.')->group(function () {
