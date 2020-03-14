@@ -6,10 +6,13 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header">
-                        <i class="fa fa-align-justify"></i> کاربران غیرفعال
+                        <i class="fa fa-align-justify"></i>
                         @switch($step)
-                            @case(1)
-                                24 ساعت گذشته
+                            @case(\App\Http\Controllers\Api\V1\Constants\UserActivationConstant::STATE_FIRST_SMS)
+                            کاربران غیرفعال 24 ساعت گذشته
+                                @break
+                            @case(\App\Http\Controllers\Api\V1\Constants\UserActivationConstant::STATE_FIRST_ATTEMPT_DIE)
+                                کاربران مرده 24 ساعت گذشته
                                 @break
                         @endswitch
                     </div>
