@@ -18,9 +18,9 @@
                             <div class="input-group mb-3">
                                     <span class="input-group-addon"><i class="icon-user"></i>
                                     </span>
-                                <input name="email" value="{{ old('email') }}" type="email" required
+                                <input name="phone_number" value="{{ old('phone_number') }}" type="text" required
                                        class="form-control"
-                                       placeholder="پست الکترونیک">
+                                       placeholder="شماره تلفن">
                             </div>
                             <div class="input-group mb-4">
                                     <span class="input-group-addon"><i class="icon-lock"></i>

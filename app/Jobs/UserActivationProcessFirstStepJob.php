@@ -55,6 +55,9 @@ class UserActivationProcessFirstStepJob implements ShouldQueue
             'users.created_at',
             '<',
             Carbon::now()->subHours(24)
+        )->where(
+            'users.state',
+            '1'
         )->whereNull(
             'panel_user_activation_states.id'
         )->orderByDesc('users.created_at')
@@ -80,12 +83,18 @@ class UserActivationProcessFirstStepJob implements ShouldQueue
             $userActivationState->save();
 
             if ($dataCounter  == 0) {
+                if (app()->environment() != 'production') {
+                    $delayTime = now()->addMinutes(5);
+                } else {
+                    $delayTime = now()->addHours(12);
+                }
+
                 \Log::debug("Sending sms to user->id = {$user->id}");
                 dispatch(new UserActivationSmsJob(
                     $user,
                     UserActivationConstant::SMS_TEXT_FIRST,
                     UserActivationConstant::STATE_FIRST_SMS
-                ))->delay(now()->addMinutes(2));
+                ))->delay($delayTime);
 
             } else {
                 \Log::debug("User was active in 24 hour => {$user->id}");

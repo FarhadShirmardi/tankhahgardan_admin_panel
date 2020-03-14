@@ -8,8 +8,14 @@ use Illuminate\Http\Request;
 
 class UserActivationController extends Controller
 {
-    public function UserActivation24HDispatcher()
+    public function UserActivationDispatcher($step)
     {
-        $this->dispatch(new UserActivationProcessFirstStepJob());
+        if ($step == 1) {
+            $this->dispatch(new UserActivationProcessFirstStepJob());
+        } elseif ($step == 2) {
+            //
+        } elseif ($step == 3) {
+            //
+        }
     }
 }
