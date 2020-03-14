@@ -34,7 +34,7 @@ class UserActivationController extends Controller
             'users.id'
         );
 
-        if ($step == '1') {
+        if ($step == UserActivationConstant::STATE_FIRST_SMS) {
             $data = $q->where(
                 'panel_user_activation_states.state',
                 UserActivationConstant::STATE_FIRST_SMS
@@ -42,6 +42,11 @@ class UserActivationController extends Controller
                 'panel_user_activation_states.updated_at',
                 '<',
                 Carbon::now()->subHours(24)->toDateTimeString()
+            )->paginate();
+        } elseif ($step == UserActivationConstant::STATE_FIRST_ATTEMPT_DIE) {
+            $data = $q->where(
+                'panel_user_activation_states.state',
+                UserActivationConstant::STATE_FIRST_ATTEMPT_DIE
             )->paginate();
         }
 
