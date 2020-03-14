@@ -17,4 +17,56 @@ class UserActivationConstant
     const STATE_THIRD_ATTEMPT_DIE = 3000;
 
     const SMS_TEXT_FIRST = 'بیا آموزش ببین و پشتیبانی بگیر.';
+
+    public static function getStates($state = null)
+    {
+        $data = collect([
+            [
+                'name' => 'فعال',
+                'value' => self::STATE_ACTIVE_USER,
+            ],
+            [
+                'name' => 'پیامک اول',
+                'value' => self::STATE_FIRST_SMS,
+            ],
+            [
+                'name' => 'تماس اول',
+                'value' => self::STATE_FIRST_CALL
+            ],
+            [
+                'name' => 'پیامک دوم',
+                'value' => self::STATE_SECOND_SMS,
+            ],
+            [
+                'name' => 'تماس دوم',
+                'value' => self::STATE_SECOND_CALL
+            ],
+            [
+                'name' => 'پیامک سوم',
+                'value' => self::STATE_THIRD_SMS,
+            ],
+            [
+                'name' => 'تماس سوم',
+                'value' => self::STATE_THIRD_CALL
+            ],
+            [
+                'name' => 'کاربر مرده در تلاش اول',
+                'value' => self::STATE_FIRST_ATTEMPT_DIE,
+            ],
+            [
+                'name' => 'کاربر مرده در تلاش دوم',
+                'value' => self::STATE_SECOND_ATTEMPT_DIE,
+            ],
+            [
+                'name' => 'کاربر مرده در تلاش سوم',
+                'value' => self::STATE_THIRD_ATTEMPT_DIE,
+            ],
+        ]);
+
+        if ($state !== null) {
+            $data = $data->where('value', $state)->first();
+        }
+
+        return $data;
+    }
 }
