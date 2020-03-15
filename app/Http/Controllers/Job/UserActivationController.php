@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Jobs\UserActivationProcessFirstStepDieJob;
 use App\Jobs\UserActivationProcessFirstStepInactiveJob;
 use App\Jobs\UserActivationProcessFirstStepSMSJob;
-use App\Jobs\UserActivationProcessSecondStepSMS;
+use App\Jobs\UserActivationProcessSecondStepDieJob;
+use App\Jobs\UserActivationProcessSecondStepInactiveJob;
+use App\Jobs\UserActivationProcessSecondStepSMSJob;
 use Illuminate\Http\Request;
 
 class UserActivationController extends Controller
@@ -18,7 +20,9 @@ class UserActivationController extends Controller
             $this->dispatch(new UserActivationProcessFirstStepInactiveJob());
             $this->dispatch(new UserActivationProcessFirstStepDieJob());
         } elseif ($step == 2) {
-            $this->dispatch(new UserActivationProcessSecondStepSMS());
+            $this->dispatch(new UserActivationProcessSecondStepSMSJob());
+            $this->dispatch(new UserActivationProcessSecondStepInactiveJob());
+            $this->dispatch(new UserActivationProcessSecondStepDieJob());
         } elseif ($step == 3) {
             //
         }

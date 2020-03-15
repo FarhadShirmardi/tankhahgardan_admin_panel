@@ -34,15 +34,15 @@ class UserActivationController extends Controller
             'users.id'
         );
 
-        if ($step == UserActivationConstant::STATE_FIRST_SMS) {
+        if ($step == UserActivationConstant::STATE_FIRST_STEP_INACTIVE) {
             $data = $q->where(
                 'panel_user_activation_states.state',
                 UserActivationConstant::STATE_FIRST_STEP_INACTIVE
             )->paginate();
-        } elseif ($step == UserActivationConstant::STATE_FIRST_ATTEMPT_DIE) {
+        } elseif ($step == UserActivationConstant::STATE_SECOND_STEP_INACTIVE) {
             $data = $q->where(
                 'panel_user_activation_states.state',
-                UserActivationConstant::STATE_FIRST_ATTEMPT_DIE
+                UserActivationConstant::STATE_SECOND_STEP_INACTIVE
             )->paginate();
         }
 

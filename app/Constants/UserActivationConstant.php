@@ -21,6 +21,7 @@ class UserActivationConstant
 
     const SMS_TEXT_FIRST = 'بیا آموزش ببین و پشتیبانی بگیر.';
     const SMS_TEXT_SECOND = 'پیامک فعال سازی دوم.';
+    const SMS_TEXT_FIRST_POLL = 'پیامک نظرسنجی اول';
     const SMS_TEXT_THIRD = 'پیامک فعال سازی سوم.';
 
     public static function getStates($state = null)

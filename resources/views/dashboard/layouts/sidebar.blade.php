@@ -8,15 +8,15 @@
                 <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-basket"></i>فعال سازی کاربران</a>
                 <ul class="nav-dropdown-items">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('dashboard.users.activation', ['step' => \App\Http\Controllers\Api\V1\Constants\UserActivationConstant::STATE_FIRST_SMS]) }}">
+                        <a class="nav-link" href="{{ route('dashboard.users.activation', ['step' => \App\Http\Controllers\Api\V1\Constants\UserActivationConstant::STATE_FIRST_STEP_INACTIVE]) }}">
                             <i class="icon-pie-chart"></i>
                             غیر فعال 24 ساعت گذشته
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('dashboard.users.activation', ['step' => \App\Http\Controllers\Api\V1\Constants\UserActivationConstant::STATE_FIRST_ATTEMPT_DIE]) }}">
+                        <a class="nav-link" href="{{ route('dashboard.users.activation', ['step' => \App\Http\Controllers\Api\V1\Constants\UserActivationConstant::STATE_SECOND_STEP_INACTIVE]) }}">
                             <i class="icon-pie-chart"></i>
-                            مرده 24 ساعت گذشته
+                            غیر فعال یک هفته گذشته
                         </a>
                     </li>
                 </ul>
