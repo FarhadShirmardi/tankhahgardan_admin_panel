@@ -49,7 +49,7 @@ class UserActivationProcessSecondStepDieJob implements ShouldQueue
         Helpers::setUserStatus(
             $userStates,
             UserActivationConstant::STATE_SECOND_ATTEMPT_DIE,
-            Carbon::now()->subHours(72)->toDateTimeString(),
+            72,
             true,
             UserActivationConstant::SMS_TEXT_FIRST_POLL
         );
