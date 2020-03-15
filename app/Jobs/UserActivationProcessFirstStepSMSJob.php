@@ -54,7 +54,7 @@ class UserActivationProcessFirstStepSMSJob implements ShouldQueue
         )->where(
             'users.created_at',
             '<',
-            Carbon::now()->subHours(24)
+            Carbon::now()->subHours(24)->toDateTimeString()
         )->where(
             'users.state',
             '1'

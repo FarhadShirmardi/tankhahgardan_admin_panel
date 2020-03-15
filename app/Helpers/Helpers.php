@@ -9,7 +9,11 @@
 namespace App\Helpers;
 
 use App;
+use App\Http\Controllers\Api\V1\Constants\UserActivationConstant;
+use App\Jobs\UserActivationSmsJob;
+use App\Project;
 use App\User;
+use App\UserActivationState;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -125,7 +129,8 @@ class Helpers
         &$data = null,
         string $jsonResourceClassName = null,
         $metaData = []
-    ) {
+    )
+    {
         $metaData += [
             self::RESPONSE_MESSAGE => $message == null ? [] : [$message],
         ];
@@ -166,7 +171,8 @@ class Helpers
         $fileName = null,
         $path = 'public',
         $fileColumn = 'image'
-    ) {
+    )
+    {
         if ($request->hasFile($fileColumn)) {
             $fileExtension = $request->file($fileColumn)->getClientOriginalExtension();
             if ($fileName == null) {
@@ -449,7 +455,8 @@ class Helpers
     public static function generateRandomToken(
         $length = 10,
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    ) {
+    )
+    {
         $charactersLength = strlen($characters);
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {
@@ -484,5 +491,69 @@ class Helpers
             return '(' . number_format($number * -1) . ')';
         }
         return number_format($number);
+    }
+
+    public static function setUserStatus(&$userStates, $state, $time = null, $sendSms = false, $smsText = null)
+    {
+        if ($sendSms == true and $smsText == null) {
+            throw new Exception('Sms text can not be null!');
+        }
+
+        foreach ($userStates as $userState) {
+            $user = User::findOrFail($userState->user_id);
+            $projects = $user->projects()->get();
+
+            $dataCounter = 0;
+
+            /** @var Project $project */
+            foreach ($projects as $project) {
+
+                if ($time === null) {
+                    $time = $userState->updated_at->toDateTimeString();
+                }
+
+                $dataCounter += $project->notes()->where(
+                    'notes.created_at',
+                    '>',
+                    $time
+                )->count();
+                $dataCounter += $project->payments()
+                    ->where(
+                        'payments.created_at',
+                        '>',
+                        $time
+                    )->count();
+                $dataCounter += $project->receives()
+                    ->where(
+                        'receives.created_at',
+                        '>',
+                        $time
+                    )->count();
+            }
+
+            if ($dataCounter == 0) {
+                //Update user activation state
+                $userActivationState = UserActivationState::where(
+                    'user_id',
+                    $user->id
+                )->first();
+                $userActivationState->state = $state;
+                $userActivationState->save();
+
+                if ($sendSms == true) {
+                    if (app()->environment() != 'production') {
+                        $delayTime = now()->addMinutes(5);
+                    } else {
+                        $delayTime = now()->addHours(12);
+                    }
+
+                    dispatch(new UserActivationSmsJob(
+                        $user,
+                        $smsText,
+                        $state
+                    ))->delay($delayTime);
+                }
+            }
+        }
     }
 }

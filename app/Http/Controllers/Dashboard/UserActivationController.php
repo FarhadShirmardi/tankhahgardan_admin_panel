@@ -34,19 +34,15 @@ class UserActivationController extends Controller
             'users.id'
         );
 
-        if ($step == UserActivationConstant::STATE_FIRST_SMS) {
+        if ($step == UserActivationConstant::STATE_FIRST_STEP_INACTIVE) {
             $data = $q->where(
                 'panel_user_activation_states.state',
-                UserActivationConstant::STATE_FIRST_SMS
-            )->where(
-                'panel_user_activation_states.updated_at',
-                '<',
-                Carbon::now()->subHours(24)->toDateTimeString()
+                UserActivationConstant::STATE_FIRST_STEP_INACTIVE
             )->paginate();
-        } elseif ($step == UserActivationConstant::STATE_FIRST_ATTEMPT_DIE) {
+        } elseif ($step == UserActivationConstant::STATE_SECOND_STEP_INACTIVE) {
             $data = $q->where(
                 'panel_user_activation_states.state',
-                UserActivationConstant::STATE_FIRST_ATTEMPT_DIE
+                UserActivationConstant::STATE_SECOND_STEP_INACTIVE
             )->paginate();
         }
 
@@ -87,9 +83,9 @@ class UserActivationController extends Controller
         $userActivationState = UserActivationState::where('user_id', $userId)->first();
 
         $smsStateArray = [
-            UserActivationConstant::STATE_FIRST_SMS,
-            UserActivationConstant::STATE_SECOND_SMS,
-            UserActivationConstant::STATE_THIRD_SMS
+            UserActivationConstant::STATE_FIRST_STEP_INACTIVE,
+            UserActivationConstant::STATE_SECOND_STEP_INACTIVE,
+            UserActivationConstant::STATE_THIRD_STEP_INACTIVE
         ];
         if (!in_array($userActivationState->state, $smsStateArray)) {
             throw new SetUserCallDateTimeException();
@@ -97,13 +93,13 @@ class UserActivationController extends Controller
 
         $step = 0;
         \DB::transaction(function () use ($userActivationState, &$step, &$request) {
-            if ($userActivationState->state == UserActivationConstant::STATE_FIRST_SMS) {
+            if ($userActivationState->state == UserActivationConstant::STATE_FIRST_STEP_INACTIVE) {
                 $notifyType = UserActivationConstant::STATE_FIRST_CALL;
                 $step = 1;
-            } elseif ($userActivationState->state == UserActivationConstant::STATE_SECOND_SMS) {
+            } elseif ($userActivationState->state == UserActivationConstant::STATE_SECOND_STEP_INACTIVE) {
                 $notifyType = UserActivationConstant::STATE_SECOND_CALL;
                 $step = 2;
-            } elseif ($userActivationState = UserActivationConstant::STATE_THIRD_SMS) {
+            } elseif ($userActivationState = UserActivationConstant::STATE_THIRD_STEP_INACTIVE) {
                 $notifyType = UserActivationConstant::STATE_THIRD_CALL;
                 $step = 3;
             }

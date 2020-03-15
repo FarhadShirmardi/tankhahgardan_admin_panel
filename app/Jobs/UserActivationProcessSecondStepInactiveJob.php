@@ -15,7 +15,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class UserActivationProcessFirstStepDieJob implements ShouldQueue
+class UserActivationProcessSecondStepInactiveJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -33,18 +33,19 @@ class UserActivationProcessFirstStepDieJob implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
         $userStates = UserActivationState::where(
             'state',
-            UserActivationConstant::STATE_FIRST_CALL
+            UserActivationConstant::STATE_SECOND_SMS
         )->where(
             'updated_at',
             '<',
-            Carbon::now()->subHours(48)->toDateTimeString()
+            Carbon::now()->subHours(24)->toDateTimeString()
         )->get();
 
-        Helpers::setUserStatus($userStates, UserActivationConstant::STATE_FIRST_ATTEMPT_DIE);
+        Helpers::setUserStatus($userStates, UserActivationConstant::STATE_SECOND_STEP_INACTIVE);
     }
 }
