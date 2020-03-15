@@ -19,6 +19,12 @@
                             غیر فعال یک هفته گذشته
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('dashboard.users.activation', ['step' => \App\Http\Controllers\Api\V1\Constants\UserActivationConstant::STATE_THIRD_STEP_INACTIVE]) }}">
+                            <i class="icon-pie-chart"></i>
+                            غیر فعال یک ماه گذشته
+                        </a>
+                    </li>
                 </ul>
             </li>
         </ul>

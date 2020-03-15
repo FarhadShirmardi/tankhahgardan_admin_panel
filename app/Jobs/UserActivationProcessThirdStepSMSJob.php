@@ -12,7 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class UserActivationProcessSecondStepSMSJob implements ShouldQueue
+class UserActivationProcessThirdStepSMSJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -34,40 +34,32 @@ class UserActivationProcessSecondStepSMSJob implements ShouldQueue
      */
     public function handle()
     {
-        $userStates = UserActivationState::where(function ($q) {
+        $time = Carbon::now()->subMonth()->toDateTimeString();
+        $userStates = UserActivationState::where(function ($q) use ($time) {
            $q->where(
                'updated_at',
                '<',
-               Carbon::now()->subWeek()->toDateTimeString()
+               $time
            )->where(
                'state',
-               UserActivationConstant::STATE_FIRST_SMS
+               UserActivationConstant::STATE_SECOND_SMS
            );
-        })->orWhere(function ($q) {
+        })->orWhere(function ($q) use ($time) {
             $q->where(
                 'updated_at',
                 '<',
-                Carbon::now()->subWeek()->toDateTimeString()
+                $time
             )->where(
                 'state',
-                UserActivationConstant::STATE_FIRST_CALL
-            );
-        })->orWhere(function ($q) {
-            $q->where(
-                'updated_at',
-                '<',
-                Carbon::now()->subWeek()->toDateTimeString()
-            )->where(
-                'state',
-                UserActivationConstant::STATE_ACTIVE_USER
+                UserActivationConstant::STATE_SECOND_CALL
             );
         })->get();
 
         Helpers::setUserStatus(
-            $userStates, UserActivationConstant::STATE_SECOND_SMS,
-            7 * 24,
+            $userStates, UserActivationConstant::STATE_THIRD_SMS,
+            30 * 24,
             true,
-            UserActivationConstant::SMS_TEXT_SECOND
+            UserActivationConstant::SMS_TEXT_THIRD
         );
     }
 }

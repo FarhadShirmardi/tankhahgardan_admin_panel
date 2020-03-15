@@ -493,7 +493,7 @@ class Helpers
         return number_format($number);
     }
 
-    public static function setUserStatus(&$userStates, $state, $time = null, $sendSms = false, $smsText = null)
+    public static function setUserStatus(&$userStates, $state, $addHours = null, $sendSms = false, $smsText = null)
     {
         if ($sendSms == true and $smsText == null) {
             throw new Exception('Sms text can not be null!');
@@ -508,8 +508,10 @@ class Helpers
             /** @var Project $project */
             foreach ($projects as $project) {
 
-                if ($time === null) {
+                if ($addHours === null) {
                     $time = $userState->updated_at->toDateTimeString();
+                } else {
+                    $time = $userState->updated_at->addHours($addHours)->toDateString();
                 }
 
                 $dataCounter += $project->notes()->where(

@@ -44,6 +44,11 @@ class UserActivationController extends Controller
                 'panel_user_activation_states.state',
                 UserActivationConstant::STATE_SECOND_STEP_INACTIVE
             )->paginate();
+        } elseif ($step == UserActivationConstant::STATE_THIRD_STEP_INACTIVE) {
+            $data = $q->where(
+                'panel_user_activation_states.state',
+                UserActivationConstant::STATE_THIRD_STEP_INACTIVE
+            )->paginate();
         }
 
 //        dd($data->toSql(), $data->getBindings());
@@ -99,7 +104,7 @@ class UserActivationController extends Controller
             } elseif ($userActivationState->state == UserActivationConstant::STATE_SECOND_STEP_INACTIVE) {
                 $notifyType = UserActivationConstant::STATE_SECOND_CALL;
                 $step = 2;
-            } elseif ($userActivationState = UserActivationConstant::STATE_THIRD_STEP_INACTIVE) {
+            } elseif ($userActivationState->state == UserActivationConstant::STATE_THIRD_STEP_INACTIVE) {
                 $notifyType = UserActivationConstant::STATE_THIRD_CALL;
                 $step = 3;
             }

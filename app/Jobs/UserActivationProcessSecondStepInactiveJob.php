@@ -46,6 +46,10 @@ class UserActivationProcessSecondStepInactiveJob implements ShouldQueue
             Carbon::now()->subHours(24)->toDateTimeString()
         )->get();
 
-        Helpers::setUserStatus($userStates, UserActivationConstant::STATE_SECOND_STEP_INACTIVE);
+        Helpers::setUserStatus(
+            $userStates,
+            UserActivationConstant::STATE_SECOND_STEP_INACTIVE,
+            24
+        );
     }
 }

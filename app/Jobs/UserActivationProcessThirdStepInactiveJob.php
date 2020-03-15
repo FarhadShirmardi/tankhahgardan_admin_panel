@@ -15,7 +15,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class UserActivationProcessFirstStepInactiveJob implements ShouldQueue
+class UserActivationProcessThirdStepInactiveJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -39,7 +39,7 @@ class UserActivationProcessFirstStepInactiveJob implements ShouldQueue
     {
         $userStates = UserActivationState::where(
             'state',
-            UserActivationConstant::STATE_FIRST_SMS
+            UserActivationConstant::STATE_THIRD_SMS
         )->where(
             'updated_at',
             '<',
@@ -48,7 +48,7 @@ class UserActivationProcessFirstStepInactiveJob implements ShouldQueue
 
         Helpers::setUserStatus(
             $userStates,
-            UserActivationConstant::STATE_FIRST_STEP_INACTIVE,
+            UserActivationConstant::STATE_THIRD_STEP_INACTIVE,
             24
         );
     }
