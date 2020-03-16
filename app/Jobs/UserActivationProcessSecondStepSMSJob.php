@@ -64,8 +64,9 @@ class UserActivationProcessSecondStepSMSJob implements ShouldQueue
         })->get();
 
         Helpers::setUserStatus(
-            $userStates, UserActivationConstant::STATE_SECOND_SMS,
-            7 * 24,
+            $userStates,
+            UserActivationConstant::STATE_SECOND_SMS,
+            null,
             true,
             UserActivationConstant::SMS_TEXT_SECOND
         );
