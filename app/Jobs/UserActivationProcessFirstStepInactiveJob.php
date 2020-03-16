@@ -48,8 +48,7 @@ class UserActivationProcessFirstStepInactiveJob implements ShouldQueue
 
         Helpers::setUserStatus(
             $userStates,
-            UserActivationConstant::STATE_FIRST_STEP_INACTIVE,
-            24
+            UserActivationConstant::STATE_FIRST_STEP_INACTIVE
         );
     }
 }

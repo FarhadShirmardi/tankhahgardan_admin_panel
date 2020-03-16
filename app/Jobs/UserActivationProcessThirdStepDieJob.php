@@ -49,7 +49,7 @@ class UserActivationProcessThirdStepDieJob implements ShouldQueue
         Helpers::setUserStatus(
             $userStates,
             UserActivationConstant::STATE_THIRD_ATTEMPT_DIE,
-            72,
+            null,
             true,
             UserActivationConstant::SMS_TEXT_SECOND_POLL
         );

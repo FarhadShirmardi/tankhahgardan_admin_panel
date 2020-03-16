@@ -36,14 +36,14 @@ class UserActivationProcessThirdStepSMSJob implements ShouldQueue
     {
         $time = Carbon::now()->subMonth()->toDateTimeString();
         $userStates = UserActivationState::where(function ($q) use ($time) {
-           $q->where(
-               'updated_at',
-               '<',
-               $time
-           )->where(
-               'state',
-               UserActivationConstant::STATE_SECOND_SMS
-           );
+            $q->where(
+                'updated_at',
+                '<',
+                $time
+            )->where(
+                'state',
+                UserActivationConstant::STATE_SECOND_SMS
+            );
         })->orWhere(function ($q) use ($time) {
             $q->where(
                 'updated_at',
@@ -56,8 +56,9 @@ class UserActivationProcessThirdStepSMSJob implements ShouldQueue
         })->get();
 
         Helpers::setUserStatus(
-            $userStates, UserActivationConstant::STATE_THIRD_SMS,
-            30 * 24,
+            $userStates,
+            UserActivationConstant::STATE_THIRD_SMS,
+            null,
             true,
             UserActivationConstant::SMS_TEXT_THIRD
         );

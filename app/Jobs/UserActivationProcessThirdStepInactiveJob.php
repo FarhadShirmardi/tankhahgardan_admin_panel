@@ -48,8 +48,7 @@ class UserActivationProcessThirdStepInactiveJob implements ShouldQueue
 
         Helpers::setUserStatus(
             $userStates,
-            UserActivationConstant::STATE_THIRD_STEP_INACTIVE,
-            24
+            UserActivationConstant::STATE_THIRD_STEP_INACTIVE
         );
     }
 }
