@@ -12,7 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class UserActivationProcessSecondStepSMSJob implements ShouldQueue
+class UserActivationNPSSMSJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -34,34 +34,29 @@ class UserActivationProcessSecondStepSMSJob implements ShouldQueue
      */
     public function handle()
     {
-        $time = Carbon::now()->subWeek()->toDateTimeString();
-        $userStates = UserActivationState::where(function ($q) use ($time) {
-           $q->where(
-               'updated_at',
-               '<',
-               $time
-           )->where(
-               'state',
-               UserActivationConstant::STATE_FIRST_SMS
-           );
-        })->orWhere(function ($q) use ($time) {
+        $userStates = UserActivationState::where(function ($q) {
             $q->where(
                 'updated_at',
                 '<',
-                $time
+                Carbon::now()->subHours(24)->toDateTimeString()
             )->where(
                 'state',
-                UserActivationConstant::STATE_FIRST_CALL
+                UserActivationConstant::STATE_THIRD_SMS
             );
-        })->orWhere(function ($q) use ($time) {
+        })->orWhere(function ($q) {
             $q->where(
                 'updated_at',
                 '<',
-                $time
+                Carbon::now()->subHours(72)->toDateTimeString()
             )->where(
+                'state',
+                UserActivationConstant::STATE_THIRD_CALL
+            );
+        })->orWhere(function ($q) {
+            $q->where(
                 'updated_at',
-                '>',
-                Carbon::now()->subWeek()->subDay()->toDateTimeString()
+                '<',
+                Carbon::now()->subMonth()->toDateTimeString()
             )->where(
                 'state',
                 UserActivationConstant::STATE_ACTIVE_USER
@@ -70,10 +65,10 @@ class UserActivationProcessSecondStepSMSJob implements ShouldQueue
 
         Helpers::setUserStatus(
             $userStates,
-            UserActivationConstant::STATE_SECOND_SMS,
+            UserActivationConstant::STATE_NPS_SMS,
             null,
             true,
-            UserActivationConstant::SMS_TEXT_SECOND
+            UserActivationConstant::SMS_TEXT_NPS
         );
     }
 }

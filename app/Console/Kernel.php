@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Jobs\UserActivationNPSSMSJob;
 use App\Jobs\UserActivationProcessFirstStepDieJob;
 use App\Jobs\UserActivationProcessFirstStepInactiveJob;
 use App\Jobs\UserActivationProcessFirstStepSMSJob;
@@ -11,6 +12,7 @@ use App\Jobs\UserActivationProcessSecondStepSMSJob;
 use App\Jobs\UserActivationProcessThirdStepDieJob;
 use App\Jobs\UserActivationProcessThirdStepInactiveJob;
 use App\Jobs\UserActivationProcessThirdStepSMSJob;
+use App\Jobs\UserActivationReferralSMSJob;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -57,6 +59,12 @@ class Kernel extends ConsoleKernel
             ->dailyAt('03:30');
         $schedule->job(new UserActivationProcessThirdStepDieJob)
             ->dailyAt('04:00');
+
+        //Last Step User Activation
+        $schedule->job(new UserActivationNPSSMSJob)
+            ->dailyAt('04:30');
+        $schedule->job(new UserActivationReferralSMSJob)
+            ->dailyAt('05:00');
     }
 
     /**

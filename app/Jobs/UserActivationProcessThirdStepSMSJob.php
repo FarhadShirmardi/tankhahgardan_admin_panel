@@ -53,6 +53,15 @@ class UserActivationProcessThirdStepSMSJob implements ShouldQueue
                 'state',
                 UserActivationConstant::STATE_SECOND_CALL
             );
+        })->orWhere(function ($q) use ($time) {
+            $q->where(
+                'updated_at',
+                '<',
+                $time
+            )->where(
+                'state',
+                UserActivationConstant::STATE_ACTIVE_USER
+            );
         })->get();
 
         Helpers::setUserStatus(
