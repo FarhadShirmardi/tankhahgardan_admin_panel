@@ -553,7 +553,7 @@ class Helpers
                         $user,
                         $smsText,
                         $state
-                    ))->delay($delayTime);
+                    ))->onQueue('images')->delay($delayTime);
                 }
             } else if ($state == UserActivationConstant::STATE_NPS_SMS or
                 $state == UserActivationConstant::STATE_REFERRAL_SMS) {
@@ -576,7 +576,7 @@ class Helpers
                         $user,
                         $smsText,
                         $state
-                    ))->delay($delayTime);
+                    ))->onQueue('images')->delay($delayTime);
                 }
 
             }
