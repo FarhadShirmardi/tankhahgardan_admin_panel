@@ -3,7 +3,7 @@
 
 /**
  * A helper file for Laravel 5, to provide autocomplete information to your IDE
- * Generated for Laravel 6.18.1 on 2020-03-11 11:44:09.
+ * Generated for Laravel 6.18.1 on 2020-03-17 13:18:34.
  *
  * This file should not be included in your code, only analyzed by your IDE!
  *
@@ -8177,6 +8177,86 @@ namespace Illuminate\Support\Facades {
         }
         
         /**
+         * Migrate the delayed jobs that are ready to the regular queue.
+         *
+         * @param string $from
+         * @param string $to
+         * @return array 
+         * @static 
+         */ 
+        public static function migrateExpiredJobs($from, $to)
+        {
+                        /** @var \Illuminate\Queue\RedisQueue $instance */
+                        return $instance->migrateExpiredJobs($from, $to);
+        }
+        
+        /**
+         * Delete a reserved job from the queue.
+         *
+         * @param string $queue
+         * @param \Illuminate\Queue\Jobs\RedisJob $job
+         * @return void 
+         * @static 
+         */ 
+        public static function deleteReserved($queue, $job)
+        {
+                        /** @var \Illuminate\Queue\RedisQueue $instance */
+                        $instance->deleteReserved($queue, $job);
+        }
+        
+        /**
+         * Delete a reserved job from the reserved queue and release it.
+         *
+         * @param string $queue
+         * @param \Illuminate\Queue\Jobs\RedisJob $job
+         * @param int $delay
+         * @return void 
+         * @static 
+         */ 
+        public static function deleteAndRelease($queue, $job, $delay)
+        {
+                        /** @var \Illuminate\Queue\RedisQueue $instance */
+                        $instance->deleteAndRelease($queue, $job, $delay);
+        }
+        
+        /**
+         * Get the queue or return the default.
+         *
+         * @param string|null $queue
+         * @return string 
+         * @static 
+         */ 
+        public static function getQueue($queue)
+        {
+                        /** @var \Illuminate\Queue\RedisQueue $instance */
+                        return $instance->getQueue($queue);
+        }
+        
+        /**
+         * Get the connection for the queue.
+         *
+         * @return \Illuminate\Redis\Connections\Connection 
+         * @static 
+         */ 
+        public static function getConnection()
+        {
+                        /** @var \Illuminate\Queue\RedisQueue $instance */
+                        return $instance->getConnection();
+        }
+        
+        /**
+         * Get the underlying Redis instance.
+         *
+         * @return \Illuminate\Contracts\Redis\Factory 
+         * @static 
+         */ 
+        public static function getRedis()
+        {
+                        /** @var \Illuminate\Queue\RedisQueue $instance */
+                        return $instance->getRedis();
+        }
+        
+        /**
          * Get the retry delay for an object-based queue handler.
          *
          * @param mixed $job
@@ -8186,7 +8266,7 @@ namespace Illuminate\Support\Facades {
         public static function getJobRetryDelay($job)
         {
             //Method inherited from \Illuminate\Queue\Queue            
-                        /** @var \Illuminate\Queue\SyncQueue $instance */
+                        /** @var \Illuminate\Queue\RedisQueue $instance */
                         return $instance->getJobRetryDelay($job);
         }
         
@@ -8200,7 +8280,7 @@ namespace Illuminate\Support\Facades {
         public static function getJobExpiration($job)
         {
             //Method inherited from \Illuminate\Queue\Queue            
-                        /** @var \Illuminate\Queue\SyncQueue $instance */
+                        /** @var \Illuminate\Queue\RedisQueue $instance */
                         return $instance->getJobExpiration($job);
         }
         
@@ -8214,7 +8294,7 @@ namespace Illuminate\Support\Facades {
         public static function createPayloadUsing($callback)
         {
             //Method inherited from \Illuminate\Queue\Queue            
-                        \Illuminate\Queue\SyncQueue::createPayloadUsing($callback);
+                        \Illuminate\Queue\RedisQueue::createPayloadUsing($callback);
         }
         
         /**
@@ -8227,7 +8307,7 @@ namespace Illuminate\Support\Facades {
         public static function setContainer($container)
         {
             //Method inherited from \Illuminate\Queue\Queue            
-                        /** @var \Illuminate\Queue\SyncQueue $instance */
+                        /** @var \Illuminate\Queue\RedisQueue $instance */
                         $instance->setContainer($container);
         }
          
@@ -8467,6 +8547,104 @@ namespace Illuminate\Support\Facades {
         public static function hasMacro($name)
         {
                         return \Illuminate\Routing\Redirector::hasMacro($name);
+        }
+         
+    }
+
+    /**
+     * 
+     *
+     */ 
+    class Redis {
+        
+        /**
+         * Get a Redis connection by name.
+         *
+         * @param string|null $name
+         * @return \Illuminate\Redis\Connections\Connection 
+         * @static 
+         */ 
+        public static function connection($name = null)
+        {
+                        /** @var \Illuminate\Redis\RedisManager $instance */
+                        return $instance->connection($name);
+        }
+        
+        /**
+         * Resolve the given connection by name.
+         *
+         * @param string|null $name
+         * @return \Illuminate\Redis\Connections\Connection 
+         * @throws \InvalidArgumentException
+         * @static 
+         */ 
+        public static function resolve($name = null)
+        {
+                        /** @var \Illuminate\Redis\RedisManager $instance */
+                        return $instance->resolve($name);
+        }
+        
+        /**
+         * Return all of the created connections.
+         *
+         * @return array 
+         * @static 
+         */ 
+        public static function connections()
+        {
+                        /** @var \Illuminate\Redis\RedisManager $instance */
+                        return $instance->connections();
+        }
+        
+        /**
+         * Enable the firing of Redis command events.
+         *
+         * @return void 
+         * @static 
+         */ 
+        public static function enableEvents()
+        {
+                        /** @var \Illuminate\Redis\RedisManager $instance */
+                        $instance->enableEvents();
+        }
+        
+        /**
+         * Disable the firing of Redis command events.
+         *
+         * @return void 
+         * @static 
+         */ 
+        public static function disableEvents()
+        {
+                        /** @var \Illuminate\Redis\RedisManager $instance */
+                        $instance->disableEvents();
+        }
+        
+        /**
+         * Set the default driver.
+         *
+         * @param string $driver
+         * @return void 
+         * @static 
+         */ 
+        public static function setDriver($driver)
+        {
+                        /** @var \Illuminate\Redis\RedisManager $instance */
+                        $instance->setDriver($driver);
+        }
+        
+        /**
+         * Register a custom driver creator Closure.
+         *
+         * @param string $driver
+         * @param \Closure $callback
+         * @return \Illuminate\Redis\RedisManager 
+         * @static 
+         */ 
+        public static function extend($driver, $callback)
+        {
+                        /** @var \Illuminate\Redis\RedisManager $instance */
+                        return $instance->extend($driver, $callback);
         }
          
     }
@@ -15234,6 +15412,205 @@ namespace Facade\Ignition\Facades {
  
 }
 
+namespace Kavenegar\Laravel { 
+
+    /**
+     * 
+     *
+     */ 
+    class Facade {
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function Send($sender, $receptor, $message, $date = null, $type = null, $localid = null)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->Send($sender, $receptor, $message, $date, $type, $localid);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function SendArray($sender, $receptor, $message, $date = null, $type = null, $localmessageid = null)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->SendArray($sender, $receptor, $message, $date, $type, $localmessageid);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function Status($messageid)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->Status($messageid);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function StatusLocalMessageId($localid)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->StatusLocalMessageId($localid);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function Select($messageid)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->Select($messageid);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function SelectOutbox($startdate, $enddate, $sender)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->SelectOutbox($startdate, $enddate, $sender);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function LatestOutbox($pagesize, $sender)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->LatestOutbox($pagesize, $sender);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function CountOutbox($startdate, $enddate, $status = 0)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->CountOutbox($startdate, $enddate, $status);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function Cancel($messageid)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->Cancel($messageid);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function Receive($linenumber, $isread = 0)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->Receive($linenumber, $isread);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function CountInbox($startdate, $enddate, $linenumber, $isread = 0)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->CountInbox($startdate, $enddate, $linenumber, $isread);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function CountPostalcode($postalcode)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->CountPostalcode($postalcode);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function SendbyPostalcode($sender, $postalcode, $message, $mcistartindex, $mcicount, $mtnstartindex, $mtncount, $date)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->SendbyPostalcode($sender, $postalcode, $message, $mcistartindex, $mcicount, $mtnstartindex, $mtncount, $date);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function AccountInfo()
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->AccountInfo();
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function AccountConfig($apilogs, $dailyreport, $debug, $defaultsender, $mincreditalarm, $resendfailed)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->AccountConfig($apilogs, $dailyreport, $debug, $defaultsender, $mincreditalarm, $resendfailed);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function VerifyLookup($receptor, $token, $token2, $token3, $template, $type = null)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->VerifyLookup($receptor, $token, $token2, $token3, $template, $type);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function CallMakeTTS($receptor, $message, $date = null, $localid = null)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->CallMakeTTS($receptor, $message, $date, $localid);
+        }
+         
+    }
+ 
+}
+
 
 namespace  { 
 
@@ -18108,6 +18485,8 @@ namespace  {
 
     class Redirect extends \Illuminate\Support\Facades\Redirect {}
 
+    class Redis extends \Illuminate\Support\Facades\Redis {}
+
     class Request extends \Illuminate\Support\Facades\Request {}
 
     class Response extends \Illuminate\Support\Facades\Response {}
@@ -18129,6 +18508,8 @@ namespace  {
     class View extends \Illuminate\Support\Facades\View {}
 
     class Flare extends \Facade\Ignition\Facades\Flare {}
+
+    class Kavenegar extends \Kavenegar\Laravel\Facade {}
  
 }
 

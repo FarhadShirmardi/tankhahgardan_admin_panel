@@ -4,9 +4,6 @@ namespace App\Jobs;
 
 use App\Helpers\Helpers;
 use App\Http\Controllers\Api\V1\Constants\UserActivationConstant;
-use App\Project;
-use App\User;
-use App\UserActivationLog;
 use App\UserActivationState;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -15,7 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class UserActivationProcessSecondStepDieJob implements ShouldQueue
+class UserActivationReferralSMSJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -38,22 +35,22 @@ class UserActivationProcessSecondStepDieJob implements ShouldQueue
     public function handle()
     {
         $userStates = UserActivationState::where(
-            'state',
-            UserActivationConstant::STATE_SECOND_CALL
-        )->where(
             'updated_at',
             '<',
             app()->environment() == 'production' ?
-                Carbon::now()->subHours(72)->toDateTimeString() :
-                Carbon::now()->subMinutes(7)->toDateTimeString()
+                Carbon::now()->subWeek()->toDateTimeString() :
+                Carbon::now()->subMinutes(15)->toDateTimeString()
+        )->where(
+            'state',
+            UserActivationConstant::STATE_NPS_SMS
         )->get();
 
         Helpers::setUserStatus(
             $userStates,
-            UserActivationConstant::STATE_SECOND_ATTEMPT_DIE,
+            UserActivationConstant::STATE_REFERRAL_SMS,
             null,
             true,
-            UserActivationConstant::SMS_TEXT_FIRST_POLL
+            UserActivationConstant::SMS_TEXT_REFERRAL
         );
     }
 }

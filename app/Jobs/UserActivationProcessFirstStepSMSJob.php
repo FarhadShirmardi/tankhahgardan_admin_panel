@@ -54,7 +54,9 @@ class UserActivationProcessFirstStepSMSJob implements ShouldQueue
         )->where(
             'users.created_at',
             '<',
-            Carbon::now()->subHours(24)->toDateTimeString()
+            app()->environment() == 'production' ?
+                Carbon::now()->subHours(24)->toDateTimeString() :
+                Carbon::now()->subMinutes(2)->toDateTimeString()
         )->where(
             'users.state',
             '1'
@@ -84,7 +86,7 @@ class UserActivationProcessFirstStepSMSJob implements ShouldQueue
 
             if ($dataCounter  == 0) {
                 if (app()->environment() != 'production') {
-                    $delayTime = now()->addMinutes(5);
+                    $delayTime = now();
                 } else {
                     $delayTime = now()->addHours(12);
                 }

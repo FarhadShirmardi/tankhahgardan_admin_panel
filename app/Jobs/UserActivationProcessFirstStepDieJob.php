@@ -33,6 +33,7 @@ class UserActivationProcessFirstStepDieJob implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
@@ -42,7 +43,9 @@ class UserActivationProcessFirstStepDieJob implements ShouldQueue
         )->where(
             'updated_at',
             '<',
-            Carbon::now()->subHours(48)->toDateTimeString()
+            app()->environment() == 'production' ?
+                Carbon::now()->subHours(48)->toDateTimeString() :
+                Carbon::now()->subMinutes(4)->toDateTimeString()
         )->get();
 
         Helpers::setUserStatus($userStates, UserActivationConstant::STATE_FIRST_ATTEMPT_DIE);

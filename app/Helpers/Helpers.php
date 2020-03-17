@@ -544,7 +544,7 @@ class Helpers
 
                 if ($sendSms == true) {
                     if (app()->environment() != 'production') {
-                        $delayTime = now()->addMinutes(5);
+                        $delayTime = now();
                     } else {
                         $delayTime = now()->addHours(12);
                     }
@@ -555,6 +555,30 @@ class Helpers
                         $state
                     ))->delay($delayTime);
                 }
+            } else if ($state == UserActivationConstant::STATE_NPS_SMS or
+                $state == UserActivationConstant::STATE_REFERRAL_SMS) {
+                //Update user activation state
+                $userActivationState = UserActivationState::where(
+                    'user_id',
+                    $user->id
+                )->first();
+                $userActivationState->state = $state;
+                $userActivationState->save();
+
+                if ($sendSms == true) {
+                    if (app()->environment() != 'production') {
+                        $delayTime = now();
+                    } else {
+                        $delayTime = now()->addHours(12);
+                    }
+
+                    dispatch(new UserActivationSmsJob(
+                        $user,
+                        $smsText,
+                        $state
+                    ))->delay($delayTime);
+                }
+
             }
         }
     }

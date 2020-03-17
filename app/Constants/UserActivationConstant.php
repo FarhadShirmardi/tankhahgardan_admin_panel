@@ -14,6 +14,8 @@ class UserActivationConstant
     const STATE_THIRD_SMS = 5;
     const STATE_THIRD_STEP_INACTIVE = 500;
     const STATE_THIRD_CALL = 6;
+    const STATE_NPS_SMS = 7;
+    const STATE_REFERRAL_SMS = 8;
 
     const STATE_FIRST_ATTEMPT_DIE = 1000;
     const STATE_SECOND_ATTEMPT_DIE = 2000;
@@ -24,6 +26,8 @@ class UserActivationConstant
     const SMS_TEXT_FIRST_POLL = 'پیامک نظرسنجی اول';
     const SMS_TEXT_THIRD = 'پیامک فعال سازی سوم.';
     const SMS_TEXT_SECOND_POLL = 'پیامک نظرسنجی دوم';
+    const SMS_TEXT_NPS = 'متن پیامک NPS';
+    const SMS_TEXT_REFERRAL = 'متن پیامک ریفرال';
 
     public static function getStates($state = null)
     {

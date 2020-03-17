@@ -43,7 +43,9 @@ class UserActivationProcessFirstStepInactiveJob implements ShouldQueue
         )->where(
             'updated_at',
             '<',
-            Carbon::now()->subHours(24)->toDateTimeString()
+            app()->environment() == 'production' ?
+                Carbon::now()->subHours(24)->toDateTimeString() :
+                Carbon::now()->subMinutes(2)->toDateTimeString()
         )->get();
 
         Helpers::setUserStatus(

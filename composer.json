@@ -10,6 +10,8 @@
     "require": {
         "php": "^7.2",
         "fideloper/proxy": "^4.0",
+        "irazasyed/telegram-bot-sdk": "^2.3",
+        "kavenegar/laravel": "^1.1",
         "laravel/framework": "^6.2",
         "laravel/tinker": "^2.0",
         "predis/predis": "^1.1"
