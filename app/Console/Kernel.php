@@ -38,63 +38,63 @@ class Kernel extends ConsoleKernel
 
         if (app()->environment() == 'production') {
             //First Step User Activation
-            $schedule->job(new UserActivationProcessFirstStepSMSJob)
+            $schedule->job(new UserActivationProcessFirstStepSMSJob, 'activationSms')
                 ->dailyAt('00:00');
-            $schedule->job(new UserActivationProcessFirstStepInactiveJob)
+            $schedule->job(new UserActivationProcessFirstStepInactiveJob, 'activationSms')
                 ->dailyAt('00:30');
-            $schedule->job(new UserActivationProcessFirstStepDieJob)
+            $schedule->job(new UserActivationProcessFirstStepDieJob, 'activationSms')
                 ->dailyAt('01:00');
 
             //Second Step User Activation
-            $schedule->job(new UserActivationProcessSecondStepSMSJob)
+            $schedule->job(new UserActivationProcessSecondStepSMSJob, 'activationSms')
                 ->dailyAt('01:30');
-            $schedule->job(new UserActivationProcessSecondStepInactiveJob)
+            $schedule->job(new UserActivationProcessSecondStepInactiveJob, 'activationSms')
                 ->dailyAt('02:00');
-            $schedule->job(new UserActivationProcessSecondStepDieJob)
+            $schedule->job(new UserActivationProcessSecondStepDieJob, 'activationSms')
                 ->dailyAt('2:30');
 
             //Third Step User Activation
-            $schedule->job(new UserActivationProcessThirdStepSMSJob)
+            $schedule->job(new UserActivationProcessThirdStepSMSJob, 'activationSms')
                 ->dailyAt('03:00');
-            $schedule->job(new UserActivationProcessThirdStepInactiveJob)
+            $schedule->job(new UserActivationProcessThirdStepInactiveJob, 'activationSms')
                 ->dailyAt('03:30');
-            $schedule->job(new UserActivationProcessThirdStepDieJob)
+            $schedule->job(new UserActivationProcessThirdStepDieJob, 'activationSms')
                 ->dailyAt('04:00');
 
             //Last Step User Activation
-            $schedule->job(new UserActivationNPSSMSJob)
+            $schedule->job(new UserActivationNPSSMSJob, 'activationSms')
                 ->dailyAt('04:30');
-            $schedule->job(new UserActivationReferralSMSJob)
+            $schedule->job(new UserActivationReferralSMSJob, 'activationSms')
                 ->dailyAt('05:00');
         } else {
             //First Step User Activation
-            $schedule->job(new UserActivationProcessFirstStepSMSJob)
+            $schedule->job(new UserActivationProcessFirstStepSMSJob, 'activationSms')
                 ->everyMinute();
-            $schedule->job(new UserActivationProcessFirstStepInactiveJob)
+            $schedule->job(new UserActivationProcessFirstStepInactiveJob, 'activationSms')
                 ->everyMinute();
-            $schedule->job(new UserActivationProcessFirstStepDieJob)
+            $schedule->job(new UserActivationProcessFirstStepDieJob, 'activationSms')
                 ->everyMinute();
 
             //Second Step User Activation
-            $schedule->job(new UserActivationProcessSecondStepSMSJob)
+            $schedule->job(new UserActivationProcessSecondStepSMSJob, 'activationSms')
                 ->everyMinute();
-            $schedule->job(new UserActivationProcessSecondStepInactiveJob)
+            $schedule->job(new UserActivationProcessSecondStepInactiveJob, 'activationSms')
                 ->everyMinute();
-            $schedule->job(new UserActivationProcessSecondStepDieJob)
+            $schedule->job(new UserActivationProcessSecondStepDieJob, 'activationSms')
                 ->everyMinute();
 
             //Third Step User Activation
-            $schedule->job(new UserActivationProcessThirdStepSMSJob)
+            $schedule->job(new UserActivationProcessThirdStepSMSJob, 'activationSms')
                 ->everyMinute();
-            $schedule->job(new UserActivationProcessThirdStepInactiveJob)
+            $schedule->job(new UserActivationProcessThirdStepInactiveJob, 'activationSms')
                 ->everyMinute();
-            $schedule->job(new UserActivationProcessThirdStepDieJob)
+            $schedule->job(new UserActivationProcessThirdStepDieJob, 'activationSms')
                 ->everyMinute();
 
             //Last Step User Activation
-            $schedule->job(new UserActivationNPSSMSJob)
+            $schedule->job(new UserActivationNPSSMSJob, 'activationSms')
                 ->everyMinute();
-            $schedule->job(new UserActivationReferralSMSJob)
+            $schedule->job(new UserActivationReferralSMSJob, 'activationSms')
                 ->everyMinute();
         }
     }

@@ -1,0 +1,8 @@
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+
+0 12 * * * php /usr/share/nginx/html/home/artisan backup:monitor
+30 2 * * * php /usr/share/nginx/html/home/artisan backup:clean
+0 3 * * * php /usr/share/nginx/html/home/artisan backup:run
+#empty line
