@@ -10,11 +10,13 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Telegram\Bot\Laravel\Facades\Telegram;
 
 class UserActivationSmsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /** @var User $user */
     private $user;
     private $text;
     private $notifyType;
@@ -40,7 +42,17 @@ class UserActivationSmsJob implements ShouldQueue
      */
     public function handle()
     {
-        //todo: Send SMS
+        if (app()->environment() == 'production') {
+            //todo: Send SMS
+        } else {
+            $text = 'کاربر: ' . $this->user->phone_number;
+            $text .= 'پیام: ' . $this->text;
+            Telegram::sendMessage([
+                'chat_id' => '@tankhahBackLog',
+                'parse_mode' => 'HTML',
+                'text' => $text,
+            ]);
+        }
 
         //Log SMS
         $userActivationLog = new UserActivationLog();

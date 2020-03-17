@@ -38,7 +38,9 @@ class UserActivationNPSSMSJob implements ShouldQueue
             $q->where(
                 'updated_at',
                 '<',
-                Carbon::now()->subHours(24)->toDateTimeString()
+                app()->environment() == 'production' ?
+                    Carbon::now()->subHours(24)->toDateTimeString() :
+                    Carbon::now()->subMinutes(2)->toDateTimeString()
             )->where(
                 'state',
                 UserActivationConstant::STATE_THIRD_SMS
@@ -47,7 +49,9 @@ class UserActivationNPSSMSJob implements ShouldQueue
             $q->where(
                 'updated_at',
                 '<',
-                Carbon::now()->subHours(72)->toDateTimeString()
+                app()->environment() == 'production' ?
+                    Carbon::now()->subHours(72)->toDateTimeString() :
+                    Carbon::now()->subMinutes(7)->toDateTimeString()
             )->where(
                 'state',
                 UserActivationConstant::STATE_THIRD_CALL
@@ -56,7 +60,9 @@ class UserActivationNPSSMSJob implements ShouldQueue
             $q->where(
                 'updated_at',
                 '<',
-                Carbon::now()->subMonth()->toDateTimeString()
+                app()->environment() == 'production' ?
+                    Carbon::now()->subMonth()->toDateTimeString() :
+                    Carbon::now()->subMinutes(20)->toDateTimeString()
             )->where(
                 'state',
                 UserActivationConstant::STATE_ACTIVE_USER

@@ -37,7 +37,9 @@ class UserActivationReferralSMSJob implements ShouldQueue
         $userStates = UserActivationState::where(
             'updated_at',
             '<',
-            Carbon::now()->subWeek()->toDateTimeString()
+            app()->environment() == 'production' ?
+                Carbon::now()->subWeek()->toDateTimeString() :
+                Carbon::now()->subMinutes(15)->toDateTimeString()
         )->where(
             'state',
             UserActivationConstant::STATE_NPS_SMS

@@ -100,13 +100,13 @@ class UserActivationController extends Controller
         \DB::transaction(function () use ($userActivationState, &$step, &$request) {
             if ($userActivationState->state == UserActivationConstant::STATE_FIRST_STEP_INACTIVE) {
                 $notifyType = UserActivationConstant::STATE_FIRST_CALL;
-                $step = 1;
+                $step = UserActivationConstant::STATE_FIRST_STEP_INACTIVE;
             } elseif ($userActivationState->state == UserActivationConstant::STATE_SECOND_STEP_INACTIVE) {
                 $notifyType = UserActivationConstant::STATE_SECOND_CALL;
-                $step = 2;
+                $step = UserActivationConstant::STATE_SECOND_STEP_INACTIVE;
             } elseif ($userActivationState->state == UserActivationConstant::STATE_THIRD_STEP_INACTIVE) {
                 $notifyType = UserActivationConstant::STATE_THIRD_CALL;
-                $step = 3;
+                $step = UserActivationConstant::STATE_THIRD_STEP_INACTIVE;
             }
 
             if (isset($notifyType)) {
