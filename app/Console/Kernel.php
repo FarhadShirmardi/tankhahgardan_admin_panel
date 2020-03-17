@@ -69,33 +69,33 @@ class Kernel extends ConsoleKernel
         } else {
             //First Step User Activation
             $schedule->job(new UserActivationProcessFirstStepSMSJob, 'activationSms')
-                ->everyMinute();
+                ->everyThirtyMinutes();
             $schedule->job(new UserActivationProcessFirstStepInactiveJob, 'activationSms')
-                ->everyMinute();
+                ->everyThirtyMinutes();
             $schedule->job(new UserActivationProcessFirstStepDieJob, 'activationSms')
-                ->everyMinute();
+                ->everyThirtyMinutes();
 
             //Second Step User Activation
             $schedule->job(new UserActivationProcessSecondStepSMSJob, 'activationSms')
-                ->everyMinute();
+                ->everyThirtyMinutes();
             $schedule->job(new UserActivationProcessSecondStepInactiveJob, 'activationSms')
-                ->everyMinute();
+                ->everyThirtyMinutes();
             $schedule->job(new UserActivationProcessSecondStepDieJob, 'activationSms')
-                ->everyMinute();
+                ->everyThirtyMinutes();
 
             //Third Step User Activation
             $schedule->job(new UserActivationProcessThirdStepSMSJob, 'activationSms')
-                ->everyMinute();
+                ->everyThirtyMinutes();
             $schedule->job(new UserActivationProcessThirdStepInactiveJob, 'activationSms')
-                ->everyMinute();
+                ->everyThirtyMinutes();
             $schedule->job(new UserActivationProcessThirdStepDieJob, 'activationSms')
-                ->everyMinute();
+                ->everyThirtyMinutes();
 
             //Last Step User Activation
             $schedule->job(new UserActivationNPSSMSJob, 'activationSms')
-                ->everyMinute();
+                ->everyThirtyMinutes();
             $schedule->job(new UserActivationReferralSMSJob, 'activationSms')
-                ->everyMinute();
+                ->everyThirtyMinutes();
         }
     }
 
