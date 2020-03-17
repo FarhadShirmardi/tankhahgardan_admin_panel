@@ -1,0 +1,4 @@
+MAILTO="ahpiri@gmail.com"
+0 * * * * /bin/sh /home/scripts/mysqlbackup_30min
+15 3 * * * /usr/bin/certbot renew --quiet
+30 3 * * * /bin/sh /home/scripts/site_backup

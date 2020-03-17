@@ -1,0 +1,6 @@
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+
+* * * * * php /usr/share/nginx/html/home/artisan schedule:run >> /dev/null 2>&1
+#empty line

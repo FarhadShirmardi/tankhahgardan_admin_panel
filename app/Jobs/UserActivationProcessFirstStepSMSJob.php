@@ -96,7 +96,7 @@ class UserActivationProcessFirstStepSMSJob implements ShouldQueue
                     $user,
                     UserActivationConstant::SMS_TEXT_FIRST,
                     UserActivationConstant::STATE_FIRST_SMS
-                ))->onQueue('images')->delay($delayTime);
+                ))->onQueue('activationSms')->delay($delayTime);
 
             } else {
                 \Log::debug("User was active in 24 hour => {$user->id}");
