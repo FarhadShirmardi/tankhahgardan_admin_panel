@@ -33,6 +33,7 @@ COPY ./docker/nginx.conf /etc/nginx/
 COPY ./docker/www.conf /etc/php-fpm.d/www.conf
 COPY ./docker/php.ini /etc/php.ini
 COPY ./docker/supervisord.conf /etc/supervisord.conf
+RUN mkdir /run/php-fpm/
 
 EXPOSE 80 443
 
