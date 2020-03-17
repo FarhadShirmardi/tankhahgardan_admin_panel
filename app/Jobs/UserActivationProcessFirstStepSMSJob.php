@@ -79,31 +79,35 @@ class UserActivationProcessFirstStepSMSJob implements ShouldQueue
                 $dataCounter += $project->receives()->count();
             }
 
-            //Create user activation state
-            $userActivationState = new UserActivationState();
-            $userActivationState->user_id = $user->id;
-            $userActivationState->save();
+            $userStateCount = UserActivationState::where('user_id', $user->id)->count();
 
-            if ($dataCounter  == 0) {
-                if (app()->environment() != 'production') {
-                    $delayTime = now();
-                } else {
-                    $delayTime = now()->addHours(12);
-                }
-
-                \Log::debug("Sending sms to user->id = {$user->id}");
-                dispatch(new UserActivationSmsJob(
-                    $user,
-                    UserActivationConstant::SMS_TEXT_FIRST,
-                    UserActivationConstant::STATE_FIRST_SMS
-                ))->onQueue('activationSms')->delay($delayTime);
-
-            } else {
-                \Log::debug("User was active in 24 hour => {$user->id}");
-
-                //Update user activation state
-                $userActivationState->state = UserActivationConstant::STATE_ACTIVE_USER;
+            if ($userStateCount === 0) {
+                //Create user activation state
+                $userActivationState = new UserActivationState();
+                $userActivationState->user_id = $user->id;
                 $userActivationState->save();
+
+                if ($dataCounter == 0) {
+                    if (app()->environment() != 'production') {
+                        $delayTime = now();
+                    } else {
+                        $delayTime = now()->addHours(12);
+                    }
+
+                    \Log::debug("Sending sms to user->id = {$user->id}");
+                    dispatch(new UserActivationSmsJob(
+                        $user,
+                        UserActivationConstant::SMS_TEXT_FIRST,
+                        UserActivationConstant::STATE_FIRST_SMS
+                    ))->onQueue('activationSms')->delay($delayTime);
+
+                } else {
+                    \Log::debug("User was active in 24 hour => {$user->id}");
+
+                    //Update user activation state
+                    $userActivationState->state = UserActivationConstant::STATE_ACTIVE_USER;
+                    $userActivationState->save();
+                }
             }
         }
     }
