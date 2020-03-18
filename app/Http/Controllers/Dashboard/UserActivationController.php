@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 
 class UserActivationController extends Controller
 {
-    public function activationIndex($step)
+    public function activationIndex($step, Request $request)
     {
         $q = \DB::connection('mysql')
         ->table('panel_user_activation_states')
@@ -35,23 +35,41 @@ class UserActivationController extends Controller
         );
 
         if ($step == UserActivationConstant::STATE_FIRST_STEP_INACTIVE) {
-            $data = $q->where(
+            $q->where(
                 'panel_user_activation_states.state',
                 UserActivationConstant::STATE_FIRST_STEP_INACTIVE
-            )->paginate();
+            );
         } elseif ($step == UserActivationConstant::STATE_SECOND_STEP_INACTIVE) {
-            $data = $q->where(
+            $q->where(
                 'panel_user_activation_states.state',
                 UserActivationConstant::STATE_SECOND_STEP_INACTIVE
-            )->paginate();
+            );
         } elseif ($step == UserActivationConstant::STATE_THIRD_STEP_INACTIVE) {
-            $data = $q->where(
+            $q->where(
                 'panel_user_activation_states.state',
                 UserActivationConstant::STATE_THIRD_STEP_INACTIVE
-            )->paginate();
+            );
         }
 
-//        dd($data->toSql(), $data->getBindings());
+        if ($request->has('search')) {
+            $q->where(function ($q) use ($request) {
+                $q->orWhere(
+                    'name',
+                    'like',
+                    '%'.$request->search.'%'
+                )->orWhere(
+                    'family',
+                    'like',
+                    '%'.$request->search.'%'
+                )->orWhere(
+                    'phone_number',
+                    'like',
+                    '%'.$request->search.'%'
+                );
+            });
+        }
+
+        $data = $q->orderByDesc('updated_at')->paginate();
 
         return view('dashboard.user_activation.activation_list', [
             'data' => $data ?? [],
