@@ -8,12 +8,12 @@
                     <div class="card-header">
                         <i class="fa fa-align-justify"></i>
                         @switch($step)
-                            @case(\App\Http\Controllers\Api\V1\Constants\UserActivationConstant::STATE_FIRST_SMS)
+                            @case(\App\Constants\UserActivationConstant::STATE_FIRST_SMS)
                             کاربران غیرفعال 24 ساعت گذشته
-                                @break
-                            @case(\App\Http\Controllers\Api\V1\Constants\UserActivationConstant::STATE_FIRST_ATTEMPT_DIE)
-                                کاربران مرده 24 ساعت گذشته
-                                @break
+                            @break
+                            @case(\App\Constants\UserActivationConstant::STATE_FIRST_ATTEMPT_DIE)
+                            کاربران مرده 24 ساعت گذشته
+                            @break
                         @endswitch
                     </div>
                     <div class="card-body">
@@ -46,8 +46,8 @@
                                         <td>{{ $item->name . ' ' . $item->family }}</td>
                                         <td>{{ $item->phone_number }}</td>
                                         @php
-                                            $userCreatedAtArr = explode(' ', $item->user_created_at);
-                                            $jalaliUserCreatedAtDate = \App\Helpers\Helpers::gregorianDateStringToJalali($userCreatedAtArr[0]);
+                                            use App\Helpers\Helpers;$userCreatedAtArr = explode(' ', $item->user_created_at);
+                                            $jalaliUserCreatedAtDate = Helpers::gregorianDateStringToJalali($userCreatedAtArr[0])
                                         @endphp
                                         <td>{{ $jalaliUserCreatedAtDate.' '.$userCreatedAtArr[1] }}</td>
                                     </tr>

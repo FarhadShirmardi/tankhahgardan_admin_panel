@@ -24,6 +24,7 @@
     "dependencies": {
         "cropper": "^4.0.0",
         "cropperjs": "^1.5.5",
+        "highcharts": "^8.0.4",
         "jquery-cropper": "^1.0.0",
         "node-sass": "^4.12.0",
         "popper.js": "^1.12.3"

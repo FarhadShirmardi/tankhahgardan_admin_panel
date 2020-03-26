@@ -1,7 +1,8 @@
 <!-- Bootstrap and necessary plugins -->
 <script src="{{ asset('js/popper.min.js') }}"></script>
 <script src="{{ asset('js/bootstrap.min.js') }}"></script>
-<script src="{{ 'js/pace.min.js' }}"></script>
+<script src="{{ asset('js/jquery.min.js') }}"></script>
+<script src="{{ asset('js/pace.min.js') }}"></script>
 <script src="{{ asset('js/select2.full.min.js') }}"></script>
 <script src="{{ asset('js/i18n/en.js') }}"></script>
 <script src="{{ asset('js/i18n/fa.js') }}"></script>
@@ -12,6 +13,7 @@
 <script src="{{ asset('js/persian-datepicker.min.js') }}"></script>
 <script src="{{ asset('js/loadingoverlay.min.js') }}"></script>
 <script src="{{ asset('js/jquery.toast.min.js') }}"></script>
+<script src="{{ asset('js/highcharts.js') }}"></script>
 
 <!-- Plugins and scripts required by all views -->
 {{--<script src="{{ asset('dashboard/js/views/charts.js') }}"></script>--}}

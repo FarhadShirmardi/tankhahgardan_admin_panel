@@ -19,7 +19,20 @@
     <div class="container-fluid">
 
         <div class="animated fadeIn">
-            @yield('content')
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header">
+                            @yield('title')
+                        </div>
+                        <div class="card-body">
+                            @include('dashboard.layouts.success_message')
+                            @include('dashboard.layouts.error_message')
+                            @yield('content')
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
 

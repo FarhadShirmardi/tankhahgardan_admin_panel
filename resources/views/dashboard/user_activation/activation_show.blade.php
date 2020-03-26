@@ -28,7 +28,7 @@
                             <div class="form-group row">
                                 <div class="col-3">وضعیت کاربر:</div>
                                 <div class="col-9">
-                                    {{ \App\Http\Controllers\Api\V1\Constants\UserActivationConstant::getStates($data->state)['name'] }}
+                                    {{ \App\Constants\UserActivationConstant::getStates($data->state)['name'] }}
                                 </div>
                             </div>
 

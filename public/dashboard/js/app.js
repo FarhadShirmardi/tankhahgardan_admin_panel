@@ -320,7 +320,7 @@ function init(url) {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! /home/amir/PhpProjects/tankhahgardan_admin_panel/resources/js/dashboard/app.js */"./resources/js/dashboard/app.js");
+module.exports = __webpack_require__(/*! C:\xampp\htdocs\tankhahgardan_admin_panel\resources\js\dashboard\app.js */"./resources/js/dashboard/app.js");
 
 
 /***/ })

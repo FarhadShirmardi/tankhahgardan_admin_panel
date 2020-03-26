@@ -4,29 +4,29 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Exceptions\Web\User\SetUserCallDateTimeException;
 use App\Helpers\Helpers;
-use App\Http\Controllers\Api\V1\Constants\UserActivationConstant;
+use App\Constants\UserActivationConstant;
 use App\Http\Controllers\Controller;
 use App\User;
 use App\UserActivationLog;
 use App\UserActivationState;
-use Carbon\Carbon;
+use DB;
 use Illuminate\Http\Request;
 
 class UserActivationController extends Controller
 {
     public function activationIndex($step, Request $request)
     {
-        $q = \DB::connection('mysql')
-        ->table('panel_user_activation_states')
-        ->select([
-            'users.id',
-            'users.name',
-            'users.family',
-            'users.phone_number',
-            'users.created_at as user_created_at',
-            'panel_user_activation_states.state',
-            'panel_user_activation_states.created_at',
-            'panel_user_activation_states.updated_at',
+        $q = DB::connection('mysql')
+            ->table('panel_user_activation_states')
+            ->select([
+                'users.id',
+                'users.name',
+                'users.family',
+                'users.phone_number',
+                'users.created_at as user_created_at',
+                'panel_user_activation_states.state',
+                'panel_user_activation_states.created_at',
+                'panel_user_activation_states.updated_at',
         ])->join(
             'users',
             'panel_user_activation_states.user_id',
@@ -115,7 +115,7 @@ class UserActivationController extends Controller
         }
 
         $step = 0;
-        \DB::transaction(function () use ($userActivationState, &$step, &$request) {
+        DB::transaction(function () use ($userActivationState, &$step, &$request) {
             if ($userActivationState->state == UserActivationConstant::STATE_FIRST_STEP_INACTIVE) {
                 $notifyType = UserActivationConstant::STATE_FIRST_CALL;
                 $step = UserActivationConstant::STATE_FIRST_STEP_INACTIVE;

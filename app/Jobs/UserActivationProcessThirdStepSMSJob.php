@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Helpers\Helpers;
-use App\Http\Controllers\Api\V1\Constants\UserActivationConstant;
+use App\Constants\UserActivationConstant;
 use App\UserActivationState;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -11,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Exception;
 
 class UserActivationProcessThirdStepSMSJob implements ShouldQueue
 {
@@ -30,7 +31,7 @@ class UserActivationProcessThirdStepSMSJob implements ShouldQueue
      * Execute the job.
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function handle()
     {

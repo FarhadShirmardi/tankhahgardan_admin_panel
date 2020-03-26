@@ -9,7 +9,7 @@
 namespace App\Helpers;
 
 use App;
-use App\Http\Controllers\Api\V1\Constants\UserActivationConstant;
+use App\Constants\UserActivationConstant;
 use App\Jobs\UserActivationSmsJob;
 use App\Project;
 use App\User;

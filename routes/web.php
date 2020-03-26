@@ -15,8 +15,8 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('login', 'Dashboard\AuthController@login')->name('login');
     Route::post('authenticate', 'Dashboard\AuthController@authenticate')->name('authenticate');
 
-    Route::get('/', function () {
-        if (auth()-> guest()) {
+    Route::get('/home', function () {
+        if (auth()->guest()) {
             return redirect(route('dashboard.login'));
         }
         return view('dashboard.home');
@@ -41,6 +41,28 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
             'users/activation/{userId}/call',
             'Dashboard\UserActivationController@activationCall'
         )->name('users.activation.call.update');
+        Route::prefix('report')->name('report.')->group(function () {
+            Route::middleware(['permission:time_separation'])
+                ->match(['get', 'post'], 'timeSeparation', 'Dashboard\ReportController@timeSeparation')
+                ->name('timeSeparation');
+            Route::middleware(['permission:day_separation'])
+                ->match(['get', 'post'], 'daySeparation', 'Dashboard\ReportController@daySeparation')
+                ->name('daySeparation');
+            Route::middleware(['permission:range_separation'])
+                ->match(['get', 'post'], 'rangeSeparation', 'Dashboard\ReportController@rangeSeparation')
+                ->name('rangeSeparation');
+            Route::middleware(['permission:all_user_activity_full|all_user_activity'])
+                ->match(['get', 'post'], 'userActivity', 'Dashboard\ReportController@allUsersActivity');
+            Route::middleware(['permission:all_project_activity'])
+                ->match(['get', 'post'], 'projectActivity', 'Dashboard\ReportController@allProjectsActivity');
+            Route::middleware(['permission:user_activity'])
+                ->match(['get', 'post'], 'userActivity/{id}', 'Dashboard\ReportController@userActivity');
+            Route::middleware(['permission:project_activity'])
+                ->match(['get', 'post'], 'projectActivity/{id}', 'Dashboard\ReportController@projectActivity');
+        });
+
+        Route::get('changePassword', 'Dashboard\ReportController@changePasswordView')->name('changePasswordView');
+        Route::post('changePassword', 'Dashboard\ReportController@changePassword')->name('changePassword');
     });
 });
 

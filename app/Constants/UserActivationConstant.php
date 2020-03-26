@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Constants;
+namespace App\Constants;
 
 class UserActivationConstant
 {

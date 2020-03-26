@@ -2,10 +2,9 @@
 
 namespace App\Jobs;
 
-use App\Http\Controllers\Api\V1\Constants\UserActivationConstant;
+use App\Constants\UserActivationConstant;
 use App\Project;
 use App\User;
-use App\UserActivationLog;
 use App\UserActivationState;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -13,6 +12,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Log;
 
 class UserActivationProcessFirstStepSMSJob implements ShouldQueue
 {
@@ -65,7 +65,7 @@ class UserActivationProcessFirstStepSMSJob implements ShouldQueue
         )->orderByDesc('users.created_at')
             ->get();
 
-        \Log::debug("User counts = {$users->count()}");
+        Log::debug("User counts = {$users->count()}");
 
         foreach ($users as $user) {
             $projects = $user->projects()->get();
@@ -94,7 +94,7 @@ class UserActivationProcessFirstStepSMSJob implements ShouldQueue
                         $delayTime = now()->addHours(12);
                     }
 
-                    \Log::debug("Sending sms to user->id = {$user->id}");
+                    Log::debug("Sending sms to user->id = {$user->id}");
                     dispatch(new UserActivationSmsJob(
                         $user,
                         UserActivationConstant::SMS_TEXT_FIRST,
@@ -102,7 +102,7 @@ class UserActivationProcessFirstStepSMSJob implements ShouldQueue
                     ))->onQueue('activationSms')->delay($delayTime);
 
                 } else {
-                    \Log::debug("User was active in 24 hour => {$user->id}");
+                    Log::debug("User was active in 24 hour => {$user->id}");
 
                     //Update user activation state
                     $userActivationState->state = UserActivationConstant::STATE_ACTIVE_USER;
