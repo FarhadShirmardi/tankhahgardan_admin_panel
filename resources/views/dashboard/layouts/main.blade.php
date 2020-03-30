@@ -28,6 +28,7 @@
                         <div class="card-body">
                             @include('dashboard.layouts.success_message')
                             @include('dashboard.layouts.error_message')
+                            @yield('filter')
                             @yield('content')
                         </div>
                     </div>

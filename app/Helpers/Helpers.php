@@ -40,7 +40,7 @@ class Helpers
     const EXCEPTION_INTEGRITY_CONSTRAINT = 'Integrity constraint violation';
     const EXCEPTION_NO_QUERY_RESULTS = 'No query results for model';
 
-    const PAGE_SIZE = 15;
+    const PAGE_SIZE = 100;
 
     public static function arrayRandomize($array, $number = null)
     {

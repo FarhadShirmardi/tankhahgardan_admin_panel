@@ -1,4 +1,4 @@
-@extends('dashboard.layouts.report')
+@extends('dashboard.layouts.master')
 
 @section('title')
     <i class="fa fa-line-chart"></i>

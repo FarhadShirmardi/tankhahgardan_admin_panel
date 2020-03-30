@@ -11,39 +11,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
-/**
- * App\Receive
- *
- * @property int $id
- * @property string $amount
- * @property string $description
- * @property string $date
- * @property int|null $imprest_id
- * @property int $creator_user_id
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property string|null $deleted_at
- * @property-read TurnoverDetail $turnoverDetails
- * @method static Builder|Payment whereAmount($value)
- * @method static Builder|Payment whereContactId($value)
- * @method static Builder|Payment whereCreatedAt($value)
- * @method static Builder|Payment whereCreatorUserId($value)
- * @method static Builder|Payment whereDate($value)
- * @method static Builder|Payment whereDeletedAt($value)
- * @method static Builder|Payment whereDescription($value)
- * @method static Builder|Payment whereId($value)
- * @method static Builder|Payment whereImprestId($value)
- * @method static Builder|Payment whereUpdatedAt($value)
- * @mixin Eloquent
- * @property string $receive_subject
- * @method static Builder|Receives whereReceiveSubject($value)
- * @property int $project_id
- * @property-read Collection|Image[] $images
- * @method static Builder|Receives whereProjectId($value)
- */
+
 class Receive extends Model
 {
     use SoftDeletes;
+
+    protected $connection = 'mysql';
 
     protected $fillable = [
         'amount',

@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class File extends Model
 {
+
+    protected $connection = 'mysql';
+
     protected $fillable = [
         'path',
         'tag',

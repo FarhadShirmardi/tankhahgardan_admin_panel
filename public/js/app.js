@@ -1889,40 +1889,36 @@ module.exports = {
   isStream: isStream,
   isURLSearchParams: isURLSearchParams,
   isStandardBrowserEnv: isStandardBrowserEnv,
-    forEach: forEach,
-    merge: merge,
-    deepMerge: deepMerge,
-    extend: extend,
-    trim: trim
+  forEach: forEach,
+  merge: merge,
+  deepMerge: deepMerge,
+  extend: extend,
+  trim: trim
 };
 
 
-            /***/
-        }),
+/***/ }),
 
-        /***/ "./node_modules/highcharts/css/highcharts.scss":
-        /*!*****************************************************!*\
-          !*** ./node_modules/highcharts/css/highcharts.scss ***!
-          \*****************************************************/
-        /*! no static exports found */
-        /***/ (function (module, exports) {
+/***/ "./node_modules/highcharts/css/highcharts.scss":
+/*!*****************************************************!*\
+  !*** ./node_modules/highcharts/css/highcharts.scss ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
 
-            /***/
-        }),
+/***/ }),
 
-        /***/ "./node_modules/lodash/lodash.js":
-        /*!***************************************!*\
-          !*** ./node_modules/lodash/lodash.js ***!
-          \***************************************/
-        /*! no static exports found */
-        /***/ (function (module, exports, __webpack_require__) {
+/***/ "./node_modules/lodash/lodash.js":
+/*!***************************************!*\
+  !*** ./node_modules/lodash/lodash.js ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
-            /* WEBPACK VAR INJECTION */
-            (function (global, module) {
-                var __WEBPACK_AMD_DEFINE_RESULT__;/**
-                 * @license
+/* WEBPACK VAR INJECTION */(function(global, module) {var __WEBPACK_AMD_DEFINE_RESULT__;/**
+ * @license
  * Lodash <https://lodash.com/>
  * Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
  * Released under MIT license <https://lodash.com/license>
@@ -19073,7 +19069,7 @@ function defaultClearTimeout () {
     } catch (e) {
         cachedClearTimeout = defaultClearTimeout;
     }
-}());
+} ())
 function runTimeout(fun) {
     if (cachedSetTimeout === setTimeout) {
         //normal enviroments in sane situations
@@ -19210,9 +19206,7 @@ process.emit = noop;
 process.prependListener = noop;
 process.prependOnceListener = noop;
 
-            process.listeners = function (name) {
-                return []
-            };
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -19357,20 +19351,19 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 /***/ }),
 
 /***/ 0:
-        /*!*************************************************************************************************************************************************!*\
-          !*** multi ./resources/js/app.js ./resources/sass/app.scss ./resources/sass/dashboard/style.scss ./node_modules/highcharts/css/highcharts.scss ***!
-          \*************************************************************************************************************************************************/
-        /*! no static exports found */
+/*!*************************************************************************************************************************************************!*\
+  !*** multi ./resources/js/app.js ./resources/sass/app.scss ./resources/sass/dashboard/style.scss ./node_modules/highcharts/css/highcharts.scss ***!
+  \*************************************************************************************************************************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-            __webpack_require__(/*! C:\xampp\htdocs\tankhahgardan_admin_panel\resources\js\app.js */"./resources/js/app.js");
-            __webpack_require__(/*! C:\xampp\htdocs\tankhahgardan_admin_panel\resources\sass\app.scss */"./resources/sass/app.scss");
-            __webpack_require__(/*! C:\xampp\htdocs\tankhahgardan_admin_panel\resources\sass\dashboard\style.scss */"./resources/sass/dashboard/style.scss");
-            module.exports = __webpack_require__(/*! C:\xampp\htdocs\tankhahgardan_admin_panel\node_modules\highcharts\css\highcharts.scss */"./node_modules/highcharts/css/highcharts.scss");
+__webpack_require__(/*! C:\xampp\htdocs\tankhahgardan_admin_panel\resources\js\app.js */"./resources/js/app.js");
+__webpack_require__(/*! C:\xampp\htdocs\tankhahgardan_admin_panel\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\xampp\htdocs\tankhahgardan_admin_panel\resources\sass\dashboard\style.scss */"./resources/sass/dashboard/style.scss");
+module.exports = __webpack_require__(/*! C:\xampp\htdocs\tankhahgardan_admin_panel\node_modules\highcharts\css\highcharts.scss */"./node_modules/highcharts/css/highcharts.scss");
 
 
-            /***/
-        })
+/***/ })
 
 /******/ });
 //# sourceMappingURL=app.js.map

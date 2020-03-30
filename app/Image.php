@@ -40,6 +40,9 @@ use Illuminate\Support\Carbon;
  */
 class Image extends Model
 {
+
+    protected $connection = 'mysql';
+
     protected $fillable = [
         'path',
         'size',

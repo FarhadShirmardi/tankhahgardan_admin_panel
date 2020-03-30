@@ -11,38 +11,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
-/**
- * App\Payment
- *
- * @property int $id
- * @property string $amount
- * @property string $description
- * @property string $date
- * @property int|null $imprest_id
- * @property int|null $payment_subject
- * @property int $creator_user_id
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property string|null $deleted_at
- * @property-read TurnoverDetail $turnoverDetails
- * @method static Builder|Payments whereAmount($value)
- * @method static Builder|Payments whereContactId($value)
- * @method static Builder|Payments whereCreatedAt($value)
- * @method static Builder|Payments whereCreatorUserId($value)
- * @method static Builder|Payments whereDate($value)
- * @method static Builder|Payments whereDeletedAt($value)
- * @method static Builder|Payments whereDescription($value)
- * @method static Builder|Payments whereId($value)
- * @method static Builder|Payments whereImprestId($value)
- * @method static Builder|Payments whereUpdatedAt($value)
- * @mixin Eloquent
- * @property int $project_id
- * @property-read Collection|Image[] $images
- * @method static Builder|Payments whereProjectId($value)
- */
 class Payment extends Model
 {
     use SoftDeletes;
+
+    protected $connection = 'mysql';
 
     protected $fillable = [
         'amount',
