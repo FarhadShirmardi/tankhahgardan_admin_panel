@@ -11,6 +11,8 @@ class ProjectUser extends Pivot
     use SoftDeletes;
     protected $table = 'project_user';
 
+    protected $connection = 'mysql';
+
 
     public function project()
     {

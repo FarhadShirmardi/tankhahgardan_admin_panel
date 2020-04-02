@@ -9,7 +9,7 @@
 namespace App\Helpers;
 
 use App;
-use App\Http\Controllers\Api\V1\Constants\UserActivationConstant;
+use App\Constants\UserActivationConstant;
 use App\Jobs\UserActivationSmsJob;
 use App\Project;
 use App\User;
@@ -40,7 +40,7 @@ class Helpers
     const EXCEPTION_INTEGRITY_CONSTRAINT = 'Integrity constraint violation';
     const EXCEPTION_NO_QUERY_RESULTS = 'No query results for model';
 
-    const PAGE_SIZE = 15;
+    const PAGE_SIZE = 100;
 
     public static function arrayRandomize($array, $number = null)
     {

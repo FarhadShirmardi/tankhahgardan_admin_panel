@@ -8,8 +8,8 @@
     <title>پنل مدیریت تنخواه گردان</title>
 
     <!-- Icons -->
-    <link href="{{ url('/') }}/dashboard/css/font-awesome.min.css" rel="stylesheet">
-    <link href="{{ url('/') }}/dashboard/css/simple-line-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('dashboard/css/font-awesome.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('dashboard/css/simple-line-icons.css') }}"/>
 
     {{--    <link rel="stylesheet" href="{{ asset('dashboard/css/selectr.css') }}">--}}
     <link rel="stylesheet" href="{{ asset('dashboard/css/jstree.min.css') }}"/>

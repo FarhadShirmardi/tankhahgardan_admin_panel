@@ -11,41 +11,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
-/**
- * App\Imprest
- *
- * @property int $id
- * @property int $imprest_number
- * @property int $state
- * @property string $start_date
- * @property string $end_date
- * @property string|null $description
- * @property int $project_id
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property string|null $deleted_at
- * @property-read Collection|Payment[] $payments
- * @property-read Collection|Receive[] $receives
- * @method static bool|null forceDelete()
- * @method static \Illuminate\Database\Query\Builder|Imprests onlyTrashed()
- * @method static bool|null restore()
- * @method static Builder|Imprests whereCreatedAt($value)
- * @method static Builder|Imprests whereDeletedAt($value)
- * @method static Builder|Imprests whereDescription($value)
- * @method static Builder|Imprests whereEndDate($value)
- * @method static Builder|Imprests whereId($value)
- * @method static Builder|Imprests whereImprestNumber($value)
- * @method static Builder|Imprests whereProjectId($value)
- * @method static Builder|Imprests whereStartDate($value)
- * @method static Builder|Imprests whereState($value)
- * @method static Builder|Imprests whereUpdatedAt($value)
- * @method static \Illuminate\Database\Query\Builder|Imprests withTrashed()
- * @method static \Illuminate\Database\Query\Builder|Imprests withoutTrashed()
- * @mixin Eloquent
- */
+
 class Imprest extends Model
 {
     use SoftDeletes;
+
+    protected $connection = 'mysql';
 
     protected $fillable = [
         'imprest_number',

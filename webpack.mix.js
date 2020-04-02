@@ -50,4 +50,6 @@ mix.sourceMaps(true, 'source-map')
     .copy(bowerPath + '/jquery-toast-plugin/dist/jquery.toast.min.js', 'public/js')
     .copy('./resources/js/dashboard/tinymce/fa.js', 'public/js')
     .styles([bowerPath + '/jquery-toast-plugin/dist/jquery.toast.min.css'], dashboardCssPath + '/jquery.toast.min.css')
+    .copy(npmPath + '/highcharts/highcharts.js', 'public/js')
+    .sass(npmPath + '/highcharts/css/highcharts.scss', dashboardCssPath + '/highcharts.min.css')
 ;

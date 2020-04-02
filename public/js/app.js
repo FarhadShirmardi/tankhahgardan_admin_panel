@@ -1899,6 +1899,17 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./node_modules/highcharts/css/highcharts.scss":
+/*!*****************************************************!*\
+  !*** ./node_modules/highcharts/css/highcharts.scss ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
+
+/***/ }),
+
 /***/ "./node_modules/lodash/lodash.js":
 /*!***************************************!*\
   !*** ./node_modules/lodash/lodash.js ***!
@@ -19340,15 +19351,16 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 /***/ }),
 
 /***/ 0:
-/*!***************************************************************************************************!*\
-  !*** multi ./resources/js/app.js ./resources/sass/app.scss ./resources/sass/dashboard/style.scss ***!
-  \***************************************************************************************************/
+/*!*************************************************************************************************************************************************!*\
+  !*** multi ./resources/js/app.js ./resources/sass/app.scss ./resources/sass/dashboard/style.scss ./node_modules/highcharts/css/highcharts.scss ***!
+  \*************************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /home/amir/PhpProjects/tankhahgardan_admin_panel/resources/js/app.js */"./resources/js/app.js");
-__webpack_require__(/*! /home/amir/PhpProjects/tankhahgardan_admin_panel/resources/sass/app.scss */"./resources/sass/app.scss");
-module.exports = __webpack_require__(/*! /home/amir/PhpProjects/tankhahgardan_admin_panel/resources/sass/dashboard/style.scss */"./resources/sass/dashboard/style.scss");
+__webpack_require__(/*! C:\xampp\htdocs\tankhahgardan_admin_panel\resources\js\app.js */"./resources/js/app.js");
+__webpack_require__(/*! C:\xampp\htdocs\tankhahgardan_admin_panel\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\xampp\htdocs\tankhahgardan_admin_panel\resources\sass\dashboard\style.scss */"./resources/sass/dashboard/style.scss");
+module.exports = __webpack_require__(/*! C:\xampp\htdocs\tankhahgardan_admin_panel\node_modules\highcharts\css\highcharts.scss */"./node_modules/highcharts/css/highcharts.scss");
 
 
 /***/ })

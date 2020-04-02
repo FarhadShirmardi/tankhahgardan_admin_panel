@@ -39,13 +39,15 @@
                 {{--<a class="dropdown-item" href="#"><i class="fa fa-tasks"></i> کارها<span--}}
                 {{--class="badge badge-danger">42</span></a>--}}
                 {{--<a class="dropdown-item" href="#"><i class="fa fa-comments"></i> نظرات<span class="badge badge-warning">42</span></a>--}}
-{{--                <div class="dropdown-header text-center">--}}
-{{--                    <strong>تنظیمات</strong>--}}
-{{--                </div>--}}
+                {{--                <div class="dropdown-header text-center">--}}
+                {{--                    <strong>تنظیمات</strong>--}}
+                {{--                </div>--}}
                 <a class="dropdown-item" href="#"><i
                         class="fa fa-user"></i> پروفایل</a>
-{{--                <a class="dropdown-item" href="#"><i class="fa fa-wrench"></i>--}}
-{{--                    تنظیمات</a>--}}
+                <a class="dropdown-item" href="{{ route('dashboard.changePasswordView') }}"><i
+                        class="fa fa-user-secret"></i> تغییر رمز عبور</a>
+                {{--                <a class="dropdown-item" href="#"><i class="fa fa-wrench"></i>--}}
+                {{--                    تنظیمات</a>--}}
                 {{--<a class="dropdown-item" href="#"><i class="fa fa-usd"></i> پرداخت ها<span class="badge badge-default">42</span></a>--}}
                 {{--<a class="dropdown-item" href="#"><i class="fa fa-file"></i> پروژه ها<span class="badge badge-primary">42</span></a>--}}
                 <div class="divider"></div>

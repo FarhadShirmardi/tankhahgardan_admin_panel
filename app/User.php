@@ -45,7 +45,7 @@ class User extends Authenticatable
 
     public function getFullNameAttribute()
     {
-        return "{$this->name} {$this->family}";
+        return ($this->name or $this->family) ? "{$this->name} {$this->family}" : Helpers::getPersianString($this->phone_number);
     }
 
     public function getCreatedAtDateAttribute()
