@@ -45,12 +45,14 @@
                     <label>مرتب‌سازی</label>
                     <select id="sort_field" name="sort_field">
                         @foreach($sortable_fields as $key => $sortable_field)
-                            <option @if ($key == $filter['sort_field']) selected @endif value="{{ $key }}">{{ $sortable_field }}</option>
+                            <option @if ($key == $filter['sort_field']) selected
+                                    @endif value="{{ $key }}">{{ $sortable_field }}</option>
                         @endforeach
                     </select>
                     <select id="sort_type" name="sort_type">
                         @foreach($sortable_types as $key => $sortable_type)
-                            <option value="{{ $key }}">{{ $sortable_type }}</option>
+                            <option @if ($key == $filter['sort_type']) selected
+                                    @endif value="{{ $key }}">{{ $sortable_type }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -63,7 +65,7 @@
 @section('content')
     <div>{{ $users }}</div>
     <div id="ajax-table">
-        <table class="table">
+        <table class="table table-responsive">
             <thead>
             <tr>
                 <th>ردیف</th>
@@ -88,7 +90,9 @@
             </thead>
             <tbody>
             @foreach($users as $user)
-                <tr style="background-color: {{ $colors[$user['user_type']][0] }}">
+                <tr class="clickableRow table-row-clickable"
+                    data-href="{{ route('dashboard.report.userActivity', ['id' => $user->id]) }}"
+                    style="background-color: {{ $colors[$user['user_type']][0] }}">
                     <td>{{($users->currentPage() - 1) * $users->perPage() + $loop->iteration}}</td>
                     <td>{{ $user->name }}</td>
                     <td>{{ $user->phone_number }}</td>
@@ -118,14 +122,15 @@
 @section('chart')
     @include('dashboard.report.charts.allUserActivity')
 @endsection
+@section('scripts')
+    <script>
 
-<script>
+        function changeUserType(userType) {
+            var input = document.getElementById('userType');
+            input.value = userType;
 
-    function changeUserType(userType) {
-        var input = document.getElementById('userType');
-        input.value = userType;
+            document.getElementById('filter').submit();
+        }
 
-        document.getElementById('filter').submit();
-    }
-
-</script>
+    </script>
+@endsection

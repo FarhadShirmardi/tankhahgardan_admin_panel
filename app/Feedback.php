@@ -14,7 +14,8 @@ class Feedback extends Model
         'feedback_title_id',
         'text',
         'device_id',
-        'application_version'
+        'application_version',
+        'state'
     ];
 
     public function feedbackTitles()

@@ -17,7 +17,7 @@
         $('.time_picker').pDatepicker({
             format: "YYYY/MM/DD H:m",
             altFormat: "YYYY/MM/DD H:m",
-            initialValue: false,
+            initialValue: true,
             initialValueType: 'persian',
             autoClose: true,
             calendar: {

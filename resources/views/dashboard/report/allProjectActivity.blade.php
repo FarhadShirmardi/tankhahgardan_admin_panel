@@ -52,12 +52,14 @@
                     <label>مرتب‌سازی</label>
                     <select id="sort_field" name="sort_field">
                         @foreach($sortable_fields as $key => $sortable_field)
-                            <option @if ($key == $filter['sort_field']) selected @endif value="{{ $key }}">{{ $sortable_field }}</option>
+                            <option @if ($key == $filter['sort_field']) selected
+                                    @endif value="{{ $key }}">{{ $sortable_field }}</option>
                         @endforeach
                     </select>
                     <select id="sort_type" name="sort_type">
                         @foreach($sortable_types as $key => $sortable_type)
-                            <option value="{{ $key }}">{{ $sortable_type }}</option>
+                            <option @if ($key == $filter['sort_type']) selected
+                                    @endif value="{{ $key }}">{{ $sortable_type }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -73,7 +75,7 @@
 @section('content')
     <div>{{ $projects }}</div>
     <div id="ajax-table">
-        <table class="table">
+        <table class="table table-responsive">
             <thead>
             <tr>
                 <th>ردیف</th>
@@ -93,7 +95,9 @@
             </thead>
             <tbody>
             @foreach($projects as $project)
-                <tr style="background-color: {{ $colors[$project['project_type']][0] }}">
+                <tr class="clickableRow table-row-clickable"
+                    data-href="{{ route('dashboard.report.projectActivity', ['id' => $project->id]) }}"
+                    style="background-color: {{ $colors[$project['project_type']][0] }}">
                     <td>{{($projects->currentPage() - 1) * $projects->perPage() + $loop->iteration}}</td>
                     <td>{{ $project->name }}</td>
                     <td>{{ $states->firstWhere('id', $project->state_id)['name'] }}</td>
@@ -118,42 +122,43 @@
 @section('chart')
     @include('dashboard.report.charts.allUserActivity')
 @endsection
+@section('scripts')
+    <script>
 
-<script>
+        $(document).ready(function () {
+            changeSelect();
+        });
 
-    window.onload = function () {
-        changeSelect();
-    };
+        function changeProjectType(projectType) {
+            var input = document.getElementById('projectType');
+            input.value = projectType;
 
-    function changeProjectType(projectType) {
-        var input = document.getElementById('projectType');
-        input.value = projectType;
-
-        document.getElementById('filter').submit();
-    }
-
-    function removeOptions(selectElement) {
-        var i, L = selectElement.options.length - 1;
-        for(i = L; i >= 0; i--) {
-            selectElement.remove(i);
+            document.getElementById('filter').submit();
         }
-    }
 
-    function changeSelect() {
-        let cities = JSON.parse('{!! json_encode($cities) !!}');
-        var stateSelect = document.getElementById('state_id');
-        var citySelect = document.getElementById('city_id');
-        removeOptions(citySelect);
-        for (i in cities) {
-            if(cities[i]['state_id'] == stateSelect.value) {
-                var opt = document.createElement("option");
-                opt.value= cities[i]['id'];
-                opt.textContent= cities[i]['name'];
-
-                // then append it to the select element
-                citySelect.appendChild(opt);
+        function removeOptions(selectElement) {
+            var i, L = selectElement.options.length - 1;
+            for (i = L; i >= 0; i--) {
+                selectElement.remove(i);
             }
         }
-    }
 
-</script>
+        function changeSelect() {
+            let cities = JSON.parse('{!! json_encode($cities) !!}');
+            var stateSelect = document.getElementById('state_id');
+            var citySelect = document.getElementById('city_id');
+            removeOptions(citySelect);
+            for (i in cities) {
+                if (cities[i]['state_id'] == stateSelect.value) {
+                    var opt = document.createElement("option");
+                    opt.value = cities[i]['id'];
+                    opt.textContent = cities[i]['name'];
+
+                    // then append it to the select element
+                    citySelect.appendChild(opt);
+                }
+            }
+        }
+
+    </script>
+@endsection

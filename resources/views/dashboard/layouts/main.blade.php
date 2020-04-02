@@ -23,7 +23,9 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            @yield('title')
+                            <h4>
+                                @yield('title')
+                            </h4>
                         </div>
                         <div class="card-body">
                             @include('dashboard.layouts.success_message')

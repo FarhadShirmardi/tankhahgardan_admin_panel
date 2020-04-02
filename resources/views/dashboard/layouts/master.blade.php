@@ -61,6 +61,7 @@
 
 @include('dashboard.layouts.datepicker')
 
+@yield('scripts')
 
 </body>
 

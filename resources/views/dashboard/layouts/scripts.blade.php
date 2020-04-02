@@ -1,7 +1,7 @@
 <!-- Bootstrap and necessary plugins -->
 <script src="{{ asset('js/popper.min.js') }}"></script>
 <script src="{{ asset('js/bootstrap.min.js') }}"></script>
-<script src="{{ asset('js/jquery.min.js') }}"></script>
+{{--<script src="{{ asset('js/jquery.min.js') }}"></script>--}}
 <script src="{{ asset('js/pace.min.js') }}"></script>
 <script src="{{ asset('js/select2.full.min.js') }}"></script>
 <script src="{{ asset('js/i18n/en.js') }}"></script>
@@ -30,3 +30,13 @@
 
 <!-- Custom scripts required by this view -->
 <script src="{{ asset('dashboard/js/views/main.js') }}"></script>
+
+
+<script>
+    jQuery(document).ready(function ($) {
+        $(".clickableRow").click(function () {
+            let target = $(this).data("target");
+            window.open($(this).data("href"), !target ? '_blank' : target);
+        });
+    });
+</script>

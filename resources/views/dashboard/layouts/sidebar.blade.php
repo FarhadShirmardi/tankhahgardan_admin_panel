@@ -60,6 +60,9 @@
             <li class="nav-item nav-dropdown">
                 <a class="nav-link" href="{{ route('dashboard.report.allProjectsActivity') }}"><i class="icon-pie-chart"></i>گزارش وضعیت پروژه</a>
             </li>
+            <li class="nav-item nav-dropdown">
+                <a class="nav-link" href="{{ route('dashboard.feedbacks') }}"><i class="icon-user"></i>بازخوردها</a>
+            </li>
         </ul>
     </nav>
 </div>

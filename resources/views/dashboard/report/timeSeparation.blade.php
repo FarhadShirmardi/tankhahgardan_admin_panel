@@ -22,7 +22,7 @@
 @endsection
 @section('content')
     <div id="ajax-table">
-        <table class="table table-striped">
+        <table class="table table-striped table-responsive">
             <thead>
             <tr>
                 @foreach($users_time as $time)

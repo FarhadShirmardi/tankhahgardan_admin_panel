@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class FeedbackResponse extends Model
 {
+
+    protected $connection = 'mysql';
+
     protected $fillable = [
         'panel_user_id',
         'text',

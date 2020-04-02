@@ -32,6 +32,10 @@ use App\ProjectUser;
 use App\StepByStep;
 use Illuminate\Database\Eloquent\Model;
 use App\Constants\ProjectUserState;
+use App\Constants\FeedbackSource;
+use App\Comment;
+use App\Constants\FeedbackStatus;
+use App\FeedbackTitle;
 
 class ReportController extends Controller
 {
@@ -55,20 +59,20 @@ class ReportController extends Controller
         ]);
     }
 
-    protected function normalizeDate(Request &$request)
+    protected function normalizeDate(Request &$request, $setNull = false)
     {
         $startDate = $request->input('start_date', null);
         if ($startDate) {
             $startDate = Helpers::jalaliDateStringToGregorian(Helpers::getEnglishString($startDate));
-        } else {
+        } elseif (!$setNull) {
             $startDate = now()->subDays(7)->toDateString();
         }
         $endDate = $request->input('end_date', null);
         if ($endDate) {
             $endDate = Helpers::jalaliDateStringToGregorian(Helpers::getEnglishString($endDate));
         }
-        $startDate = str_replace('/', '-', $startDate);
-        $endDate = str_replace('/', '-', $endDate);
+        $startDate = $startDate ? str_replace('/', '-', $startDate) : null;
+        $endDate = $endDate ? str_replace('/', '-', $endDate) : null;
         return [$startDate, $endDate];
     }
 
@@ -134,7 +138,7 @@ class ReportController extends Controller
             'user_type' => $request->input('user_type', null),
             'sort_field' => $request->input('sort_field', 'registered_at'),
             'sort_type' => $request->input('sort_type', 'DESC'),
-            'phone_number' => $request->input('phone_number', ''),
+            'phone_number' => Helpers::getEnglishString($request->input('phone_number', '')),
             'name' => $request->input('name', ''),
         ];
 
@@ -188,6 +192,7 @@ class ReportController extends Controller
         $usersQuery = User::query()
             ->joinSub($maxTimeQuery, 'MaxTime', 'MaxTime.user_id', '=', 'users.id')
             ->selectRaw("CONCAT_WS(' ', IFNULL(users.name, ''), IFNULL(users.family, '')) as name")
+            ->addSelect('users.id as id')
             ->addSelect('phone_number')
             ->addSelect('users.created_at as registered_at')
             ->selectSub($paymentCountQuery, 'payment_count')
@@ -287,232 +292,101 @@ class ReportController extends Controller
         ];
     }
 
-    public function generateUserData(&$users, $cacheID)
-    {
-        $cacheTime = now()->addHours(25);
-        $data = null;
-        $projectNames = [];
-        foreach ($users as $key => $user) {
-            if (cache()->has($cacheID . '_' . $user->id)) {
-                $users[$key] = cache()->get($cacheID . '_' . $user->id);
-                continue;
-            } else {
-                /** @var User $user */
-                $projects = $user->projects()->pluck('projects.id');
-                $ownedProjects = $user->projects()->where('is_owner', true)->count();
-                $notOwnedProjects = $user->projects()->where('is_owner', false)->count();
-                $projectNames = $user->projects()->get(['projects.id', 'name']);
-                $payment = Payment::whereIn('project_id', $projects)
-                    ->where('creator_user_id', $user->id)->get();
-                $receive = Receive::whereIn('project_id', $projects)
-                    ->where('creator_user_id', $user->id)->get();
-                $note = Note::whereIn('project_id', $projects)
-                    ->where('creator_user_id', $user->id)->get();
-                $imprest = Imprest::whereIn('project_id', $projects)
-                    ->where('creator_user_id', $user->id)->get();
-                $image = Image::where('user_id', $user->id)->count();
-                $imageSize = Image::where('user_id', $user->id)->sum('size');
-                $file = Imprest::whereIn('project_id', $projects)
-                    ->where('creator_user_id', $user->id)->get(['created_at']);
-                $device = Device::where('user_id', $user->id)->count();
-                $feedback = Feedback::where('user_id', $user->id)->get();
-                $stepByStep = $user->stepByStep()->first();
-                $stepByStep = $stepByStep ? $stepByStep->step : 0;
-                $items = collect();
-                $items = $items->merge($payment)
-                    ->merge($receive)
-                    ->merge($imprest)
-                    ->merge($note);
-                $maxTime = $items->max('created_at');
-                $times = $this->times();
-                $rangeCount = 1;
-                $user['activationType'] = 4;
-                foreach ($times as $time) {
-                    $count = $items->where('created_at', $time[0], $time[1])->count();
-                    if ($count >= $rangeCount) {
-                        $user['activationType'] = $time[2];
-                        break;
-                    }
-                }
-
-                $user['max_time'] = $maxTime == null ? null : ($maxTime->format('m/d/Y H:i:s'));
-                $user['registered_at'] = ($user['created_at']->format('m/d/Y H:i:s'));
-                $user['projectId'] = $projects;
-                $user['project'] = count($projects);
-                $user['owned_projects'] = $ownedProjects;
-                $user['not_owned_projects'] = $notOwnedProjects;
-                $user['payment'] = count($payment);
-                $user['receive'] = count($receive);
-                $user['imprest'] = count($imprest);
-                $user['note'] = count($note);
-                $user['file'] = count($file);
-                $user['image'] = $image;
-                $user['image_size'] = $imageSize / 1024 / 1024;
-                $user['feedback'] = count($feedback);
-                $user['device'] = $device;
-                $user['step_by_step'] = $stepByStep;
-            }
-            if (!cache()->has($cacheID . '_' . $user->id)) {
-                cache()->put(
-                    $cacheID . '_' . $user->id,
-                    $user,
-                    $cacheTime
-                );
-            }
-        }
-        $data = [];
-        $data['users'] = $users;
-        $data['projectNames'] = $projectNames;
-        $data['user_ids'] = $users->pluck('id');
-        cache()->put(
-            $cacheID,
-            $data,
-            $cacheTime
-        );
-    }
-
     public function userActivity(Request $request, $id)
     {
-        $cacheID = 'panel_one_user_activity_' . $id;
-        if ($request->input('clean_cache')) {
-            cache()->forget($cacheID);
+        $user = User::with('projects')->findOrFail($id);
+
+        $paymentCountQuery = Payment::whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
+            ->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $receiveCountQuery = Receive::whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
+            ->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $noteCountQuery = Note::whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
+            ->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $imprestCountQuery = Imprest::whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
+            ->withoutTrashed()->selectRaw('count(*)')->getQuery();
+
+        $projectsQuery = Project::query()
+            ->join('project_user', function ($join) use ($id) {
+                $join->on('project_user.project_id', 'projects.id')
+                    ->where('project_user.user_id', $id);
+            })
+            ->addSelect('project_user.is_owner as is_owner')
+            ->addSelect('projects.name as name')
+            ->addSelect('projects.id as id')
+            ->selectSub($paymentCountQuery, 'payment_count')
+            ->selectSub($receiveCountQuery, 'receive_count')
+            ->selectSub($noteCountQuery, 'note_count')
+            ->selectSub($imprestCountQuery, 'imprest_count')
+            ->orderBy('projects.created_at');
+
+        $projects = $projectsQuery->get();
+
+        $rangeCounts = [];
+        foreach (range(0, 5) as $time) {
+            $paymentSubQuery = Payment::where('creator_user_id', $id)
+                ->whereRaw('substr(created_at, 12, 2) between ' . $time * 4 . ' AND ' . ($time + 1) * 4)->withoutTrashed()->selectRaw('count(*)')->getQuery();
+            $receiveSubQuery = Receive::where('creator_user_id', $id)
+                ->whereRaw('substr(created_at, 12, 2) between ' . $time * 4 . ' AND ' . ($time + 1) * 4)->withoutTrashed()->selectRaw('count(*)')->getQuery();
+            $noteSubQuery = Note::where('creator_user_id', $id)
+                ->whereRaw('substr(created_at, 12, 2) between ' . $time * 4 . ' AND ' . ($time + 1) * 4)->withoutTrashed()->selectRaw('count(*)')->getQuery();
+            $imprestSubQuery = Imprest::where('creator_user_id', $id)
+                ->whereRaw('substr(created_at, 12, 2) between ' . $time * 4 . ' AND ' . ($time + 1) * 4)->withoutTrashed()->selectRaw('count(*)')->getQuery();
+
+            $result = DB::query()
+                ->selectSub($paymentSubQuery, 'payments_count')
+                ->selectSub($receiveSubQuery, 'receives_count')
+                ->selectSub($noteSubQuery, 'notes_count')
+                ->selectSub($imprestSubQuery, 'imprests_count')
+                ->get();
+
+            $rangeCounts[($time * 4) . ' - ' . (($time + 1) * 4)] = $result->first();
         }
-        if (Cache::has($cacheID)) {
-            $cacheData = Cache::get($cacheID);
-            $user = $cacheData['users'];
-            $count = $cacheData['count'];
-            $data = $cacheData['data'];
-            $tafkikData = $cacheData['tafkikData'];
-            $dates = $cacheData['dates'];
-        } else {
-            $user = User::findOrFail($id);
-            $projects = $user->projects()->get(['projects.id', 'name']);
-            $projectIds = $user->projects()->pluck('projects.id');
-            $payment = Payment::whereIn('project_id', $projects)
-                ->where('creator_user_id', $user->id)->count();
-            $receive = Receive::whereIn('project_id', $projects)
-                ->where('creator_user_id', $user->id)->count();
-            $note = Note::whereIn('project_id', $projects)
-                ->where('creator_user_id', $user->id)->count();
-            $imprest = Imprest::whereIn('project_id', $projects)
-                ->where('creator_user_id', $user->id)->count();
-            $user['project'] = $projects;
-            $user['project_count'] = count($projects);
-            $user['payment'] = $payment;
-            $user['receive'] = $receive;
-            $user['imprest'] = $imprest;
-            $user['note'] = $note;
-            $user['sum'] = count($projects) + $payment + $receive + $imprest + $note;
-            $count = Payment::selectRaw('COUNT(type) as c, project_id, creator_user_id, type')
-                ->from(DB::raw("
-                (SELECT project_id, creator_user_id, 1 as type FROM payments WHERE isnull(deleted_at)
-                    UNION ALL
-                SELECT project_id, creator_user_id, 2 as type FROM receives WHERE isnull(deleted_at)
-                    UNION ALL
-                SELECT project_id, creator_user_id, 3 as type FROM imprests WHERE isnull(deleted_at)
-                    UNION ALL
-                SELECT project_id, creator_user_id, 4 as type FROM notes WHERE isnull(deleted_at)) as t"
-                ))
-                ->whereIn('project_id', $projectIds)->where('creator_user_id', $id)
-                ->groupBy(DB::raw('type, project_id'))->withTrashed()->get();
 
-            $count2 = Payment::selectRaw('COUNT(type) as c, project_id, creator_user_id, type, date')
-                ->from(DB::raw("
-                (SELECT project_id, creator_user_id, 1 as type, substr(updated_at,1,10) as date FROM payments WHERE isnull(deleted_at)
-                    UNION ALL
-                SELECT project_id, creator_user_id, 2 as type, substr(updated_at,1,10) as date FROM receives WHERE isnull(deleted_at)
-                    UNION ALL
-                SELECT project_id, creator_user_id, 3 as type, substr(updated_at,1,10) as date FROM imprests WHERE isnull(deleted_at)
-                    UNION ALL
-                SELECT project_id, creator_user_id, 4 as type, substr(updated_at,1,10) as date FROM notes WHERE isnull(deleted_at)) as t"
-                ))
-                ->whereIn('project_id', $projectIds)->groupBy(DB::raw('type, project_id, date'))->
-                orderBy('date')->withTrashed()->get();
+        $paymentSubQuery = Payment::where('creator_user_id', $id)->withoutTrashed()->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
+        $receiveSubQuery = Receive::where('creator_user_id', $id)->withoutTrashed()->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
+        $noteSubQuery = Note::where('creator_user_id', $id)->withoutTrashed()->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
+        $imprestSubQuery = Imprest::where('creator_user_id', $id)->withoutTrashed()->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
 
-            $tafkikData = [];
-            $datesArrays = $count2->pluck('date');
-            $dates = [];
-            foreach ($datesArrays as $item) {
-                $dates[$item]['normal'] = $item;
-                $dates[$item]['converted'] = str_replace('/', '-', Helpers::jalaliDateStringToGregorian($item));
-            }
+        $dateCounts = DB::connection('mysql')->query()
+            ->selectRaw('count(*) as c, date, project_id')
+            ->from(
+                DB::query()
+                    ->from($paymentSubQuery)
+                    ->unionAll($receiveSubQuery)
+                    ->unionAll($noteSubQuery)
+                    ->unionAll($imprestSubQuery)
+            )
+            ->groupBy(['date', 'project_id'])
+            ->orderBy('date')
+            ->get();
+
+
+        $dates = $dateCounts->pluck('date');
+
+        $counts = collect();
+        foreach ($user->projects->pluck('id') as $projectId) {
+            $data = collect();
             foreach ($dates as $date) {
-
-                foreach ($projects as $project) {
-                    $payment = $count2->where('type', 1)
-                        ->where('project_id', $project->id)
-                        ->where('creator_user_id', $user->id)
-                        ->where('date', $date['normal'])->first();
-                    $tafkikData[$project->id][$date['normal']][1] = $payment == null ? 0 : $payment['c'];
-
-                    $receive = $count2->where('type', 2)
-                        ->where('project_id', $project->id)
-                        ->where('creator_user_id', $user->id)
-                        ->where('date', $date['normal'])->first();
-                    $tafkikData[$project->id][$date['normal']][2] = $receive == null ? 0 : $receive['c'];
-
-                    $imprest = $count2->where('type', 3)
-                        ->where('project_id', $project->id)
-                        ->where('creator_user_id', $user->id)
-                        ->where('date', $date['normal'])->first();
-                    $tafkikData[$project->id][$date['normal']][3] = $imprest == null ? 0 : $imprest['c'];
-
-                    $note = $count2->where('type', 4)
-                        ->where('project_id', $project->id)
-                        ->where('creator_user_id', $user->id)
-                        ->where('date', $date['normal'])->first();
-                    $tafkikData[$project->id][$date['normal']][4] = $note == null ? 0 : $note['c'];
-                }
-
+                $data->push($dateCounts->where('date', $date)->where('project_id', $projectId)->sum('c'));
             }
-
-            $data = [];
-            $range = Payment::selectRaw('COUNT(type) as c, type, substr(date, 12, 2) DIV 4 as time')
-                ->from(DB::raw("
-                (SELECT project_id, creator_user_id, 1 as type, payments.created_at as date FROM payments WHERE isnull(deleted_at)
-                    UNION ALL
-                SELECT project_id, creator_user_id, 2 as type, receives.created_at as date FROM receives WHERE isnull(deleted_at)
-                    UNION ALL
-                SELECT project_id, creator_user_id, 3 as type, imprests.created_at as date FROM imprests WHERE isnull(deleted_at)
-                    UNION ALL
-                SELECT project_id, creator_user_id, 4 as type, notes.created_at as date FROM notes WHERE isnull(deleted_at)) as t"
-                ))
-                ->whereIn('project_id', $projectIds)
-                ->where('creator_user_id', $user->id)
-                ->groupBy(DB::raw('time, type'))->withTrashed()->get();
-
-            foreach (range(0, 5) as $item) {
-                $itemCount = $range->where('time', '=', $item);
-                $payment = $itemCount->where('type', '=', 1)->first();
-                $payment = $payment == null ? 0 : $payment['c'];
-
-                $receive = $itemCount->where('type', '=', 2)->first();
-                $receive = $receive == null ? 0 : $receive['c'];
-
-                $imprest = $itemCount->where('type', '=', 3)->first();
-                $imprest = $imprest == null ? 0 : $imprest['c'];
-
-                $note = $itemCount->where('type', '=', 4)->first();
-                $note = $note == null ? 0 : $note['c'];
-
-                $data[($item * 4) . ' - ' . (($item + 1) * 4)]['payment'] = $payment;
-                $data[($item * 4) . ' - ' . (($item + 1) * 4)]['receive'] = $receive;
-                $data[($item * 4) . ' - ' . (($item + 1) * 4)]['imprest'] = $imprest;
-                $data[($item * 4) . ' - ' . (($item + 1) * 4)]['note'] = $note;
-            }
-            $cacheData = [];
-            $cacheData['users'] = $user;
-            $cacheData['count'] = $count;
-            $cacheData['data'] = $data;
-            $cacheData['tafkikData'] = $tafkikData;
-            $cacheData['dates'] = $dates;
-            Cache::put(
-                $cacheID,
-                $cacheData,
-                60
-            );
+            $counts->push([
+                'id' => $projectId,
+                'name' => $user->projects->find($projectId)->name,
+                'data' => $data->toJson()
+            ]);
         }
-        return view('admin.userActivity', compact('user', 'count', 'data', 'tafkikData', 'dates'));
+        $dateCounts = $counts;
+        $dates = $dates->map(function ($item) {
+            return Helpers::gregorianDateStringToJalali($item);
+        });
+
+        return view('dashboard.report.userActivity', [
+            'user' => $user,
+            'projects' => $projects,
+            'range_counts' => $rangeCounts,
+            'date_counts' => $dateCounts,
+            'dates' => $dates
+        ]);
     }
 
     public function allProjectsActivity(Request $request)
@@ -569,6 +443,7 @@ class ReportController extends Controller
         $projectsQuery = Project::query()
             ->joinSub($maxTimeQuery, 'MaxTime', 'MaxTime.project_id', '=', 'projects.id')
             ->addSelect('projects.name as name')
+            ->addSelect('projects.id as id')
             ->addSelect('projects.city_id as city_id')
             ->addSelect('projects.state_id as state_id')
             ->addSelect('projects.created_at as created_at')
@@ -659,202 +534,339 @@ class ReportController extends Controller
         return [$states, $cities];
     }
 
-    public function cleanCache($cacheID, $key)
-    {
-        $data = cache()->get($cacheID);
-        if (isset($data[$key])) {
-            foreach ($data[$key] as $item) {
-                cache()->forget($cacheID . '_' . $item->id);
-            }
-        }
-        cache()->forget($cacheID);
-    }
-
-    public function getProjects(string $selectedState, string $selectedCity)
-    {
-        if ($selectedState != 0) {
-            if ($selectedCity != 0) {
-                $projects = Project::where('state_id', $selectedState)
-                    ->where('city_id', $selectedCity)->get();
-            } else {
-                $projects = Project::where('state_id', $selectedState)->get();
-            }
-        } else {
-            $projects = Project::all();
-        }
-        return $projects;
-    }
-
-    public function generateProjectData(&$projects, $cacheID, $selectedState = 0, $selectedCity = 0)
-    {
-        foreach ($projects as $key => $project) {
-            if (cache()->has($cacheID . '_' . $project->id)) {
-                $projects[$key] = cache()->get($cacheID . '_' . $project->id);
-                continue;
-            } else {
-                /** @var Project $project */
-                $activeUsers = $project->users()->where('project_user.state', ProjectUserState::ACTIVE)->count();
-                $notActiveUsers =
-                    $project->users()->where('project_user.state', '<>', ProjectUserState::ACTIVE)->count();
-
-                $payment = Payment::where('project_id', $project->id)->get();
-                $receive = Receive::where('project_id', $project->id)->get();
-                $note = Note::where('project_id', $project->id)->get();
-                $imprest = Imprest::where('project_id', $project->id)->get();
-                $times = $this->times();
-                $rangeCount = 1;
-                $project['activationType'] = 4;
-                $items = collect();
-                $items = $items
-                    ->merge($payment)
-                    ->merge($receive)
-                    ->merge($note)
-                    ->merge($imprest);
-                $maxTime = $items->max('created_at');
-                foreach ($times as $time) {
-                    $count = $items->where('created_at', $time[0], $time[1])->count();
-                    if ($count >= $rangeCount) {
-                        $project['activationType'] = $time[2];
-                        break;
-                    }
-                }
-
-                $project['max_time'] = $maxTime == null ? null : Helpers::convertDateTimeToJalali($maxTime);
-                $project['total_count'] = $items->count();
-                $project['user_count'] = $activeUsers + $notActiveUsers;
-                $project['active_user'] = $activeUsers;
-                $project['not_active_user'] = $notActiveUsers;
-            }
-            if (!cache()->has($cacheID . '_' . $project->id)) {
-                cache()->put(
-                    $cacheID . '_' . $project->id,
-                    $project,
-                    now()->addHours(25)
-                );
-            }
-        }
-        list($states, $cities) = $this->getLocations();
-        $data = [];
-        $data['projects'] = $projects;
-        $data['states'] = $states;
-        $data['cities'] = $cities;
-        $data['selected_state'] = $selectedState;
-        $data['selected_city'] = $selectedCity;
-        cache()->put(
-            $cacheID,
-            $data,
-            now()->addHours(25)
-        );
-    }
-
     public function projectActivity(Request $request, $projectId)
     {
-        $cacheID = 'panel_one_project_activity_' . $projectId;
-        if ($request->input('clean_cache')) {
-            cache()->forget($cacheID);
-        }
-        if (Cache::has($cacheID)) {
-            $cacheData = Cache::get($cacheID);
-            $users = $cacheData['users'];
-            $project = $cacheData['project'];
-        } else {
-            $project = Project::findOrFail($projectId);
-            $users = $project->users()->get();
-            foreach ($users as $user) {
-                $payment = Payment::where('project_id', $projectId)
-                    ->where('creator_user_id', $user->id)->count();
-                $receive = Receive::where('project_id', $projectId)
-                    ->where('creator_user_id', $user->id)->count();
-                $note = Note::where('project_id', $projectId)
-                    ->where('creator_user_id', $user->id)->count();
-                $imprest = Imprest::where('project_id', $projectId)
-                    ->where('creator_user_id', $user->id)->count();
-                $user['payment'] = $payment;
-                $user['receive'] = $receive;
-                $user['imprest'] = $imprest;
-                $user['note'] = $note;
-                $user['sum'] = $payment + $receive + $imprest + $note;
+        $project = Project::findOrFail($projectId);
 
-            }
+        $paymentCountQuery = Payment::whereColumn('creator_user_id', 'users.id')->where('project_id', $projectId)
+            ->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $receiveCountQuery = Receive::whereColumn('creator_user_id', 'users.id')->where('project_id', $projectId)
+            ->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $noteCountQuery = Note::whereColumn('creator_user_id', 'users.id')->where('project_id', $projectId)
+            ->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $imprestCountQuery = Imprest::whereColumn('creator_user_id', 'users.id')->where('project_id', $projectId)
+            ->withoutTrashed()->selectRaw('count(*)')->getQuery();
 
-            $cacheData = [];
-            $cacheData['users'] = $users;
-            $cacheData['project'] = $project;
-            Cache::put(
-                $cacheID,
-                $cacheData,
-                60
-            );
-        }
-        $projectStates = ProjectUserState::toArray();
-        return view('admin.projectActivity', compact('project', 'users', 'projectStates'));
+        $usersQuery = User::query()
+            ->join('project_user', function ($join) use ($projectId) {
+                $join->on('project_user.user_id', 'users.id')
+                    ->where('project_user.project_id', $projectId);
+            })
+            ->addSelect('project_user.is_owner as is_owner')
+            ->addSelect('users.name as name')
+            ->addSelect('users.family as family')
+            ->addSelect('users.phone_number as phone_number')
+            ->addSelect('users.id as id')
+            ->selectSub($paymentCountQuery, 'payment_count')
+            ->selectSub($receiveCountQuery, 'receive_count')
+            ->selectSub($noteCountQuery, 'note_count')
+            ->selectSub($imprestCountQuery, 'imprest_count')
+            ->orderBy('users.created_at');
+
+        $users = $usersQuery->get();
+
+        return view('dashboard.report.projectActivity', [
+            'project' => $project,
+            'users' => $users
+        ]);
     }
 
     public function viewFeedback(Request $request)
     {
-        $feedbacks = Feedback::join('feedback_titles', 'feedback_titles.id', '=', 'feedback_title_id')
+        list($startDate, $endDate) = $this->normalizeDate($request, true);
+        if (!$startDate) {
+            $startDate = Feedback::query()->selectRaw('min(Date(created_at)) as date')->first()->date;
+        }
+
+        $feedbackTitles = FeedbackTitle::all(['id'])->pluck('id')->toArray();
+
+        $filter = [
+            'source_type' => $request->input('source_type', FeedbackSource::toArray()),
+            'titles' => $request->input('titles', $feedbackTitles),
+            'user_id' => $request->input('user_id', null),
+            'panel_user_ids' => $request->input('panel_user_ids', []),
+            'sort_field_1' => $request->input('sort_field_1', 'source'),
+            'sort_type_1' => $request->input('sort_type_1', 'asc'),
+            'sort_field_2' => $request->input('sort_field_2', 'date'),
+            'sort_type_2' => $request->input('sort_type_2', 'desc'),
+            'start_date' => $startDate,
+            'end_date' => $endDate
+        ];
+
+
+        $feedbacks = $this->fetchFeedbacks($filter);
+
+        $sourceTypes = collect();
+        foreach (FeedbackSource::toArray() as $source) {
+            $item = [];
+            $item['value'] = $source;
+            $item['text'] = FeedbackSource::getEnum($source);
+            $item['is_selected'] = in_array($source, $filter['source_type']);
+            $sourceTypes->push($item);
+        }
+        $sourceTypes = $sourceTypes->toArray();
+
+        $titles = FeedbackTitle::get()->map(function ($item) use ($filter) {
+            $item['is_selected'] = in_array($item['id'], $filter['titles']);
+            return $item;
+        });
+
+        $users = User::query()
+            ->join('feedback', 'feedback.user_id', '=', 'users.id')
+            ->distinct()
+            ->select([
+                'users.id',
+                'users.name',
+                'users.family',
+                'users.phone_number',
+                DB::raw("false as is_selected")
+            ])
+            ->get();
+
+        if (isset($filter['user_id'])) {
+            $users->where('id', $filter['user_id'])->first()['is_selected'] = true;
+        }
+
+        $panelUsers = PanelUser::query()->get(['id', 'name']);
+
+        if (isset($filter['panel_user_ids']) and $filter['panel_user_ids'] != []) {
+            $panelUsers = $panelUsers->map(function ($item) use ($filter) {
+                $item->is_selected = in_array($item['id'], $filter['panel_user_ids']);
+                return $item;
+            });
+        }
+
+
+        $feedbacks = Helpers::paginateCollection($feedbacks, 10);
+
+        $sortableFields = [
+            'date' => 'تاریخ',
+            'title' => 'عنوان',
+            'source' => 'منبع',
+            'text' => 'متن',
+            'user_phone_number' => 'شماره کاربر',
+            'panel_user_name' => 'کارشناس',
+            'response_text_update_time' => 'تاریخ به‌روزرسانی پاسخ',
+            'response_text' => 'پاسخ بازخورد',
+            'response_score' => 'امتیاز',
+            'state' => 'وضعیت',
+        ];
+
+        $sortableTypes = [
+            'ASC' => 'صعودی',
+            'DESC' => 'نزولی',
+        ];
+
+        return view('dashboard.report.feedback', [
+            'feedbacks' => $feedbacks,
+            'filter' => $filter,
+            'source_type' => $sourceTypes,
+            'titles' => $titles,
+            'users' => $users,
+            'sortable_fields' => $sortableFields,
+            'sortable_types' => $sortableTypes,
+            'panel_users' => $panelUsers
+        ]);
+    }
+
+    private function fetchFeedbacks($filter)
+    {
+        $feedbackSubQuery = Feedback::query()
+            ->join('feedback_titles', 'feedback_titles.id', '=', 'feedback_title_id')
             ->join('users', 'users.id', '=', 'feedback.user_id')
             ->leftJoin('feedback_responses', 'feedback_responses.id', '=', 'feedback_response_id')
-            ->orderBy('feedback_response_id')
-            ->orderBy('feedback.created_at', 'DESC')->get([
+            ->leftJoin('panel_users', 'feedback_responses.panel_user_id', '=', 'panel_users.id')
+            ->where(function ($query) use ($filter) {
+                if (isset($filter['titles']) and $filter['titles'] != []) {
+                    $query->whereIn('feedback_titles.id', $filter['titles']);
+                }
+            })
+            ->select([
                 'feedback.created_at as date',
-                'feedback.id',
+                'feedback.id as feedback_id',
+                DB::raw('0 as comment_id'),
+                'feedback.state',
                 'feedback_titles.title as title',
                 'feedback_responses.text as response_text',
                 'feedback_responses.response_updated_at as response_text_update_time',
+                'feedback_responses.score as response_score',
+                'panel_users.name as panel_user_name',
                 'feedback.text as text',
+                'users.id as user_id',
                 'users.name as user_name',
                 'users.family as user_family',
-            ]);
-        $feedbacks->map(function ($item) {
-            $item['date'] = Helpers::convertDateTimeToJalali($item['date']);
-            $item['response_text_update_time'] =
-                Helpers::convertDateTimeToJalali($item['response_text_update_time']);
-            $item['full_name'] = $item['user_name'] . ' ' . $item['user_family'];
+                'users.phone_number as user_phone_number',
+                DB::raw("'" . FeedbackSource::APPLICATION . "'" . ' as source'),
+            ])->getQuery();
+
+        $commentSubQuery = Comment::query()
+            ->leftJoin('feedback_titles', 'feedback_titles.id', '=', 'feedback_title_id')
+            ->leftJoin('panel_users', 'comments.user_id', '=', 'panel_users.id')
+            ->select([
+                'comments.date',
+                DB::raw('0 as feedback_id'),
+                'comments.id as comment_id',
+                'comments.state',
+                'feedback_titles.title as title',
+                'comments.response as response_text',
+                'comments.response_date as response_text_update_time',
+                DB::raw('0 as response_score'),
+                'panel_users.name as panel_user_name',
+                'comments.text as text',
+                'comments.user_id as user_id',
+                DB::raw('"" as user_family'),
+                'comments.name as user_name',
+                'comments.phone_number as user_phone_number',
+                'comments.source',
+            ])->getQuery();
+
+        $feedbacks = DB::connection('mysql')->query()
+            ->fromSub($feedbackSubQuery->unionAll($commentSubQuery), 'comment')
+            ->where(function ($query) use ($filter) {
+                if (isset($filter['source_type']) and $filter['source_type'] != []) {
+                    $query->whereIn('source', $filter['source_type']);
+                }
+                if (isset($filter['start_date'])) {
+                    $query->whereDate('date', '>=', $filter['start_date']);
+                }
+                if (isset($filter['end_date'])) {
+                    $query->whereDate('date', '<=', $filter['end_date']);
+                }
+            })
+            ->where(function ($query) use ($filter) {
+                if (isset($filter['user_id'])) {
+                    $query->where('user_id', $filter['user_id'])
+                        ->orWhereNull('user_id');
+                }
+            })
+            ->orderBy($filter['sort_field_1'], $filter['sort_type_1'])
+            ->orderBy($filter['sort_field_2'], $filter['sort_type_2'])
+            ->get();
+
+        $feedbacks = $feedbacks->map(function ($item) {
+            $item->full_name = ($item->user_name or $item->user_family) ?
+                $item->user_name . ' ' . $item->user_family : ' - ';
+            $item->date = Helpers::convertDateTimeToJalali($item->date);
+            $item->source = FeedbackSource::getEnum($item->source);
+            $item->response_text_update_time = Helpers::convertDateTimeToJalali($item->response_text_update_time);
+            $item->state = FeedbackStatus::getEnum($item->state);
+            return $item;
         });
 
-        $sort = ['', 'DESC'];
-        if ($request->has('sort_field')) {
-            $sort = [$request->input('sort_field'), $request->input('sort_type')];
-            $feedbacks = $feedbacks->sortBy($sort[0], SORT_REGULAR, $sort[1] == 'DESC');
-            $sort[1] = $sort[1] == 'DESC' ? 'ASC' : 'DESC';
+        return $feedbacks;
+    }
+
+    public function commentView(Request $request, $id = null)
+    {
+        $filter = [
+            'phone_number' => Helpers::getEnglishString($request->input('phone_number', null)),
+            'user_id' => $request->input('user_id', null),
+            'sort_field_1' => $request->input('sort_field_1', 'date'),
+            'sort_type_1' => $request->input('sort_type_1', 'desc'),
+            'sort_field_2' => $request->input('sort_field_2', 'date'),
+            'sort_type_2' => $request->input('sort_type_2', 'desc'),
+        ];
+
+        $feedbacks = $filter['user_id'] ? $this->fetchFeedbacks($filter) : [];
+
+        $comment = Comment::find($id);
+        if (isset($comment['date'])) {
+            $comment['date'] = Helpers::convertDateTimeToJalali($comment->date);
+        }
+        if (isset($comment['response_date'])) {
+            $comment['response_date'] = Helpers::convertDateTimeToJalali($comment->response_date);
+        }
+        $comment = $comment == null ? new Comment() : $comment;
+
+        $sourceTypes = collect();
+        foreach (FeedbackSource::toArray() as $source) {
+            if ($source == FeedbackSource::APPLICATION) {
+                continue;
+            }
+            $item = [];
+            $item['value'] = $source;
+            $item['text'] = FeedbackSource::getEnum($source);
+            $sourceTypes->push($item);
+        }
+        $sourceTypes = $sourceTypes->toArray();
+
+        $feedbackTitles = FeedbackTitle::orderBy('title')->get();
+
+        $panelUsers = PanelUser::all();
+
+        $selectedUser = collect();
+        $users = collect();
+
+        if ($filter['phone_number']) {
+            $users = User::query()
+                ->where('phone_number', 'like', '%' . $filter['phone_number'] . '%')
+                ->where('state', 1)
+                ->selectRaw('false as is_selected, id, name, family, phone_number')->get();
+
+            $users->where('id', $filter['user_id'])->first()['is_selected'] = true;
+            if ($users->count() == 1 or $filter['user_id']) {
+                $selectedUser = $users->first();
+            }
         }
 
-        return view('admin.feedback', compact('feedbacks', 'checkTitles', 'sort'));
+        return view('dashboard.report.newComment', [
+            'id' => $id,
+            'feedbacks' => $feedbacks,
+            'comment' => $comment,
+            'panel_users' => $panelUsers,
+            'users' => $users,
+            'source_types' => $sourceTypes,
+            'feedback_titles' => $feedbackTitles,
+            'filter' => $filter,
+            'selected_user' => $selectedUser
+        ]);
+    }
+
+    public function addComment(Request $request, $id = null)
+    {
+        $request->merge([
+            'state' => FeedbackStatus::CLOSED
+        ]);
+        $request['date'] =
+            Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->date));
+        $request['response_date'] = $request->response_date ?
+            Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->response_date)) : null;
+        if (!$id) {
+            Comment::create($request->all());
+        } else {
+            $comment = Comment::findOrFail($id);
+            $comment->update($request->all());
+        }
+
+        return redirect()->route('dashboard.commentView')->with('success', 'با موفقیت انجام شد.');
     }
 
     public function responseFeedbackView($id)
     {
-        $feedback = Feedback::join('users', 'users.id', '=', 'feedback.user_id')
-            ->where('feedback.id', $id)->first([
-                'feedback.*',
-                'users.name',
-                'users.family',
-                'users.phone_number',
-            ]);
-        $feedback['user_name'] = $feedback->name . ' ' . $feedback->family;
-        $feedback['phone_number'] = '0' . $feedback->phone_number;
-        $response = $feedback->feedbackResponse()->first();
-        if ($response) {
-            $feedback->response = $response->text;
-        } else {
-            $feedback->response = null;
-        }
-        $oldFeedbacks = Feedback::where('user_id', $feedback->user_id)
-            ->orderBy('created_at')->get();
-        foreach ($oldFeedbacks as $oldFeedback) {
-            $oldFeedback['date'] = Helpers::convertDateTimeToJalali($oldFeedback['created_at']);
-            $response = $oldFeedback->feedbackResponse()->first();
-            $oldFeedback['response'] = $response ? $response->text : null;
-            $oldFeedback['response_text_update_time'] =
-                Helpers::convertDateTimeToJalali($response['response_updated_at']);
-        }
-        return view('admin.feedbackResponse', compact('feedback', 'oldFeedbacks'));
+        $feedback = Feedback::query()->findOrFail($id);
+        $filter = [
+            'user_id' => $feedback->user_id,
+            'sort_field_1' => 'date',
+            'sort_type_1' => 'desc',
+            'sort_field_2' => 'date',
+            'sort_type_2' => 'desc',
+        ];
+
+        $feedbacks = $this->fetchFeedbacks($filter);
+
+        $feedback = $feedbacks->where('feedback_id', $id)->first();
+
+        $feedbacks->where('feedback_id', $id)->first()->is_selected = true;
+
+        return view('dashboard.report.responseFeedback', [
+            'feedback_item' => $feedback,
+            'feedbacks' => $feedbacks
+        ]);
     }
 
     public function responseFeedback($id, Request $request)
     {
-        $feedback = Feedback::where('id', $id)->first();
+        $feedback = Feedback::query()->findOrFail($id);
         $responseText = $request->input('response', '');
         if (trim($responseText) == '') {
             return redirect()->back()->withErrors('پاسخ بازخورد نباید خالی باشد.');
@@ -862,15 +874,16 @@ class ReportController extends Controller
         $feedbackResponse = FeedbackResponse::updateOrCreate([
             'id' => $feedback->feedback_response_id,
         ], [
-            'panel_user_id' => auth()->user()->id,
+            'panel_user_id' => auth()->id(),
             'text' => trim($responseText),
             'response_updated_at' => now(),
             'read_at' => null,
         ]);
         $feedback->feedback_response_id = $feedbackResponse->id;
+        $feedback->state = $request->state;
         $feedback->save();
 
-        return redirect()->route('panel.feedbacks')->with('success', 'با موفقیت انجام شد');
+        return redirect()->route('dashboard.viewFeedback', ['feedback_id' => $id])->with('success', 'با موفقیت انجام شد');
     }
 
     public function viewNotification()
@@ -935,7 +948,7 @@ class ReportController extends Controller
             'text' => $request->text,
             'link' => $request->link,
             'expire_time' => $expiredDate,
-            'panel_user_id' => auth()->user()->id,
+            'panel_user_id' => auth()->id(),
         ]);
         foreach ($users as $user) {
             if ($request->advertisement_id) {

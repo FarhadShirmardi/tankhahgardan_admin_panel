@@ -58,9 +58,19 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
                 ->match(['get', 'post'], 'projectActivity', 'Dashboard\ReportController@allProjectsActivity')
                 ->name('allProjectsActivity');
             Route::middleware(['permission:user_activity'])
-                ->match(['get', 'post'], 'userActivity/{id}', 'Dashboard\ReportController@userActivity');
+                ->match(['get', 'post'], 'userActivity/{id}', 'Dashboard\ReportController@userActivity')
+                ->name('userActivity');
             Route::middleware(['permission:project_activity'])
-                ->match(['get', 'post'], 'projectActivity/{id}', 'Dashboard\ReportController@projectActivity');
+                ->match(['get', 'post'], 'projectActivity/{id}', 'Dashboard\ReportController@projectActivity')
+                ->name('projectActivity');
+        });
+
+        Route::group(['middleware' => ['permission:view_feedback']], function () {
+            Route::get( 'feedbacks', 'Dashboard\ReportController@viewFeedback')->name('feedbacks');
+            Route::get('comment/new/{id?}', 'Dashboard\ReportController@commentView')->name('commentView');
+            Route::post('comment/new/{id?}', 'Dashboard\ReportController@addComment')->name('newComment');
+            Route::post('feedback/{feedback_id}/response', 'Dashboard\ReportController@responseFeedback')->name('responseFeedback');
+            Route::get('feedback/{feedback_id}/response', 'Dashboard\ReportController@responseFeedbackView')->name('viewFeedback');
         });
 
         Route::get('changePassword', 'Dashboard\ReportController@changePasswordView')->name('changePasswordView');
