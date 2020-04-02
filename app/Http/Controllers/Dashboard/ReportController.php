@@ -70,6 +70,8 @@ class ReportController extends Controller
         $endDate = $request->input('end_date', null);
         if ($endDate) {
             $endDate = Helpers::jalaliDateStringToGregorian(Helpers::getEnglishString($endDate));
+        } elseif (!$setNull) {
+            $endDate = now()->toDateString();
         }
         $startDate = $startDate ? str_replace('/', '-', $startDate) : null;
         $endDate = $endDate ? str_replace('/', '-', $endDate) : null;
@@ -459,7 +461,7 @@ class ReportController extends Controller
             ->orderBy($filter['sort_field'], $filter['sort_type']);
 
         if ($filter['project_type']) {
-            $projectsQuery = $projectTypeQuery->having('project_type', $filter['project_type']);
+            $projectsQuery = $projectsQuery->having('project_type', $filter['project_type']);
         }
         if (!empty($filter['name'])) {
             $name = '%' . $filter['name'] . '%';
@@ -748,7 +750,10 @@ class ReportController extends Controller
                 $item->user_name . ' ' . $item->user_family : ' - ';
             $item->date = Helpers::convertDateTimeToJalali($item->date);
             $item->source = FeedbackSource::getEnum($item->source);
-            $item->response_text_update_time = Helpers::convertDateTimeToJalali($item->response_text_update_time);
+            $item->response_text_update_time =
+                $item->response_text_update_time ?
+                Helpers::convertDateTimeToJalali($item->response_text_update_time) :
+                null;
             $item->state = FeedbackStatus::getEnum($item->state);
             return $item;
         });

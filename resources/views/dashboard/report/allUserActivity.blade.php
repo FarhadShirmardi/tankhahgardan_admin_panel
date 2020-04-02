@@ -9,40 +9,37 @@
         {{ csrf_field() }}
         <div class="row pb-5 pt-5 justify-content-center">
             <div class="col-md-3">
-                <table>
-                    <tr>
+                <table class="table table-bordered table-responsive">
+                    <tr class="text-center">
                         <input id="userType" type="hidden" value="{{ $filter['user_type'] }}" name="user_type">
-                        <td style="border: solid black 1px;">
-                            <div onclick="changeUserType({{0}})"
-                                 style="cursor: pointer;">همه
-                            </div>
+                        <td style="border: solid black 1px; cursor: pointer;">
+                            <div onclick="changeUserType({{0}})">همه</div>
                         </td>
                         @foreach($colors as $key => $color)
-                            <td style="background-color: {{$color[0]}}">
-                                <div onclick="changeUserType({{$key}})"
-                                     style="cursor: pointer;">{{$color[1]}}</div>
+                            <td style="background-color: {{$color[0]}}; cursor: pointer">
+                                <div onclick="changeUserType({{$key}})">{{$color[1]}}</div>
                             </td>
                         @endforeach
                     </tr>
                 </table>
             </div>
-            <div class="col-md-3">
-                <div class="pr-2">
-                    <label>جستجوی شماره</label>
+            <div class="col-md-3 pr-2">
+                <div class="row">
+                    <label class="col-md-5 col-form-label text-md-left">جستجوی شماره</label>
                     <input type="text" id="phone_number" name="phone_number" value="{{$filter['phone_number']}}"
-                           placeholder="جستجوی شماره">
+                           placeholder="جستجوی شماره" class="form-control col-md-7">
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="pr-2">
-                    <label>جستجوی نام</label>
+            <div class="col-md-3 pr-2">
+                <div class="row">
+                    <label class="col-md-5 col-form-label text-md-left">جستجوی نام</label>
                     <input type="text" id="name" name="name" value="{{$filter['name']}}"
-                           placeholder="جستجوی نام">
+                           placeholder="جستجوی نام" class="form-control col-md-7">
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="pr-2">
-                    <label>مرتب‌سازی</label>
+            <div class="col-md-3 pr-2">
+                <div class="row">
+                    <label class="col-md-5 col-form-label text-md-left">مرتب‌سازی</label>
                     <select id="sort_field" name="sort_field">
                         @foreach($sortable_fields as $key => $sortable_field)
                             <option @if ($key == $filter['sort_field']) selected
@@ -131,6 +128,14 @@
 
             document.getElementById('filter').submit();
         }
+
+        $('#sort_field').select2({
+            width: 'element',
+        });
+
+        $('#sort_type').select2({
+            width: 'element',
+        });
 
     </script>
 @endsection

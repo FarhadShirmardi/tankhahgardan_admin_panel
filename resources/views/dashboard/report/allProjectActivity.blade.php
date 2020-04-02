@@ -9,8 +9,8 @@
         {{ csrf_field() }}
         <div class="row pt-5 justify-content-center">
             <div class="col-md-3">
-                <table>
-                    <tr>
+                <table class="table table-bordered table-responsive">
+                    <tr class="text-center">
                         <input id="projectType" type="hidden" value="{{ $filter['project_type'] }}" name="project_type">
                         <td style="border: solid black 1px;">
                             <div onclick="changeUserType({{0}})"
@@ -26,30 +26,35 @@
                     </tr>
                 </table>
             </div>
-            <div class="col-md-3">
-                <div class="pr-2">
-                    <label>جستجوی نام</label>
+            <div class="col-md-3 pr-2">
+                <div class="row">
+                    <label class="col-md-5 col-form-label text-md-left">جستجوی نام</label>
                     <input type="text" id="name" name="name" value="{{$filter['name']}}"
-                           placeholder="جستجوی نام">
+                           placeholder="جستجوی نام" class="form-control col-md-7">
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="pr-2">
-                    <label>شهر و استان</label>
-                    <select id="state_id" name="state_id" onchange="changeSelect();" onload="changeSelect();">
-                        @foreach($states as $state)
-                            <option value="{{$state['id']}}" @if($filter['state_id'] == $state['id']) selected @endif>
-                                {{$state['name']}}
-                            </option>
-                        @endforeach
-                    </select>
-                    <select id="city_id" name="city_id">
-                    </select>
+            <div class="col-md-3 pr-2">
+                <div class="row">
+                    <label class="col-md-4 col-form-label text-md-left">شهر و استان</label>
+                    <div class="col-md-4">
+                        <select style="width: 100%" id="state_id" name="state_id" onchange="changeSelect();"
+                                onload="changeSelect();">
+                            @foreach($states as $state)
+                                <option value="{{$state['id']}}"
+                                        @if($filter['state_id'] == $state['id']) selected @endif>
+                                    {{$state['name']}}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select style="width: 100%" id="city_id" name="city_id"></select>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="pr-2">
-                    <label>مرتب‌سازی</label>
+            <div class="col-md-3 pr-2">
+                <div class="row">
+                    <label class="col-md-5 col-form-label text-md-left">مرتب‌سازی</label>
                     <select id="sort_field" name="sort_field">
                         @foreach($sortable_fields as $key => $sortable_field)
                             <option @if ($key == $filter['sort_field']) selected
@@ -124,6 +129,30 @@
 @endsection
 @section('scripts')
     <script>
+
+        function changeUserType(projectType) {
+            var input = document.getElementById('projectType');
+            input.value = projectType;
+
+            document.getElementById('filter').submit();
+        }
+
+        $('#state_id').select2({
+            width: 'element',
+        });
+
+        $('#city_id').select2({
+            width: 'element',
+        });
+
+        $('#sort_field').select2({
+            width: 'element',
+        });
+
+        $('#sort_type').select2({
+            width: 'element',
+        });
+
 
         $(document).ready(function () {
             changeSelect();
