@@ -43,7 +43,7 @@ class UserActivationProcessSecondStepInactiveJob implements ShouldQueue
             '<',
             app()->environment() == 'production' ?
                 Carbon::now()->subHours(24)->toDateTimeString() :
-                Carbon::now()->subMinutes(2)->toDateTimeString()
+                Carbon::now()->subHours(24)->toDateTimeString()
         )->get();
 
         Helpers::setUserStatus(

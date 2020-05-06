@@ -43,7 +43,7 @@ class UserActivationProcessThirdStepDieJob implements ShouldQueue
             '<',
             app()->environment() == 'production' ?
                 Carbon::now()->subHours(72)->toDateTimeString() :
-                Carbon::now()->subMinutes(7)->toDateTimeString()
+                Carbon::now()->subHours(24)->toDateTimeString()
         )->get();
 
         Helpers::setUserStatus(
