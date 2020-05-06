@@ -37,7 +37,7 @@ class UserActivationProcessSecondStepSMSJob implements ShouldQueue
     {
         $time = app()->environment() == 'production' ?
             Carbon::now()->subWeek()->toDateTimeString() :
-            Carbon::now()->subMinutes(15)->toDateTimeString();
+            Carbon::now()->subHours(48)->toDateTimeString();
         $userStates = UserActivationState::where(function ($q) use ($time) {
            $q->where(
                'updated_at',
@@ -66,7 +66,7 @@ class UserActivationProcessSecondStepSMSJob implements ShouldQueue
                 '>',
                 app()->environment() == 'production' ?
                     Carbon::now()->subWeek()->subDay()->toDateTimeString() :
-                    Carbon::now()->subMinutes(16)->toDateTimeString()
+                    Carbon::now()->subHours(48)->toDateTimeString()
             )->where(
                 'state',
                 UserActivationConstant::STATE_ACTIVE_USER

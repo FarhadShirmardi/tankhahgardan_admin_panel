@@ -27,7 +27,7 @@ class UserActivationProcessFirstStepDieJob implements ShouldQueue
         //
     }
 
-    /**
+    /**1120357122:AAH_xc5qknc741bgGtxi2dQ48ecvTXJ72KE
      * Execute the job.
      *
      * @return void
@@ -43,7 +43,7 @@ class UserActivationProcessFirstStepDieJob implements ShouldQueue
             '<',
             app()->environment() == 'production' ?
                 Carbon::now()->subHours(48)->toDateTimeString() :
-                Carbon::now()->subMinutes(4)->toDateTimeString()
+                Carbon::now()->subHours(24)->toDateTimeString()
         )->get();
 
         Helpers::setUserStatus($userStates, UserActivationConstant::STATE_FIRST_ATTEMPT_DIE);

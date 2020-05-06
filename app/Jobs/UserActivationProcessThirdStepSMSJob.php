@@ -37,7 +37,7 @@ class UserActivationProcessThirdStepSMSJob implements ShouldQueue
     {
         $time = app()->environment() == 'production' ?
             Carbon::now()->subMonth()->toDateTimeString() :
-            Carbon::now()->subMinutes(20)->toDateTimeString();
+            Carbon::now()->subHours(72)->toDateTimeString();
         $userStates = UserActivationState::where(function ($q) use ($time) {
             $q->where(
                 'updated_at',

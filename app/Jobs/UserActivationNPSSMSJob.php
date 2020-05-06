@@ -41,7 +41,7 @@ class UserActivationNPSSMSJob implements ShouldQueue
                 '<',
                 app()->environment() == 'production' ?
                     Carbon::now()->subHours(24)->toDateTimeString() :
-                    Carbon::now()->subMinutes(2)->toDateTimeString()
+                    Carbon::now()->subHours(24)->toDateTimeString()
             )->where(
                 'state',
                 UserActivationConstant::STATE_THIRD_SMS
@@ -52,7 +52,7 @@ class UserActivationNPSSMSJob implements ShouldQueue
                 '<',
                 app()->environment() == 'production' ?
                     Carbon::now()->subHours(72)->toDateTimeString() :
-                    Carbon::now()->subMinutes(7)->toDateTimeString()
+                    Carbon::now()->subHours(24)->toDateTimeString()
             )->where(
                 'state',
                 UserActivationConstant::STATE_THIRD_CALL
@@ -63,7 +63,7 @@ class UserActivationNPSSMSJob implements ShouldQueue
                 '<',
                 app()->environment() == 'production' ?
                     Carbon::now()->subMonth()->toDateTimeString() :
-                    Carbon::now()->subMinutes(20)->toDateTimeString()
+                    Carbon::now()->subHours(72)->toDateTimeString()
             )->where(
                 'state',
                 UserActivationConstant::STATE_ACTIVE_USER
