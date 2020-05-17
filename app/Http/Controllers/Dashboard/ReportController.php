@@ -36,6 +36,7 @@ use App\Constants\FeedbackSource;
 use App\Comment;
 use App\Constants\FeedbackStatus;
 use App\FeedbackTitle;
+use App\UserReport;
 
 class ReportController extends Controller
 {
@@ -144,6 +145,34 @@ class ReportController extends Controller
             'name' => $request->input('name', ''),
         ];
 
+
+        $usersQuery = UserReport::query();
+
+//        $usersQuery = $this->getUserQuery();
+
+        $usersQuery = $this->applyFilterUserQuery($usersQuery, $filter);
+
+//        dd($usersQuery->toSql());
+
+        $users = $usersQuery->paginate(100);
+
+        $counts = $this->getUserTypeCounts();
+
+        list($sortableFields, $sortableTypes) = $this->getUserSortFields();
+
+        return view('dashboard.report.allUserActivity', [
+                'users' => $users,
+                'counts' => $counts,
+                'colors' => $this->colors(),
+                'filter' => $filter,
+                'sortable_fields' => $sortableFields,
+                'sortable_types' => $sortableTypes
+            ]
+        );
+    }
+
+    public function getUserQuery()
+    {
         $paymentCountQuery = Payment::whereColumn('creator_user_id', 'users.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
         $receiveCountQuery = Receive::whereColumn('creator_user_id', 'users.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
         $noteCountQuery = Note::whereColumn('creator_user_id', 'users.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
@@ -158,7 +187,7 @@ class ReportController extends Controller
         $noteMaxQuery = Note::whereColumn('creator_user_id', 'users.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
         $imprestMaxQuery = Imprest::whereColumn('creator_user_id', 'users.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
 
-        $imageSizeQuery = Image::whereColumn('user_id', 'users.id')->selectRaw('sum(size) / 1024 / 1024')->getQuery();
+        $imageSizeQuery = Image::whereColumn('user_id', 'users.id')->selectRaw('IFNULL(sum(size), 0) / 1024 / 1024')->getQuery();
 
         $projectCount = ProjectUser::whereColumn('user_id', 'users.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
         $ownProjectCount = ProjectUser::whereColumn('user_id', 'users.id')->withoutTrashed()->where('is_owner', true)->selectRaw('count(*)')->getQuery();
@@ -211,67 +240,9 @@ class ReportController extends Controller
             ->selectSub($ownProjectCount, 'own_project_count')
             ->selectSub($notOwnProjectCount, 'not_own_project_count')
             ->selectRaw('MaxTime.max_time as max_time')
-            ->selectRaw($userTypeQuery)
-            ->orderBy($filter['sort_field'], $filter['sort_type']);
+            ->selectRaw($userTypeQuery);
 
-        if ($filter['user_type']) {
-            $usersQuery = $usersQuery->having('user_type', $filter['user_type']);
-        }
-        if (!empty($filter['phone_number'])) {
-            $phoneNumber = '%' . Helpers::getEnglishString((string)(int)$filter['phone_number']) . '%';
-            $usersQuery = $usersQuery->where('phone_number', 'like', $phoneNumber);
-        }
-        if (!empty($filter['name'])) {
-            $name = '%' . $filter['name'] . '%';
-            $usersQuery = $usersQuery->where('name', 'like', $name);
-        }
-
-        $users = $usersQuery->get();
-
-
-        $counts = array_fill(1, 4, 0);
-        $countUser = $users->groupBy('user_type');
-        foreach ($countUser as $key => $item) {
-            $counts[$key] = count($item);
-        }
-
-        $users = Helpers::paginateCollection($users);
-
-
-        $sortableFields = [
-            'name' => 'نام و نام خانوادگی',
-            'phone_number' => 'شماره تلفن',
-            'registered_at' => 'تاریخ و ساعت ثبت نام',
-            'max_time' => 'آخرین ثبت',
-            'project_count' => 'تعداد کل پروژه',
-            'own_project_count' => 'تعداد پروژه مالک',
-            'not_own_project_count' => 'تعداد پروژه اشتراکی',
-            'payment_count' => 'تعداد پرداخت',
-            'receive_count' => 'تعداد دریافت',
-            'note_count' => 'تعداد یادداشت',
-            'imprest_count' => 'تعداد تنخواه',
-            'file_count' => 'تعداد فایل‌ها',
-            'image_count' => 'تعداد عکس‌ها',
-            'image_size' => 'حجم عکس‌ها',
-            'feedback_count' => 'تعداد بازخورد',
-            'device_count' => 'تعداد دستگاه‌ها',
-            'step_by_step' => 'گام به گام',
-        ];
-
-        $sortableTypes = [
-            'ASC' => 'صعودی',
-            'DESC' => 'نزولی',
-        ];
-
-        return view('dashboard.report.allUserActivity', [
-                'users' => $users,
-                'counts' => $counts,
-                'colors' => $this->colors(),
-                'filter' => $filter,
-                'sortable_fields' => $sortableFields,
-                'sortable_types' => $sortableTypes
-            ]
-        );
+        return $usersQuery;
     }
 
     private function times()
@@ -752,8 +723,8 @@ class ReportController extends Controller
             $item->source = FeedbackSource::getEnum($item->source);
             $item->response_text_update_time =
                 $item->response_text_update_time ?
-                Helpers::convertDateTimeToJalali($item->response_text_update_time) :
-                null;
+                    Helpers::convertDateTimeToJalali($item->response_text_update_time) :
+                    null;
             $item->state = FeedbackStatus::getEnum($item->state);
             return $item;
         });
@@ -1063,5 +1034,68 @@ class ReportController extends Controller
             $collection = $collection->sortBy($sort[0], SORT_REGULAR, $sort[1] == 'DESC');
         }
         $sort[1] = $sort[1] == 'DESC' ? 'ASC' : 'DESC';
+    }
+
+    private function applyFilterUserQuery(&$usersQuery, array $filter)
+    {
+        $usersQuery = $usersQuery->orderBy($filter['sort_field'], $filter['sort_type']);
+
+        if ($filter['user_type']) {
+            $usersQuery = $usersQuery->having('user_type', $filter['user_type']);
+        }
+        if (!empty($filter['phone_number'])) {
+            $phoneNumber = '%' . Helpers::getEnglishString((string)(int)$filter['phone_number']) . '%';
+            $usersQuery = $usersQuery->where('phone_number', 'like', $phoneNumber);
+        }
+        if (!empty($filter['name'])) {
+            $name = '%' . $filter['name'] . '%';
+            $usersQuery = $usersQuery->where('name', 'like', $name);
+        }
+
+        return $usersQuery;
+    }
+
+    private function getUserSortFields()
+    {
+        $sortableFields = [
+            'name' => 'نام و نام خانوادگی',
+            'phone_number' => 'شماره تلفن',
+            'registered_at' => 'تاریخ و ساعت ثبت نام',
+            'max_time' => 'آخرین ثبت',
+            'project_count' => 'تعداد کل پروژه',
+            'own_project_count' => 'تعداد پروژه مالک',
+            'not_own_project_count' => 'تعداد پروژه اشتراکی',
+            'payment_count' => 'تعداد پرداخت',
+            'receive_count' => 'تعداد دریافت',
+            'note_count' => 'تعداد یادداشت',
+            'imprest_count' => 'تعداد تنخواه',
+            'file_count' => 'تعداد فایل‌ها',
+            'image_count' => 'تعداد عکس‌ها',
+            'image_size' => 'حجم عکس‌ها',
+            'feedback_count' => 'تعداد بازخورد',
+            'device_count' => 'تعداد دستگاه‌ها',
+            'step_by_step' => 'گام به گام',
+        ];
+
+        $sortableTypes = [
+            'ASC' => 'صعودی',
+            'DESC' => 'نزولی',
+        ];
+
+        return [$sortableFields, $sortableTypes];
+    }
+
+    public function getUserTypeCounts()
+    {
+        $countsCollection = UserReport::query()
+            ->selectRaw('user_type, count(*) as count_user_type')
+            ->groupBy('user_type')
+            ->get();
+
+        $counts = $countsCollection->mapWithKeys(function ($item) {
+            return [$item['user_type'] => $item['count_user_type']];
+        })->toArray();
+
+        return $counts;
     }
 }

@@ -8,7 +8,7 @@
     <form id="filter" method="get" action="">
         {{ csrf_field() }}
         <div class="row pb-5 pt-5 justify-content-center">
-            <div class="col-md-3">
+            <div class="col-md-3 col-sm-10">
                 <table class="table table-bordered table-responsive">
                     <tr class="text-center">
                         <input id="userType" type="hidden" value="{{ $filter['user_type'] }}" name="user_type">
@@ -16,28 +16,28 @@
                             <div onclick="changeUserType({{0}})">همه</div>
                         </td>
                         @foreach($colors as $key => $color)
-                            <td style="background-color: {{$color[0]}}; cursor: pointer">
+                            <td style="background-color: {{$color[0]}}; cursor: pointer;">
                                 <div onclick="changeUserType({{$key}})">{{$color[1]}}</div>
                             </td>
                         @endforeach
                     </tr>
                 </table>
             </div>
-            <div class="col-md-3 pr-2">
+            <div class="col-md-3 col-sm-10 pr-2">
                 <div class="row">
                     <label class="col-md-5 col-form-label text-md-left">جستجوی شماره</label>
                     <input type="text" id="phone_number" name="phone_number" value="{{$filter['phone_number']}}"
                            placeholder="جستجوی شماره" class="form-control col-md-7">
                 </div>
             </div>
-            <div class="col-md-3 pr-2">
+            <div class="col-md-3 col-sm-12 pr-2">
                 <div class="row">
                     <label class="col-md-5 col-form-label text-md-left">جستجوی نام</label>
                     <input type="text" id="name" name="name" value="{{$filter['name']}}"
                            placeholder="جستجوی نام" class="form-control col-md-7">
                 </div>
             </div>
-            <div class="col-md-3 pr-2">
+            <div class="col-md-3 col-sm-12 pr-2">
                 <div class="row">
                     <label class="col-md-5 col-form-label text-md-left">مرتب‌سازی</label>
                     <select id="sort_field" name="sort_field">
@@ -61,8 +61,8 @@
 @endsection
 @section('content')
     <div>{{ $users }}</div>
-    <div id="ajax-table">
-        <table class="table table-responsive">
+    <div id="ajax-table" style="overflow-x: auto;">
+        <table class="table">
             <thead>
             <tr>
                 <th>ردیف</th>
