@@ -69,8 +69,10 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
             Route::get( 'feedbacks', 'Dashboard\ReportController@viewFeedback')->name('feedbacks');
             Route::get('comment/new/{id?}', 'Dashboard\ReportController@commentView')->name('commentView');
             Route::post('comment/new/{id?}', 'Dashboard\ReportController@addComment')->name('newComment');
-            Route::post('feedback/{feedback_id}/response', 'Dashboard\ReportController@responseFeedback')->name('responseFeedback');
             Route::get('feedback/{feedback_id}/response', 'Dashboard\ReportController@responseFeedbackView')->name('viewFeedback');
+        });
+        Route::middleware(['permission:response_feedback'])->group(function () {
+            Route::post('feedback/{feedback_id}/response', 'Dashboard\ReportController@responseFeedback')->name('responseFeedback');
         });
 
         Route::get('changePassword', 'Dashboard\ReportController@changePasswordView')->name('changePasswordView');
