@@ -169,25 +169,24 @@ class ReportController extends Controller
         );
     }
 
-    public function applyFilterProjectQuery(&$projectsQuery, array $filter)
+    private function getAllUserActivityFilter(Request &$request)
     {
-        $projectsQuery = $projectsQuery->orderBy($filter['sort_field'], $filter['sort_type']);
-
-        if ($filter['project_type']) {
-            $projectsQuery = $projectsQuery->having('project_type', $filter['project_type']);
-        }
-        if (!empty($filter['name'])) {
-            $name = '%' . $filter['name'] . '%';
-            $projectsQuery = $projectsQuery->where('name', 'like', $name);
-        }
-        if ($filter['state_id']) {
-            $projectsQuery = $projectsQuery->where('state_id', $filter['state_id']);
-        }
-        if ($filter['city_id']) {
-            $projectsQuery = $projectsQuery->where('city_id', $filter['city_id']);
+        list($startDate, $endDate) = $this->normalizeDate($request, true);
+        if (!$startDate) {
+            $startDate = UserReport::query()->selectRaw('min(Date(registered_at)) as date')->first()->date;
         }
 
-        return $projectsQuery;
+        $filter = [
+            'user_type' => $request->input('user_type', null),
+            'sort_field' => $request->input('sort_field', 'registered_at'),
+            'sort_type' => $request->input('sort_type', 'DESC'),
+            'phone_number' => Helpers::getEnglishString($request->input('phone_number', '')),
+            'name' => $request->input('name', ''),
+            'start_date' => $startDate,
+            'end_date' => $endDate
+        ];
+
+        return $filter;
     }
 
     private function applyFilterUserQuery(&$usersQuery, array $filter)
@@ -195,7 +194,7 @@ class ReportController extends Controller
         $usersQuery = $usersQuery->orderBy($filter['sort_field'], $filter['sort_type']);
 
         if ($filter['user_type']) {
-            $usersQuery = $usersQuery->having('user_type', $filter['user_type']);
+            $usersQuery = $usersQuery->where('user_type', $filter['user_type']);
         }
         if (!empty($filter['phone_number'])) {
             $phoneNumber = '%' . Helpers::getEnglishString((string)(int)$filter['phone_number']) . '%';
@@ -205,10 +204,10 @@ class ReportController extends Controller
             $name = '%' . $filter['name'] . '%';
             $usersQuery = $usersQuery->where('name', 'like', $name);
         }
-        if($filter['start_date']) {
+        if ($filter['start_date']) {
             $usersQuery = $usersQuery->where('registered_at', '>=', $filter['start_date']);
         }
-        if($filter['end_date']) {
+        if ($filter['end_date']) {
             $usersQuery = $usersQuery->where('registered_at', '<=', $filter['end_date']);
         }
 
@@ -222,23 +221,10 @@ class ReportController extends Controller
             ->groupBy('user_type')
             ->get();
 
-        $counts = $countsCollection->mapWithKeys(function ($item) {
-            return [$item['user_type'] => $item['count_user_type']];
-        })->toArray();
-
-        return $counts;
-    }
-
-    public function getProjectTypeCounts()
-    {
-        $countsCollection = ProjectReport::query()
-            ->selectRaw('project_type, count(*) as count_project_type')
-            ->groupBy('project_type')
-            ->get();
-
-        $counts = $countsCollection->mapWithKeys(function ($item) {
-            return [$item['project_type'] => $item['count_project_type']];
-        })->toArray();
+        $counts = array_fill(1, 4, 0);
+        foreach ($countsCollection as $item) {
+            $counts[$item['user_type']] = $item['count_user_type'];
+        }
 
         return $counts;
     }
@@ -263,29 +249,6 @@ class ReportController extends Controller
             'feedback_count' => 'تعداد بازخورد',
             'device_count' => 'تعداد دستگاه‌ها',
             'step_by_step' => 'گام به گام',
-        ];
-
-        $sortableTypes = [
-            'ASC' => 'صعودی',
-            'DESC' => 'نزولی',
-        ];
-
-        return [$sortableFields, $sortableTypes];
-    }
-
-    private function getProjectSortFields()
-    {
-        $sortableFields = [
-            'name' => 'نام پروژه',
-            'created_at' => 'تاریخ ایجاد پروژه',
-            'max_time' => 'آخرین ثبت',
-            'user_count' => 'تعداد کاربران پروژه',
-            'active_user_count' => 'تعداد کاربران فعال',
-            'not_active_user_count' => 'تعداد کاربران غیرفعال',
-            'payment_count' => 'تعداد پرداخت',
-            'receive_count' => 'تعداد دریافت',
-            'note_count' => 'تعداد یادداشت',
-            'imprest_count' => 'تعداد تنخواه',
         ];
 
         $sortableTypes = [
@@ -379,6 +342,16 @@ class ReportController extends Controller
         return $projectsQuery;
     }
 
+    private function times()
+    {
+        return [
+            1 => ['>=', now()->subDays(7)->toDateTimeString(), 1],
+            2 => ['>=', now()->subDays(14)->toDateTimeString(), 2],
+            3 => ['>=', now()->subMonths(1)->toDateTimeString(), 3],
+            4 => ['<', now()->subMonths(1)->toDateTimeString(), 4],
+        ];
+    }
+
     public function getUserQuery()
     {
         $paymentCountQuery = Payment::whereColumn('creator_user_id', 'users.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
@@ -451,16 +424,6 @@ class ReportController extends Controller
             ->selectRaw($userTypeQuery);
 
         return $usersQuery;
-    }
-
-    private function times()
-    {
-        return [
-            1 => ['>=', now()->subDays(7)->toDateTimeString(), 1],
-            2 => ['>=', now()->subDays(14)->toDateTimeString(), 2],
-            3 => ['>=', now()->subMonths(1)->toDateTimeString(), 3],
-            4 => ['<', now()->subMonths(1)->toDateTimeString(), 4],
-        ];
     }
 
     public function userActivity(Request $request, $id)
@@ -587,6 +550,56 @@ class ReportController extends Controller
         ]);
     }
 
+    private function getAllProjectActivity(Request &$request)
+    {
+        $filter = [
+            'project_type' => $request->input('project_type', null),
+            'sort_field' => $request->input('sort_field', 'created_at'),
+            'sort_type' => $request->input('sort_type', 'DESC'),
+            'state_id' => $request->input('state_id', 0),
+            'city_id' => $request->input('city_id', 0),
+            'name' => $request->input('name', ''),
+        ];
+
+        return $filter;
+    }
+
+    public function applyFilterProjectQuery(&$projectsQuery, array $filter)
+    {
+        $projectsQuery = $projectsQuery->orderBy($filter['sort_field'], $filter['sort_type']);
+
+        if ($filter['project_type']) {
+            $projectsQuery = $projectsQuery->where('project_type', $filter['project_type']);
+        }
+        if (!empty($filter['name'])) {
+            $name = '%' . $filter['name'] . '%';
+            $projectsQuery = $projectsQuery->where('name', 'like', $name);
+        }
+        if ($filter['state_id']) {
+            $projectsQuery = $projectsQuery->where('state_id', $filter['state_id']);
+        }
+        if ($filter['city_id']) {
+            $projectsQuery = $projectsQuery->where('city_id', $filter['city_id']);
+        }
+
+        return $projectsQuery;
+    }
+
+    public function getProjectTypeCounts()
+    {
+        $countsCollection = ProjectReport::query()
+            ->selectRaw('project_type, count(*) as count_project_type')
+            ->groupBy('project_type')
+            ->get();
+
+        $counts = array_fill(1, 4, 0);
+        foreach ($countsCollection as $item) {
+            $counts[$item['project_type']] = $item['count_project_type'];
+        }
+        
+        return $counts;
+    }
+
     private function getLocations()
     {
         $states = State::orderBy('name')->get(['id', 'name']);
@@ -605,6 +618,29 @@ class ReportController extends Controller
         }
         $cities = $cities->sortBy('id');
         return [$states, $cities];
+    }
+
+    private function getProjectSortFields()
+    {
+        $sortableFields = [
+            'name' => 'نام پروژه',
+            'created_at' => 'تاریخ ایجاد پروژه',
+            'max_time' => 'آخرین ثبت',
+            'user_count' => 'تعداد کاربران پروژه',
+            'active_user_count' => 'تعداد کاربران فعال',
+            'not_active_user_count' => 'تعداد کاربران غیرفعال',
+            'payment_count' => 'تعداد پرداخت',
+            'receive_count' => 'تعداد دریافت',
+            'note_count' => 'تعداد یادداشت',
+            'imprest_count' => 'تعداد تنخواه',
+        ];
+
+        $sortableTypes = [
+            'ASC' => 'صعودی',
+            'DESC' => 'نزولی',
+        ];
+
+        return [$sortableFields, $sortableTypes];
     }
 
     public function projectActivity(Request $request, $projectId)
@@ -1134,39 +1170,5 @@ class ReportController extends Controller
             $collection = $collection->sortBy($sort[0], SORT_REGULAR, $sort[1] == 'DESC');
         }
         $sort[1] = $sort[1] == 'DESC' ? 'ASC' : 'DESC';
-    }
-
-    private function getAllUserActivityFilter(Request &$request)
-    {
-        list($startDate, $endDate) = $this->normalizeDate($request, true);
-        if (!$startDate) {
-            $startDate = UserReport::query()->selectRaw('min(Date(registered_at)) as date')->first()->date;
-        }
-
-        $filter = [
-            'user_type' => $request->input('user_type', null),
-            'sort_field' => $request->input('sort_field', 'registered_at'),
-            'sort_type' => $request->input('sort_type', 'DESC'),
-            'phone_number' => Helpers::getEnglishString($request->input('phone_number', '')),
-            'name' => $request->input('name', ''),
-            'start_date' => $startDate,
-            'end_date' => $endDate
-        ];
-
-        return $filter;
-    }
-
-    private function getAllProjectActivity(Request &$request)
-    {
-        $filter = [
-            'project_type' => $request->input('project_type', null),
-            'sort_field' => $request->input('sort_field', 'created_at'),
-            'sort_type' => $request->input('sort_type', 'DESC'),
-            'state_id' => $request->input('state_id', 0),
-            'city_id' => $request->input('city_id', 0),
-            'name' => $request->input('name', ''),
-        ];
-
-        return $filter;
     }
 }

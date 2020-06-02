@@ -159,6 +159,7 @@
             form.action = '{{ route('dashboard.report.export.allUsersActivity') }}';
 
             document.getElementById('filter').submit();
+            form.action = '';
         }
 
         $('#sort_field').select2({
