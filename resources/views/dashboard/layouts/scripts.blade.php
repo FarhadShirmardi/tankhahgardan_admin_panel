@@ -39,4 +39,23 @@
             window.open($(this).data("href"), !target ? '_blank' : target);
         });
     });
+
+    function sortTable(field) {
+        let dir = '{{ $filter['sort_type'] ?? '' }}';
+        let currentField = '{{ $filter['sort_field'] ?? '' }}';
+
+        if (field === currentField) {
+            dir = dir === 'DESC' ? 'ASC' : 'DESC';
+        } else {
+            dir = 'DESC';
+        }
+
+        var sortField = document.getElementById('sort_field');
+        sortField.value = field;
+
+        var sortType = document.getElementById('sort_type');
+        sortType.value = dir;
+
+        document.getElementById('filter').submit();
+    }
 </script>

@@ -54,35 +54,60 @@
                     </select>
                 </div>
             </div>
+            <div class="col-md-3 col-sm-12 pr-2"></div>
+            <div class="col-md-3 col-sm-12 pr-2">
+                <div class="row">
+                    <label class="col-md-5 col-form-label text-md-left">تاریخ شروع</label>
+                    <input id="start_date" class="form-control range_date col-md-7" type="text" name="start_date"
+                           value="{{$filter['start_date']}}">
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-12 pr-2">
+                <div class="row">
+                    <label class="col-md-5 col-form-label text-md-left">تاریخ پایان</label>
+                    <input id="end_date" class="form-control range_date col-md-7" type="text" name="end_date"
+                           value="{{$filter['end_date']}}">
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-12 pr-2"></div>
             <input type="hidden" name="page" value="1"/>
-            <input class="btn btn-info pt-2" type="submit" value="اعمال فیلتر">
+            <div class="row pt-2">
+                <input class="btn btn-info" type="submit" value="اعمال فیلتر">
+                @if(auth()->user()->hasRole('Admin'))
+                    <input class="btn btn-warning mr-2" type="button" value="فایل خروجی" onclick="exportClick()">
+                @endif
+            </div>
         </div>
     </form>
 @endsection
 @section('content')
-    <div>{{ $users }}</div>
+    <div></div>
+    <div class="row">
+        <div class="col-md-4">{{ $users }}</div>
+        <div class="col-md-8"><p>تعداد {{ $users->total() }} کاربر با شرایط فوق پیدا شد.</p></div>
+    </div>
     <div id="ajax-table" style="overflow-x: auto;">
         <table class="table">
             <thead>
-            <tr>
+            <tr style="cursor: pointer;">
                 <th>ردیف</th>
-                <th>نام و نام خانوادگی</th>
-                <th>شماره تلفن</th>
-                <th>تاریخ و ساعت ثبت نام</th>
-                <th>آخرین ثبت</th>
-                <th>تعداد کل پروژه</th>
-                <th>تعداد پروژه مالک</th>
-                <th>تعداد پروژه اشتراکی</th>
-                <th>تعداد پرداخت</th>
-                <th>تعداد دریافت</th>
-                <th>تعداد یادداشت</th>
-                <th>تعداد تنخواه</th>
-                <th>تعداد فایل‌ها</th>
-                <th>تعداد عکس‌ها</th>
-                <th>حجم عکس‌ها</th>
-                <th>تعداد بازخورد</th>
-                <th>تعداد دستگاه‌ها</th>
-                <th>گام به گام</th>
+                <th onclick="sortTable('name')">نام و نام خانوادگی</th>
+                <th onclick="sortTable('phone_number')">شماره تلفن</th>
+                <th onclick="sortTable('registered_at')">تاریخ و ساعت ثبت نام</th>
+                <th onclick="sortTable('max_time')">آخرین ثبت</th>
+                <th onclick="sortTable('project_count')">تعداد کل پروژه</th>
+                <th onclick="sortTable('own_project_count')">تعداد پروژه مالک</th>
+                <th onclick="sortTable('not_own_project_count')">تعداد پروژه اشتراکی</th>
+                <th onclick="sortTable('payment_count')">تعداد پرداخت</th>
+                <th onclick="sortTable('receive_count')">تعداد دریافت</th>
+                <th onclick="sortTable('note_count')">تعداد یادداشت</th>
+                <th onclick="sortTable('imprest_count')">تعداد تنخواه</th>
+                <th onclick="sortTable('file_count')">تعداد فایل‌ها</th>
+                <th onclick="sortTable('image_count')">تعداد عکس‌ها</th>
+                <th onclick="sortTable('image_size')">حجم عکس‌ها</th>
+                <th onclick="sortTable('feedback_count')">تعداد بازخورد</th>
+                <th onclick="sortTable('device_count')">تعداد دستگاه‌ها</th>
+                <th onclick="sortTable('step_by_step')">گام به گام</th>
             </tr>
             </thead>
             <tbody>
@@ -125,6 +150,13 @@
         function changeUserType(userType) {
             var input = document.getElementById('userType');
             input.value = userType;
+
+            document.getElementById('filter').submit();
+        }
+
+        function exportClick() {
+            var form = document.getElementById('filter');
+            form.action = '{{ route('dashboard.report.export.allUsersActivity') }}';
 
             document.getElementById('filter').submit();
         }
