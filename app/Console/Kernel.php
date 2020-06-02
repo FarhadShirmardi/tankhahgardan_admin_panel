@@ -98,7 +98,10 @@ class Kernel extends ConsoleKernel
                 ->everyThirtyMinutes();
         }
         $schedule->command('generate:report --user')
-            ->dailyAt('05:00')
+            ->dailyAt('02:00')
+            ->then(function () {
+                $this->call('generate:report --project');
+            })
             ->runInBackground();
     }
 
@@ -109,7 +112,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands()
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }
