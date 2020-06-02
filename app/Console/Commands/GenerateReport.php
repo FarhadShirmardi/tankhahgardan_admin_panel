@@ -6,6 +6,9 @@ use Illuminate\Console\Command;
 use DB;
 use App\UserReport;
 use App\Http\Controllers\Dashboard\ReportController;
+use App\User;
+use App\ProjectReport;
+use App\Project;
 
 class GenerateReport extends Command
 {
@@ -46,16 +49,26 @@ class GenerateReport extends Command
             $reportController = app()->make(ReportController::class);
             if ($this->option('user')) {
                 UserReport::truncate();
-                $users = $reportController->getUserQuery()->get();
-                $bar = $this->output->createProgressBar($users->count());
-                foreach ($users as $user) {
-                    UserReport::query()->insert($user->toArray());
-                    $bar->advance();
+                $projectIds = User::query()->pluck('id')->chunk(100);
+                $bar = $this->output->createProgressBar(User::query()->count());
+                foreach ($projectIds as $projectId) {
+                    $users = $reportController->getUserQuery()->whereIn('users.id', $projectId->toArray())->get();
+                    foreach ($users as $user) {
+                        UserReport::query()->insert($user->toArray());
+                        $bar->advance();
+                    }
                 }
-
-                $reportController->getUserTypeCounts();
             } elseif ($this->option('project')) {
-                $this->fetchHistory();
+                ProjectReport::truncate();
+                $projectIds = Project::query()->pluck('id')->chunk(100);
+                $bar = $this->output->createProgressBar(Project::query()->count());
+                foreach ($projectIds as $projectId) {
+                    $projects = $reportController->getProjectQuery()->whereIn('projects.id', $projectId->toArray())->get();
+                    foreach ($projects as $project) {
+                        ProjectReport::query()->insert($project->toArray());
+                        $bar->advance();
+                    }
+                }
             }
         }, 3);
         $end = now();

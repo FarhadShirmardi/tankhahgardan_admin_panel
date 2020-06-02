@@ -82,20 +82,20 @@
     <div id="ajax-table">
         <table class="table table-responsive">
             <thead>
-            <tr>
+            <tr style="cursor: pointer;">
                 <th>ردیف</th>
-                <th>نام پروژه</th>
+                <th onclick="sortTable('name')">نام پروژه</th>
                 <th>استان</th>
                 <th>شهر</th>
-                <th>تاریخ ایجاد پروژه</th>
-                <th>آخرین ثبت</th>
-                <th>تعداد کل کاربران</th>
-                <th>کاربران فعال پروژه</th>
-                <th>کاربران غیرفعال</th>
-                <th>تعداد پرداخت</th>
-                <th>تعداد دریافت</th>
-                <th>تعداد یادداشت</th>
-                <th>تعداد تنخواه</th>
+                <th onclick="sortTable('created_at')">تاریخ ایجاد پروژه</th>
+                <th onclick="sortTable('max_time')">آخرین ثبت</th>
+                <th onclick="sortTable('user_count')">تعداد کل کاربران</th>
+                <th onclick="sortTable('active_user_count')">کاربران فعال پروژه</th>
+                <th onclick="sortTable('not_active_user_count')">کاربران غیرفعال</th>
+                <th onclick="sortTable('payment_count')">تعداد پرداخت</th>
+                <th onclick="sortTable('receive_count')">تعداد دریافت</th>
+                <th onclick="sortTable('note_count')">تعداد یادداشت</th>
+                <th onclick="sortTable('imprest_count')">تعداد تنخواه</th>
             </tr>
             </thead>
             <tbody>

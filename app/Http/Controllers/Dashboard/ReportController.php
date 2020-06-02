@@ -37,6 +37,11 @@ use App\Comment;
 use App\Constants\FeedbackStatus;
 use App\FeedbackTitle;
 use App\UserReport;
+use App\Exports\allUserExport;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Illuminate\Support\Str;
+use App\ProjectReport;
 
 class ReportController extends Controller
 {
@@ -137,14 +142,7 @@ class ReportController extends Controller
 
     public function allUsersActivity(Request $request)
     {
-        $filter = [
-            'user_type' => $request->input('user_type', null),
-            'sort_field' => $request->input('sort_field', 'registered_at'),
-            'sort_type' => $request->input('sort_type', 'DESC'),
-            'phone_number' => Helpers::getEnglishString($request->input('phone_number', '')),
-            'name' => $request->input('name', ''),
-        ];
-
+        $filter = $this->getAllUserActivityFilter($request);
 
         $usersQuery = UserReport::query();
 
@@ -169,6 +167,216 @@ class ReportController extends Controller
                 'sortable_types' => $sortableTypes
             ]
         );
+    }
+
+    public function applyFilterProjectQuery(&$projectsQuery, array $filter)
+    {
+        $projectsQuery = $projectsQuery->orderBy($filter['sort_field'], $filter['sort_type']);
+
+        if ($filter['project_type']) {
+            $projectsQuery = $projectsQuery->having('project_type', $filter['project_type']);
+        }
+        if (!empty($filter['name'])) {
+            $name = '%' . $filter['name'] . '%';
+            $projectsQuery = $projectsQuery->where('name', 'like', $name);
+        }
+        if ($filter['state_id']) {
+            $projectsQuery = $projectsQuery->where('state_id', $filter['state_id']);
+        }
+        if ($filter['city_id']) {
+            $projectsQuery = $projectsQuery->where('city_id', $filter['city_id']);
+        }
+
+        return $projectsQuery;
+    }
+
+    private function applyFilterUserQuery(&$usersQuery, array $filter)
+    {
+        $usersQuery = $usersQuery->orderBy($filter['sort_field'], $filter['sort_type']);
+
+        if ($filter['user_type']) {
+            $usersQuery = $usersQuery->having('user_type', $filter['user_type']);
+        }
+        if (!empty($filter['phone_number'])) {
+            $phoneNumber = '%' . Helpers::getEnglishString((string)(int)$filter['phone_number']) . '%';
+            $usersQuery = $usersQuery->where('phone_number', 'like', $phoneNumber);
+        }
+        if (!empty($filter['name'])) {
+            $name = '%' . $filter['name'] . '%';
+            $usersQuery = $usersQuery->where('name', 'like', $name);
+        }
+        if($filter['start_date']) {
+            $usersQuery = $usersQuery->where('registered_at', '>=', $filter['start_date']);
+        }
+        if($filter['end_date']) {
+            $usersQuery = $usersQuery->where('registered_at', '<=', $filter['end_date']);
+        }
+
+        return $usersQuery;
+    }
+
+    public function getUserTypeCounts()
+    {
+        $countsCollection = UserReport::query()
+            ->selectRaw('user_type, count(*) as count_user_type')
+            ->groupBy('user_type')
+            ->get();
+
+        $counts = $countsCollection->mapWithKeys(function ($item) {
+            return [$item['user_type'] => $item['count_user_type']];
+        })->toArray();
+
+        return $counts;
+    }
+
+    public function getProjectTypeCounts()
+    {
+        $countsCollection = ProjectReport::query()
+            ->selectRaw('project_type, count(*) as count_project_type')
+            ->groupBy('project_type')
+            ->get();
+
+        $counts = $countsCollection->mapWithKeys(function ($item) {
+            return [$item['project_type'] => $item['count_project_type']];
+        })->toArray();
+
+        return $counts;
+    }
+
+    private function getUserSortFields()
+    {
+        $sortableFields = [
+            'name' => 'نام و نام خانوادگی',
+            'phone_number' => 'شماره تلفن',
+            'registered_at' => 'تاریخ و ساعت ثبت نام',
+            'max_time' => 'آخرین ثبت',
+            'project_count' => 'تعداد کل پروژه',
+            'own_project_count' => 'تعداد پروژه مالک',
+            'not_own_project_count' => 'تعداد پروژه اشتراکی',
+            'payment_count' => 'تعداد پرداخت',
+            'receive_count' => 'تعداد دریافت',
+            'note_count' => 'تعداد یادداشت',
+            'imprest_count' => 'تعداد تنخواه',
+            'file_count' => 'تعداد فایل‌ها',
+            'image_count' => 'تعداد عکس‌ها',
+            'image_size' => 'حجم عکس‌ها',
+            'feedback_count' => 'تعداد بازخورد',
+            'device_count' => 'تعداد دستگاه‌ها',
+            'step_by_step' => 'گام به گام',
+        ];
+
+        $sortableTypes = [
+            'ASC' => 'صعودی',
+            'DESC' => 'نزولی',
+        ];
+
+        return [$sortableFields, $sortableTypes];
+    }
+
+    private function getProjectSortFields()
+    {
+        $sortableFields = [
+            'name' => 'نام پروژه',
+            'created_at' => 'تاریخ ایجاد پروژه',
+            'max_time' => 'آخرین ثبت',
+            'user_count' => 'تعداد کاربران پروژه',
+            'active_user_count' => 'تعداد کاربران فعال',
+            'not_active_user_count' => 'تعداد کاربران غیرفعال',
+            'payment_count' => 'تعداد پرداخت',
+            'receive_count' => 'تعداد دریافت',
+            'note_count' => 'تعداد یادداشت',
+            'imprest_count' => 'تعداد تنخواه',
+        ];
+
+        $sortableTypes = [
+            'ASC' => 'صعودی',
+            'DESC' => 'نزولی',
+        ];
+
+        return [$sortableFields, $sortableTypes];
+    }
+
+    public function colors()
+    {
+        return [
+            1 => ['#BEDACE', 'یک هفته'],
+            2 => ['#DCE1FF', 'دو هفته'],
+            3 => ['#FBE9E7', 'یک ماه'],
+            4 => ['#F1F3F4', 'غیرفعال'],
+        ];
+    }
+
+    public function exportAllUsersActivity(Request $request)
+    {
+        $filter = $this->getAllUserActivityFilter($request);
+
+        $usersQuery = UserReport::query();
+        $usersQuery = $this->applyFilterUserQuery($usersQuery, $filter);
+
+        $users = $usersQuery->get();
+
+        return Excel::download(new AllUserExport($users), 'users.xlsx');
+    }
+
+    public function getProjectQuery()
+    {
+        $paymentCountQuery = Payment::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $receiveCountQuery = Receive::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $noteCountQuery = Note::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $imprestCountQuery = Imprest::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
+
+        $paymentMaxQuery = Payment::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
+        $receiveMaxQuery = Receive::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
+        $noteMaxQuery = Note::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
+        $imprestMaxQuery = Imprest::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
+
+        $userCount = ProjectUser::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $activeUserCount = ProjectUser::whereColumn('project_id', 'projects.id')->withoutTrashed()->where('state', ProjectUserState::ACTIVE)->selectRaw('count(*)')->getQuery();
+        $notActiveUserCount = ProjectUser::whereColumn('project_id', 'projects.id')->withoutTrashed()->where('state', '<>', ProjectUserState::ACTIVE)->selectRaw('count(*)')->getQuery();
+
+        $maxTimeQuery = Project::query()
+            ->selectRaw(
+                "NULLIF(
+                    GREATEST(
+                        COALESCE((" . $paymentMaxQuery . "), 0),
+                        COALESCE((" . $receiveMaxQuery . "), 0),
+                        COALESCE((" . $noteMaxQuery . "), 0),
+                        COALESCE((" . $imprestMaxQuery . "), 0)
+                    ),
+                    0
+                ) as max_time, projects.id as project_id"
+            );
+
+        $times = $this->times();
+
+        $projectTypeQuery = '';
+        foreach ($times as $key => $time) {
+            if ($key == count($times)) {
+                $projectTypeQuery .= $time[2] . str_repeat(')', $key - 1) . ' as project_type';
+            } else {
+                $projectTypeQuery .= 'IF(MaxTime.max_time ' . $time[0] . ' \'' . $time[1] . '\', ' . $time[2] . ', ';
+            }
+        }
+
+
+        $projectsQuery = Project::query()
+            ->joinSub($maxTimeQuery, 'MaxTime', 'MaxTime.project_id', '=', 'projects.id')
+            ->addSelect('projects.name as name')
+            ->addSelect('projects.id as id')
+            ->addSelect('projects.city_id as city_id')
+            ->addSelect('projects.state_id as state_id')
+            ->addSelect('projects.created_at as created_at')
+            ->selectSub($paymentCountQuery, 'payment_count')
+            ->selectSub($receiveCountQuery, 'receive_count')
+            ->selectSub($noteCountQuery, 'note_count')
+            ->selectSub($imprestCountQuery, 'imprest_count')
+            ->selectSub($userCount, 'user_count')
+            ->selectSub($activeUserCount, 'active_user_count')
+            ->selectSub($notActiveUserCount, 'not_active_user_count')
+            ->selectRaw('MaxTime.max_time as max_time')
+            ->selectRaw($projectTypeQuery);
+
+        return $projectsQuery;
     }
 
     public function getUserQuery()
@@ -252,16 +460,6 @@ class ReportController extends Controller
             2 => ['>=', now()->subDays(14)->toDateTimeString(), 2],
             3 => ['>=', now()->subMonths(1)->toDateTimeString(), 3],
             4 => ['<', now()->subMonths(1)->toDateTimeString(), 4],
-        ];
-    }
-
-    public function colors()
-    {
-        return [
-            1 => ['#BEDACE', 'یک هفته'],
-            2 => ['#DCE1FF', 'دو هفته'],
-            3 => ['#FBE9E7', 'یک ماه'],
-            4 => ['#F1F3F4', 'غیرفعال'],
         ];
     }
 
@@ -364,116 +562,18 @@ class ReportController extends Controller
 
     public function allProjectsActivity(Request $request)
     {
+        $filter = $this->getAllProjectActivity($request);
 
-        $filter = [
-            'project_type' => $request->input('project_type', null),
-            'sort_field' => $request->input('sort_field', 'created_at'),
-            'sort_type' => $request->input('sort_type', 'DESC'),
-            'state_id' => $request->input('state_id', 0),
-            'city_id' => $request->input('city_id', 0),
-            'name' => $request->input('name', ''),
-        ];
+        $projectsQuery = ProjectReport::query();
+        $projectsQuery = $this->applyFilterProjectQuery($projectsQuery, $filter);
 
-        $paymentCountQuery = Payment::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $receiveCountQuery = Receive::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $noteCountQuery = Note::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $imprestCountQuery = Imprest::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $projects = $projectsQuery->paginate(100);
 
-        $paymentMaxQuery = Payment::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
-        $receiveMaxQuery = Receive::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
-        $noteMaxQuery = Note::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
-        $imprestMaxQuery = Imprest::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
-
-        $userCount = ProjectUser::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $activeUserCount = ProjectUser::whereColumn('project_id', 'projects.id')->withoutTrashed()->where('state', ProjectUserState::ACTIVE)->selectRaw('count(*)')->getQuery();
-        $notActiveUserCount = ProjectUser::whereColumn('project_id', 'projects.id')->withoutTrashed()->where('state', '<>', ProjectUserState::ACTIVE)->selectRaw('count(*)')->getQuery();
-
-        $maxTimeQuery = Project::query()
-            ->selectRaw(
-                "NULLIF(
-                    GREATEST(
-                        COALESCE((" . $paymentMaxQuery . "), 0),
-                        COALESCE((" . $receiveMaxQuery . "), 0),
-                        COALESCE((" . $noteMaxQuery . "), 0),
-                        COALESCE((" . $imprestMaxQuery . "), 0)
-                    ),
-                    0
-                ) as max_time, projects.id as project_id"
-            );
-
-        $times = $this->times();
-
-        $projectTypeQuery = '';
-        foreach ($times as $key => $time) {
-            if ($key == count($times)) {
-                $projectTypeQuery .= $time[2] . str_repeat(')', $key - 1) . ' as project_type';
-            } else {
-                $projectTypeQuery .= 'IF(MaxTime.max_time ' . $time[0] . ' \'' . $time[1] . '\', ' . $time[2] . ', ';
-            }
-        }
-
-
-        $projectsQuery = Project::query()
-            ->joinSub($maxTimeQuery, 'MaxTime', 'MaxTime.project_id', '=', 'projects.id')
-            ->addSelect('projects.name as name')
-            ->addSelect('projects.id as id')
-            ->addSelect('projects.city_id as city_id')
-            ->addSelect('projects.state_id as state_id')
-            ->addSelect('projects.created_at as created_at')
-            ->selectSub($paymentCountQuery, 'payment_count')
-            ->selectSub($receiveCountQuery, 'receive_count')
-            ->selectSub($noteCountQuery, 'note_count')
-            ->selectSub($imprestCountQuery, 'imprest_count')
-            ->selectSub($userCount, 'user_count')
-            ->selectSub($activeUserCount, 'active_user_count')
-            ->selectSub($notActiveUserCount, 'not_active_user_count')
-            ->selectRaw('MaxTime.max_time as max_time')
-            ->selectRaw($projectTypeQuery)
-            ->orderBy($filter['sort_field'], $filter['sort_type']);
-
-        if ($filter['project_type']) {
-            $projectsQuery = $projectsQuery->having('project_type', $filter['project_type']);
-        }
-        if (!empty($filter['name'])) {
-            $name = '%' . $filter['name'] . '%';
-            $projectsQuery = $projectsQuery->where('name', 'like', $name);
-        }
-        if ($filter['state_id']) {
-            $projectsQuery = $projectsQuery->where('state_id', $filter['state_id']);
-        }
-        if ($filter['city_id']) {
-            $projectsQuery = $projectsQuery->where('city_id', $filter['city_id']);
-        }
-
-        $projects = $projectsQuery->get();
-
-        $counts = array_fill(1, 4, 0);
-        $countProject = $projects->groupBy('project_type');
-        foreach ($countProject as $key => $item) {
-            $counts[$key] = count($item);
-        }
-
-        $projects = Helpers::paginateCollection($projects);
+        $counts = $this->getProjectTypeCounts();
 
         list($states, $cities) = $this->getLocations();
 
-        $sortableFields = [
-            'name' => 'نام پروژه',
-            'created_at' => 'تاریخ ایجاد پروژه',
-            'max_time' => 'آخرین ثبت',
-            'user_count' => 'تعداد کاربران پروژه',
-            'active_user_count' => 'تعداد کاربران فعال',
-            'not_active_user_count' => 'تعداد کاربران غیرفعال',
-            'payment_count' => 'تعداد پرداخت',
-            'receive_count' => 'تعداد دریافت',
-            'note_count' => 'تعداد یادداشت',
-            'imprest_count' => 'تعداد تنخواه',
-        ];
-
-        $sortableTypes = [
-            'ASC' => 'صعودی',
-            'DESC' => 'نزولی',
-        ];
+        list($sortableFields, $sortableTypes) = $this->getProjectSortFields();
 
         return view('dashboard.report.allProjectActivity', [
             'projects' => $projects,
@@ -1036,66 +1136,37 @@ class ReportController extends Controller
         $sort[1] = $sort[1] == 'DESC' ? 'ASC' : 'DESC';
     }
 
-    private function applyFilterUserQuery(&$usersQuery, array $filter)
+    private function getAllUserActivityFilter(Request &$request)
     {
-        $usersQuery = $usersQuery->orderBy($filter['sort_field'], $filter['sort_type']);
-
-        if ($filter['user_type']) {
-            $usersQuery = $usersQuery->having('user_type', $filter['user_type']);
-        }
-        if (!empty($filter['phone_number'])) {
-            $phoneNumber = '%' . Helpers::getEnglishString((string)(int)$filter['phone_number']) . '%';
-            $usersQuery = $usersQuery->where('phone_number', 'like', $phoneNumber);
-        }
-        if (!empty($filter['name'])) {
-            $name = '%' . $filter['name'] . '%';
-            $usersQuery = $usersQuery->where('name', 'like', $name);
+        list($startDate, $endDate) = $this->normalizeDate($request, true);
+        if (!$startDate) {
+            $startDate = UserReport::query()->selectRaw('min(Date(registered_at)) as date')->first()->date;
         }
 
-        return $usersQuery;
-    }
-
-    private function getUserSortFields()
-    {
-        $sortableFields = [
-            'name' => 'نام و نام خانوادگی',
-            'phone_number' => 'شماره تلفن',
-            'registered_at' => 'تاریخ و ساعت ثبت نام',
-            'max_time' => 'آخرین ثبت',
-            'project_count' => 'تعداد کل پروژه',
-            'own_project_count' => 'تعداد پروژه مالک',
-            'not_own_project_count' => 'تعداد پروژه اشتراکی',
-            'payment_count' => 'تعداد پرداخت',
-            'receive_count' => 'تعداد دریافت',
-            'note_count' => 'تعداد یادداشت',
-            'imprest_count' => 'تعداد تنخواه',
-            'file_count' => 'تعداد فایل‌ها',
-            'image_count' => 'تعداد عکس‌ها',
-            'image_size' => 'حجم عکس‌ها',
-            'feedback_count' => 'تعداد بازخورد',
-            'device_count' => 'تعداد دستگاه‌ها',
-            'step_by_step' => 'گام به گام',
+        $filter = [
+            'user_type' => $request->input('user_type', null),
+            'sort_field' => $request->input('sort_field', 'registered_at'),
+            'sort_type' => $request->input('sort_type', 'DESC'),
+            'phone_number' => Helpers::getEnglishString($request->input('phone_number', '')),
+            'name' => $request->input('name', ''),
+            'start_date' => $startDate,
+            'end_date' => $endDate
         ];
 
-        $sortableTypes = [
-            'ASC' => 'صعودی',
-            'DESC' => 'نزولی',
-        ];
-
-        return [$sortableFields, $sortableTypes];
+        return $filter;
     }
 
-    public function getUserTypeCounts()
+    private function getAllProjectActivity(Request &$request)
     {
-        $countsCollection = UserReport::query()
-            ->selectRaw('user_type, count(*) as count_user_type')
-            ->groupBy('user_type')
-            ->get();
+        $filter = [
+            'project_type' => $request->input('project_type', null),
+            'sort_field' => $request->input('sort_field', 'created_at'),
+            'sort_type' => $request->input('sort_type', 'DESC'),
+            'state_id' => $request->input('state_id', 0),
+            'city_id' => $request->input('city_id', 0),
+            'name' => $request->input('name', ''),
+        ];
 
-        $counts = $countsCollection->mapWithKeys(function ($item) {
-            return [$item['user_type'] => $item['count_user_type']];
-        })->toArray();
-
-        return $counts;
+        return $filter;
     }
 }
