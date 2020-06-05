@@ -43,6 +43,7 @@ class GenerateReport extends Command
      */
     public function handle()
     {
+        \Log::debug('start generate report');
         $start = now();
         $this->info($start->toDateTimeString());
         DB::transaction(function () {
