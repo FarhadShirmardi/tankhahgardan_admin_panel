@@ -15,6 +15,7 @@ use App\Jobs\UserActivationProcessThirdStepSMSJob;
 use App\Jobs\UserActivationReferralSMSJob;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Console\Commands\GenerateReport;
 
 class Kernel extends ConsoleKernel
 {
@@ -24,7 +25,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        GenerateReport::class
     ];
 
     /**
