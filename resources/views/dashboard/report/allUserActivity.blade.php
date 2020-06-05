@@ -83,7 +83,7 @@
 @section('content')
     <div></div>
     <div class="row">
-        <div class="col-md-4">{{ $users }}</div>
+        <div class="col-md-4">{{ $users->appends(request()->input())->links() }}</div>
         <div class="col-md-8"><p>تعداد {{ $users->total() }} کاربر با شرایط فوق پیدا شد.</p></div>
     </div>
     <div id="ajax-table" style="overflow-x: auto;">
