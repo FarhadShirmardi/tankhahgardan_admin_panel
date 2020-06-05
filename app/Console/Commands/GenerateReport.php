@@ -49,24 +49,24 @@ class GenerateReport extends Command
         DB::transaction(function () {
             $reportController = app()->make(ReportController::class);
             if ($this->option('user')) {
-                UserReport::truncate();
-                $projectIds = User::query()->pluck('id')->chunk(100);
-                $bar = $this->output->createProgressBar(User::query()->count());
-                foreach ($projectIds as $projectId) {
-                    $users = $reportController->getUserQuery()->whereIn('users.id', $projectId->toArray())->get();
-                    foreach ($users as $user) {
-                        UserReport::query()->insert($user->toArray());
-                        $bar->advance();
-                    }
+                UserReport::query()->truncate();
+                $userIds = User::query()->pluck('id')->chunk(1000);
+                $bar = $this->output->createProgressBar(count($userIds));
+                foreach ($userIds as $userId) {
+                    $users = $reportController->getUserQuery()->whereIn('users.id', $userId->toArray())->get();
+                    UserReport::insert($users->toArray());
+                    $bar->advance();
                 }
             } elseif ($this->option('project')) {
-                ProjectReport::truncate();
                 $projectIds = Project::query()->pluck('id')->chunk(100);
                 $bar = $this->output->createProgressBar(Project::query()->count());
                 foreach ($projectIds as $projectId) {
                     $projects = $reportController->getProjectQuery()->whereIn('projects.id', $projectId->toArray())->get();
                     foreach ($projects as $project) {
-                        ProjectReport::query()->insert($project->toArray());
+                        ProjectReport::query()->updateOrInsert(
+                            $project->id,
+                            $project->toArray()
+                        );
                         $bar->advance();
                     }
                 }
