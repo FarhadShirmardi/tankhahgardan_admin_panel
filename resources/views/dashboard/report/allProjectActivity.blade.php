@@ -78,7 +78,7 @@
     </form>
 @endsection
 @section('content')
-    <div>{{ $projects }}</div>
+    <div>{{ $projects->appends(request()->input())->links() }}</div>
     <div id="ajax-table">
         <table class="table table-responsive">
             <thead>

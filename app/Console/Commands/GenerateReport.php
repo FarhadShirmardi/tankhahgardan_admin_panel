@@ -58,17 +58,13 @@ class GenerateReport extends Command
                     $bar->advance();
                 }
             } elseif ($this->option('project')) {
-                $projectIds = Project::query()->pluck('id')->chunk(100);
-                $bar = $this->output->createProgressBar(Project::query()->count());
+                ProjectReport::query()->truncate();
+                $projectIds = Project::query()->pluck('id')->chunk(1000);
+                $bar = $this->output->createProgressBar(count($projectIds));
                 foreach ($projectIds as $projectId) {
                     $projects = $reportController->getProjectQuery()->whereIn('projects.id', $projectId->toArray())->get();
-                    foreach ($projects as $project) {
-                        ProjectReport::query()->updateOrInsert(
-                            $project->id,
-                            $project->toArray()
-                        );
-                        $bar->advance();
-                    }
+                    ProjectReport::insert($projects->toArray());
+                    $bar->advance();
                 }
             }
         }, 3);

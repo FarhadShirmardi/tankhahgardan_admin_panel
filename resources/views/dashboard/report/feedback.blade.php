@@ -119,7 +119,7 @@
 @endsection
 @section('content')
     @include('dashboard.report.listFeedback')
-    {{ $feedbacks }}
+    {{ $feedbacks->appends(request()->input())->links() }}
     <script type="text/javascript">
         function selectAll() {
             $('#title_ids').attr('selected', 'selected');
