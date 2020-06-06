@@ -37,7 +37,7 @@ use App\Comment;
 use App\Constants\FeedbackStatus;
 use App\FeedbackTitle;
 use App\UserReport;
-use App\Exports\allUserExport;
+use App\Exports\AllUserExport;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Illuminate\Support\Str;
@@ -596,7 +596,7 @@ class ReportController extends Controller
         foreach ($countsCollection as $item) {
             $counts[$item['project_type']] = $item['count_project_type'];
         }
-        
+
         return $counts;
     }
 
