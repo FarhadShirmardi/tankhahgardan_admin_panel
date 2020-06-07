@@ -275,8 +275,7 @@ class ReportController extends Controller
         $filter = $this->getAllUserActivityFilter($request);
 
 //        $users = $usersQuery->get();
-        $job = (new UserReportExportJob($filter))->onQueue('activationSms');
-        $this->dispatch($job);
+        $this->dispatch((new UserReportExportJob($filter)));
 
         return redirect()->back()->with('success', 'File will be sent by email!');
     }
