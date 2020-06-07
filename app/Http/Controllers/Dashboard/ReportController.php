@@ -275,9 +275,9 @@ class ReportController extends Controller
         $filter = $this->getAllUserActivityFilter($request);
 
 //        $users = $usersQuery->get();
-        $this->dispatch((new UserReportExportJob($filter)));
+        $this->dispatch((new UserReportExportJob($filter))->onConnection('activationSms'));
 
-        return redirect()->back()->with('success', 'File will be sent by email!');
+        return redirect()->back()->with('success', 'فایل در حال ساخته شدن میباشد. پس از چند دقیقه ایمیل خود را چک کنید.');
     }
 
     public function getProjectQuery()
