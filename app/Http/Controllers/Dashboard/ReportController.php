@@ -42,6 +42,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Illuminate\Support\Str;
 use App\ProjectReport;
+use App\Jobs\UserReportExportJob;
 
 class ReportController extends Controller
 {
@@ -189,7 +190,7 @@ class ReportController extends Controller
         return $filter;
     }
 
-    private function applyFilterUserQuery(&$usersQuery, array $filter)
+    public function applyFilterUserQuery(&$usersQuery, array $filter)
     {
         $usersQuery = $usersQuery->orderBy($filter['sort_field'], $filter['sort_type']);
 
@@ -273,12 +274,11 @@ class ReportController extends Controller
     {
         $filter = $this->getAllUserActivityFilter($request);
 
-        $usersQuery = UserReport::query();
-        $usersQuery = $this->applyFilterUserQuery($usersQuery, $filter);
+//        $users = $usersQuery->get();
+        $job = (new UserReportExportJob($filter))->onQueue('activationSms')->onConnection('sync');
+        $this->dispatch($job);
 
-        $users = $usersQuery->get();
-
-        return Excel::download(new AllUserExport($users), 'users.xlsx');
+        return redirect()->back()->with('success', 'File will be sent by email!');
     }
 
     public function getProjectQuery()
@@ -1170,5 +1170,10 @@ class ReportController extends Controller
             $collection = $collection->sortBy($sort[0], SORT_REGULAR, $sort[1] == 'DESC');
         }
         $sort[1] = $sort[1] == 'DESC' ? 'ASC' : 'DESC';
+    }
+
+    public function downloadReport($filename)
+    {
+        return response()->download(storage_path('app/' . $filename), 'users.xlsx')->deleteFileAfterSend(true);
     }
 }

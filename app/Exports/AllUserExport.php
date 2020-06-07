@@ -13,7 +13,8 @@ use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class AllUserExport implements FromCollection, WithStrictNullComparison, WithMapping, WithHeadingRow, WithHeadings, WithColumnFormatting
+class AllUserExport implements FromCollection, WithStrictNullComparison,
+    WithMapping, WithHeadingRow, WithHeadings, WithColumnFormatting
 {
     protected $users, $row;
     private $carbon;

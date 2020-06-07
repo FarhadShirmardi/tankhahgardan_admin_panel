@@ -64,9 +64,13 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
                 ->match(['get', 'post'], 'projectActivity/{id}', 'Dashboard\ReportController@projectActivity')
                 ->name('projectActivity');
             Route::prefix('export')->name('export.')->group(function () {
-                Route::middleware(['permission:all_user_activity_full|all_user_activity'])
+                Route::middleware(['permission:all_user_activity_full'])
                     ->get('userActivity', 'Dashboard\ReportController@exportAllUsersActivity')
                     ->name('allUsersActivity');
+
+                Route::middleware(['permission:all_user_activity_full', 'signed'])
+                    ->get('download/{filename}', 'Dashboard\ReportController@downloadReport')
+                    ->name('download');
             });
         });
 
