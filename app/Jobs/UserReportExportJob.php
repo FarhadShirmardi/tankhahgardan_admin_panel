@@ -43,7 +43,6 @@ class UserReportExportJob implements ShouldQueue
         Excel::store((new AllUserExport($users)), $filename);
 
         \Mail::send('mail', [
-            'name' => auth()->user()->name,
             'link' => \URL::temporarySignedRoute('dashboard.report.export.download', now()->addHour(), ['filename' => 'users.xlsx']),
         ], function ($message) use ($filename) {
             $appName = env('APP_NAME');
