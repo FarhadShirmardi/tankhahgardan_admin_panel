@@ -693,10 +693,10 @@ class ReportController extends Controller
             'titles' => $request->input('titles', $feedbackTitles),
             'user_id' => $request->input('user_id', null),
             'panel_user_ids' => $request->input('panel_user_ids', []),
-            'sort_field_1' => $request->input('sort_field_1', 'source'),
-            'sort_type_1' => $request->input('sort_type_1', 'asc'),
-            'sort_field_2' => $request->input('sort_field_2', 'date'),
-            'sort_type_2' => $request->input('sort_type_2', 'desc'),
+            'sort_field_1' => $request->input('sort_field_1', 'date'),
+            'sort_type_1' => $request->input('sort_type_1', 'desc'),
+            'sort_field_2' => $request->input('sort_field_2', 'state'),
+            'sort_type_2' => $request->input('sort_type_2', 'asc'),
             'start_date' => $startDate,
             'end_date' => $endDate
         ];
