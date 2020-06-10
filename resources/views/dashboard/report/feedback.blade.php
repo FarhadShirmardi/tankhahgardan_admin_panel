@@ -23,7 +23,7 @@
                 <div class="col-md-4 row">
                     <label class="col-md-5 col-form-label text-md-left">موضوع بازخورد</label>
                     <div class="ms-list col-md-7">
-                        <select name="titleس[]" multiple="multiple" id="title_ids" style="width: 100%">
+                        <select name="titles[]" multiple="multiple" id="title_ids" style="width: 100%">
                             <option onselect="selectAll()"></option>
                             @foreach($titles as $title)
                                 <option @if($title['is_selected']) selected @endif
