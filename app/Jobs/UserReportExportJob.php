@@ -17,15 +17,18 @@ class UserReportExportJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private $filter;
+    private $link;
 
     /**
      * Create a new job instance.
      *
      * @param $filter
+     * @param $link
      */
-    public function __construct($filter)
+    public function __construct($filter, $link)
     {
         $this->filter = $filter;
+        $this->link = $link;
     }
 
     /**
@@ -41,14 +44,5 @@ class UserReportExportJob implements ShouldQueue
         $users = $usersQuery->get();
         $filename = 'users.xlsx';
         Excel::store((new AllUserExport($users)), $filename);
-
-        \Mail::send('mail', [
-            'link' => \URL::temporarySignedRoute('dashboard.report.export.download', now()->addHour(), ['filename' => 'users.xlsx']),
-        ], function ($message) use ($filename) {
-            $appName = env('APP_NAME');
-            $message->to('shirmardi7@gmail.com', '')
-                ->subject("{$appName} user report");
-            $message->from('no-reply@tankhahgardan.com', "{$appName} Panel");
-        });
     }
 }
