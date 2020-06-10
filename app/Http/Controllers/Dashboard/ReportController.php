@@ -746,7 +746,7 @@ class ReportController extends Controller
         }
 
 
-        $feedbacks = Helpers::paginateCollection($feedbacks, 10);
+        $feedbacks = Helpers::paginateCollection($feedbacks, 100);
 
         $sortableFields = [
             'date' => 'تاریخ',
@@ -844,8 +844,7 @@ class ReportController extends Controller
             })
             ->where(function ($query) use ($filter) {
                 if (isset($filter['user_id'])) {
-                    $query->where('user_id', $filter['user_id'])
-                        ->orWhereNull('user_id');
+                    $query->where('user_id', $filter['user_id']);
                 }
             })
             ->orderBy($filter['sort_field_1'], $filter['sort_type_1'])
