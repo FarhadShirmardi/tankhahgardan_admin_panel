@@ -5,6 +5,7 @@
     وضعیت کاربران
 @endsection
 @section('filter')
+    @include('dashboard.layouts.link_message')
     <form id="filter" method="get" action="">
         {{ csrf_field() }}
         <div class="row pb-5 pt-5 justify-content-center">

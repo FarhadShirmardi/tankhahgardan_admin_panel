@@ -275,9 +275,10 @@ class ReportController extends Controller
         $filter = $this->getAllUserActivityFilter($request);
 
 //        $users = $usersQuery->get();
-        $this->dispatch((new UserReportExportJob($filter))->onQueue('activationSms'));
+        $link = \URL::temporarySignedRoute('dashboard.report.export.download', now()->addHour(), ['filename' => 'users.xlsx']);
+        $this->dispatch((new UserReportExportJob($filter, $link))->onQueue('activationSms'));
 
-        return redirect()->back()->with('success', 'فایل در حال ساخته شدن میباشد. پس از چند دقیقه ایمیل خود را چک کنید.');
+        return redirect()->back()->with('success', 'فایل در حال ساخته شدن میباشد.')->with('link', $link);
     }
 
     public function getProjectQuery()
@@ -694,9 +695,9 @@ class ReportController extends Controller
             'user_id' => $request->input('user_id', null),
             'panel_user_ids' => $request->input('panel_user_ids', []),
             'sort_field_1' => $request->input('sort_field_1', 'state'),
-            'sort_type_1' => $request->input('sort_type_1', 'asc'),
+            'sort_type_1' => $request->input('sort_type_1', 'ASC'),
             'sort_field_2' => $request->input('sort_field_2', 'date'),
-            'sort_type_2' => $request->input('sort_type_2', 'desc'),
+            'sort_type_2' => $request->input('sort_type_2', 'DESC'),
             'start_date' => $startDate,
             'end_date' => $endDate
         ];
@@ -1173,6 +1174,11 @@ class ReportController extends Controller
 
     public function downloadReport($filename)
     {
+        if (!file_exists(storage_path('app/' . $filename))) {
+            $validator = Validator::make([], []);
+            $validator->errors()->add('file', 'فایل آماده نشده است.');
+            return redirect()->back()->withErrors($validator);
+        }
         return response()->download(storage_path('app/' . $filename), 'users.xlsx')->deleteFileAfterSend(true);
     }
 }
