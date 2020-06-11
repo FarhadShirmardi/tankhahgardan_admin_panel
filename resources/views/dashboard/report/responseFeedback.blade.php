@@ -34,7 +34,7 @@
         </div>
         <div class="row pt-3">
             <label class="col-md-5 col-form-label text-md-left">پاسخ</label>
-            <textarea class="col-md-3" name="response">{{ $feedback_item->response_text }}</textarea>
+            <textarea class="col-md-6" rows="10" name="response">{{ $feedback_item->response_text }}</textarea>
         </div>
         <div class="row pt-1">
             <label class="col-md-5 col-form-label text-md-left">وضعیت</label>
@@ -52,6 +52,10 @@
             </div>
         </div>
     </form>
+
+    <hr>
+
+    @include('dashboard.report.listUser')
 
     <hr>
 

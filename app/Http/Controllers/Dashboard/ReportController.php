@@ -965,13 +965,17 @@ class ReportController extends Controller
 
         $feedbacks = $this->fetchFeedbacks($filter);
 
+        $users = UserReport::query()->where('id', $feedback->user_id)->paginate();
+
         $feedback = $feedbacks->where('feedback_id', $id)->first();
 
         $feedbacks->where('feedback_id', $id)->first()->is_selected = true;
 
         return view('dashboard.report.responseFeedback', [
             'feedback_item' => $feedback,
-            'feedbacks' => $feedbacks
+            'feedbacks' => $feedbacks,
+            'users' => $users,
+            'colors' => $this->colors(),
         ]);
     }
 
