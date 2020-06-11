@@ -698,6 +698,7 @@ class ReportController extends Controller
             'sort_type_1' => $request->input('sort_type_1', 'ASC'),
             'sort_field_2' => $request->input('sort_field_2', 'date'),
             'sort_type_2' => $request->input('sort_type_2', 'DESC'),
+            'scores' => $request->input('scores', []),
             'start_date' => $startDate,
             'end_date' => $endDate
         ];
@@ -738,11 +739,20 @@ class ReportController extends Controller
 
         $panelUsers = PanelUser::query()->get(['id', 'name']);
 
-        if (isset($filter['panel_user_ids']) and $filter['panel_user_ids'] != []) {
+        if ($filter['panel_user_ids'] != []) {
             $panelUsers = $panelUsers->map(function ($item) use ($filter) {
                 $item->is_selected = in_array($item['id'], $filter['panel_user_ids']);
                 return $item;
             });
+        }
+
+        $scores = collect();
+        foreach (range(0, 5) as $item) {
+            $scores->push([
+                'id' => $item,
+                'name' => $item == 0 ? 'بدون امتیاز' : $item,
+                'is_selected' => in_array($item, $filter['scores'])
+            ]);
         }
 
 
@@ -774,7 +784,8 @@ class ReportController extends Controller
             'users' => $users,
             'sortable_fields' => $sortableFields,
             'sortable_types' => $sortableTypes,
-            'panel_users' => $panelUsers
+            'panel_users' => $panelUsers,
+            'scores' => $scores
         ]);
     }
 
@@ -800,6 +811,7 @@ class ReportController extends Controller
                 'feedback_responses.response_updated_at as response_text_update_time',
                 'feedback_responses.score as response_score',
                 'panel_users.name as panel_user_name',
+                'panel_users.id as panel_user_id',
                 'feedback.text as text',
                 'users.id as user_id',
                 'users.name as user_name',
@@ -810,7 +822,7 @@ class ReportController extends Controller
 
         $commentSubQuery = Comment::query()
             ->leftJoin('feedback_titles', 'feedback_titles.id', '=', 'feedback_title_id')
-            ->leftJoin('panel_users', 'comments.user_id', '=', 'panel_users.id')
+            ->leftJoin('panel_users', 'comments.panel_user_id', '=', 'panel_users.id')
             ->select([
                 'comments.date',
                 DB::raw('0 as feedback_id'),
@@ -821,6 +833,7 @@ class ReportController extends Controller
                 'comments.response_date as response_text_update_time',
                 DB::raw('0 as response_score'),
                 'panel_users.name as panel_user_name',
+                'panel_users.id as panel_user_id',
                 'comments.text as text',
                 'comments.user_id as user_id',
                 DB::raw('"" as user_family'),
@@ -845,6 +858,16 @@ class ReportController extends Controller
             ->where(function ($query) use ($filter) {
                 if (isset($filter['user_id'])) {
                     $query->where('user_id', $filter['user_id']);
+                }
+            })
+            ->where(function ($query) use ($filter) {
+                if ($filter['panel_user_ids'] != []) {
+                    $query->whereIn('panel_user_id', $filter['panel_user_ids']);
+                }
+            })
+            ->where(function ($query) use ($filter) {
+                if ($filter['scores'] != []) {
+                    $query->whereIn('response_score', $filter['scores']);
                 }
             })
             ->orderBy($filter['sort_field_1'], $filter['sort_type_1'])

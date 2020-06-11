@@ -1,5 +1,5 @@
-<div id="ajax-table">
-    <table class="table table-striped table-responsive">
+<div id="ajax-table" style="overflow-x: auto;">
+    <table class="table table-striped">
         <thead>
         <tr>
             <th>ردیف</th>
@@ -12,7 +12,9 @@
             <th>کارشناس</th>
             <th>تاریخ به‌روزرسانی پاسخ</th>
             <th>پاسخ بازخورد</th>
-            <th>امتیاز</th>
+            @if(auth()->user()->hasRole('Admin'))
+                <th>امتیاز</th>
+            @endif
             <th>وضعیت</th>
         </tr>
         </thead>
@@ -40,7 +42,9 @@
                 <td>{{ $feedback->panel_user_name }}</td>
                 <td class="ltr">{{ $feedback->response_text_update_time }}</td>
                 <td>{{ $feedback->response_text }}</td>
-                <td>{{ $feedback->response_score }}</td>
+                @if(auth()->user()->hasRole('Admin'))
+                    <td>{{ $feedback->response_score }}</td>
+                @endif
                 <td>{{ $feedback->state }}</td>
             </tr>
         @endforeach

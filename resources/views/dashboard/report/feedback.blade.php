@@ -99,10 +99,22 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-4 row"></div>
+                <div class="col-md-4 row">
+                    @if(auth()->user()->hasRole('Admin'))
+                        <label class="col-md-5 col-form-label text-md-left">امتیاز</label>
+                        <div class="ms-list col-md-7">
+                            <select name="scores[]" multiple="multiple" id="scores" style="width: 100%">
+                                @foreach($scores as $score)
+                                    <option @if($score['is_selected']) selected @endif
+                                    value="{{$score['id']}}">{{$score['name']}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
+                </div>
             </div>
             <input type="hidden" name="page" value="1"/>
-            <div class="pt-2 pb-3 justify-content-center align-center row">
+            <div class="pt-5 pb-3 justify-content-center align-center row">
                 <div class="col-md-2">
                     <input class="form-control btn btn-info" type="submit" value="اعمال فیلتر">
                 </div>
@@ -131,6 +143,10 @@
             $('#panel_user_ids').select2({
                 width: 'element',
                 placeholder: 'انتخاب کارشناس'
+            });
+            $('#scores').select2({
+                width: 'element',
+                placeholder: 'امتیاز کاربر'
             });
             $('#user_id').select2({
                 width: 'element',
