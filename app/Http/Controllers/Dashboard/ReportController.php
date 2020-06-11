@@ -739,7 +739,7 @@ class ReportController extends Controller
 
         $panelUsers = PanelUser::query()->get(['id', 'name']);
 
-        if ($filter['panel_user_ids'] != []) {
+        if (isset($filter['panel_user_ids']) and $filter['panel_user_ids'] != []) {
             $panelUsers = $panelUsers->map(function ($item) use ($filter) {
                 $item->is_selected = in_array($item['id'], $filter['panel_user_ids']);
                 return $item;
@@ -861,12 +861,12 @@ class ReportController extends Controller
                 }
             })
             ->where(function ($query) use ($filter) {
-                if ($filter['panel_user_ids'] != []) {
+                if (isset($filter['panel_user_ids']) and $filter['panel_user_ids'] != []) {
                     $query->whereIn('panel_user_id', $filter['panel_user_ids']);
                 }
             })
             ->where(function ($query) use ($filter) {
-                if ($filter['scores'] != []) {
+                if (isset($filter['scores']) and $filter['scores'] != []) {
                     $query->whereIn('response_score', $filter['scores']);
                 }
             })
@@ -903,6 +903,8 @@ class ReportController extends Controller
 
         $feedbacks = $filter['user_id'] ? $this->fetchFeedbacks($filter) : [];
 
+        $users = $filter['user_id'] ? UserReport::query()->where('id', $filter['user_id'])->paginate() : [];
+
         $comment = Comment::find($id);
         if (isset($comment['date'])) {
             $comment['date'] = Helpers::convertDateTimeToJalali($comment->date);
@@ -929,17 +931,17 @@ class ReportController extends Controller
         $panelUsers = PanelUser::all();
 
         $selectedUser = collect();
-        $users = collect();
+        $selectUsers = collect();
 
         if ($filter['phone_number']) {
-            $users = User::query()
+            $selectUsers = User::query()
                 ->where('phone_number', 'like', '%' . $filter['phone_number'] . '%')
                 ->where('state', 1)
                 ->selectRaw('false as is_selected, id, name, family, phone_number')->get();
 
-            $users->where('id', $filter['user_id'])->first()['is_selected'] = true;
-            if ($users->count() == 1 or $filter['user_id']) {
-                $selectedUser = $users->first();
+            $selectUsers->where('id', $filter['user_id'])->first()['is_selected'] = true;
+            if ($selectUsers->count() == 1 or $filter['user_id']) {
+                $selectedUser = $selectUsers->first();
             }
         }
 
@@ -948,11 +950,13 @@ class ReportController extends Controller
             'feedbacks' => $feedbacks,
             'comment' => $comment,
             'panel_users' => $panelUsers,
-            'users' => $users,
+            'select_users' => $selectUsers,
             'source_types' => $sourceTypes,
             'feedback_titles' => $feedbackTitles,
             'filter' => $filter,
-            'selected_user' => $selectedUser
+            'selected_user' => $selectedUser,
+            'users' => $users,
+            'colors' => $this->colors()
         ]);
     }
 

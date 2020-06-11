@@ -7,6 +7,47 @@
 @section('filter')
 @endsection
 @section('content')
+    <form id="filter" method="get" action="">
+        {{ csrf_field() }}
+        <div class="pb-5 pt-5 justify-content-center">
+            <div class="row">
+                <div class="col-md-6 row">
+                    <label class="col-md-5 col-form-label text-md-left">جستجوی شماره</label>
+                    <input class="form-control custom-select-sm col-md-7" type="text" id="phone_number"
+                           name="phone_number" value="{{$filter['phone_number']}}"
+                           placeholder="جستجوی شماره">
+                </div>
+                <div class="col-md-2"></div>
+                <div class="col-md-2">
+                    <input class="form-control btn btn-warning" type="submit" value="جستجو">
+                </div>
+            </div>
+            @if(count($select_users))
+                <div class="row pt-5">
+                    <div class="col-md-6 row">
+                        <label class="col-md-5 col-form-label text-md-left">کاربر</label>
+                        <div class="ms-list col-md-7">
+                            <select name="user_id" id="user_id" style="width: 100%">
+                                <option></option>
+                                @foreach($select_users as $key => $user)
+                                    <option @if($user['is_selected']) selected @endif
+                                    value="{{ $user->id }}">{{ $user->full_name . ' - ' . $user->phone_number }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2"></div>
+                    <div class="col-md-2">
+                        <input class="form-control btn btn-spotify" type="submit" value="انتخاب کاربر">
+                    </div>
+                </div>
+            @endif
+        </div>
+    </form>
+
+    <hr>
+
+
     <form method="post" action="{{ route('dashboard.newComment', ['id' => $id]) }}">
         {{ csrf_field() }}
         <input type="hidden" name="id" value="{{$comment->id}}">
@@ -25,7 +66,8 @@
             </div>
             <div class="col-md-4 row">
                 <label class="col-md-5 col-form-label text-md-left">منبع بازخورد</label>
-                <select required id="source" name="source" id="source_types" class="form-control custom-select-sm col-md-7">
+                <select required id="source" name="source" id="source_types"
+                        class="form-control custom-select-sm col-md-7">
                     <option></option>
                     @foreach($source_types as $sourceType)
                         <option @if($comment->source == $sourceType['value']) selected @endif
@@ -35,7 +77,8 @@
             </div>
             <div class="col-md-4 row">
                 <label class="col-md-5 col-form-label text-md-left">موضوع</label>
-                <select required id="feedback_title_id" name="feedback_title_id" class="form-control custom-select-sm col-md-7">
+                <select required id="feedback_title_id" name="feedback_title_id"
+                        class="form-control custom-select-sm col-md-7">
                     <option></option>
                     @foreach($feedback_titles as $feedbackTitle)
                         <option @if($comment->feedback_title_id == $feedbackTitle['id']) selected @endif
@@ -48,17 +91,20 @@
         <div class="row">
             <div class="col-md-4 row">
                 <label class="col-md-5 col-form-label text-md-left">نام</label>
-                <input name="name" value="{{$filter['user_id'] ? $selected_user['name'] . ' ' . $selected_user['family'] : $comment->name}}"
+                <input name="name"
+                       value="{{$filter['user_id'] ? $selected_user['name'] . ' ' . $selected_user['family'] : $comment->name}}"
                        class="form-control custom-select-sm col-md-7"/>
             </div>
             <div class="col-md-4 row">
                 <label class="col-md-5 col-form-label text-md-left">شماره تلفن</label>
-                <input name="phone_number" value="{{$filter['user_id'] ? $selected_user['phone_number'] : $comment->phone_number}}" class="form-control custom-select-sm
+                <input name="phone_number"
+                       value="{{$filter['user_id'] ? $selected_user['phone_number'] : $comment->phone_number}}" class="form-control custom-select-sm
                 col-md-7" maxlength="11"/>
             </div>
             <div class="col-md-4 row">
                 <label class="col-md-5 col-form-label text-md-left">ایمیل</label>
-                <input name="email" value="{{$filter['user_id'] ? $selected_user['email'] : $comment->email}}" type="email" class="form-control custom-select-sm
+                <input name="email" value="{{$filter['user_id'] ? $selected_user['email'] : $comment->email}}"
+                       type="email" class="form-control custom-select-sm
                 col-md-7"/>
             </div>
         </div>
@@ -108,36 +154,13 @@
 
     <hr>
 
-    <form id="filter" method="get" action="">
-        {{ csrf_field() }}
-        <div class="pb-5 pt-5 justify-content-center">
-            <div class="row">
-                <div class="col-md-6 row">
-                    <label class="col-md-5 col-form-label text-md-left">جستجوی شماره</label>
-                    <input class="form-control custom-select-sm col-md-7" type="text" id="phone_number" name="phone_number" value="{{$filter['phone_number']}}"
-                           placeholder="جستجوی شماره">
-                </div>
-                <div class="col-md-6 row">
-                    <label class="col-md-5 col-form-label text-md-left">کاربر</label>
-                    <div class="ms-list col-md-7">
-                        <select name="user_id" id="user_id" style="width: 100%">
-                            <option></option>
-                            @foreach($users as $key => $user)
-                                <option @if($user['is_selected']) selected @endif
-                                value="{{$user->id}}">{{$user->full_name . ' - ' . $user->phone_number}}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="row justify-content-center pt-4">
-                <div class="col-md-2">
-                    <input class="form-control btn btn-warning" type="submit" value="جستجو">
-                </div>
-            </div>
-        </div>
-    </form>
-    @include('dashboard.report.listFeedback')
+    @if(count($users))
+        @include('dashboard.report.listUser')
+    @endif
+
+    @if(count($feedbacks))
+        @include('dashboard.report.listFeedback')
+    @endif
 
 
     <script type="text/javascript">
