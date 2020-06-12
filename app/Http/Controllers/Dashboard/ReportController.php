@@ -43,6 +43,7 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Illuminate\Support\Str;
 use App\ProjectReport;
 use App\Jobs\UserReportExportJob;
+use Kavenegar;
 
 class ReportController extends Controller
 {
@@ -1210,5 +1211,17 @@ class ReportController extends Controller
             return redirect()->back()->withErrors($validator);
         }
         return response()->download(storage_path('app/' . $filename), 'users.xlsx')->deleteFileAfterSend(true);
+    }
+
+    public function sendSms(Request $request)
+    {
+        $phoneNumber = Helpers::formatPhoneNumber($request->phone_number);
+        $text = $request->text;
+        try {
+            $result = Kavenegar::Send(null, $phoneNumber, $text);
+            return redirect()->back()->with('success', 'با موفقیت ارسال شد');
+        } catch (\Exception $exception) {
+            return redirect()->back()->withInput($request->all())->withException($exception);
+        }
     }
 }

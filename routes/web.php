@@ -82,6 +82,7 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
         });
         Route::middleware(['permission:response_feedback'])->group(function () {
             Route::post('feedback/{feedback_id}/response', 'Dashboard\ReportController@responseFeedback')->name('responseFeedback');
+            Route::get('sendSms', 'Dashboard\ReportController@sendSms')->name('sendSms');
         });
 
         Route::get('changePassword', 'Dashboard\ReportController@changePasswordView')->name('changePasswordView');

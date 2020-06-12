@@ -154,6 +154,30 @@
 
     <hr>
 
+    <form method="get" action="{{ route('dashboard.sendSms') }}">
+        <div class="row">
+            <div class="col-md-4 row">
+                <label class="col-md-5 col-form-label text-md-left">شماره تلفن</label>
+                <input name="phone_number"
+                       value="{{$filter['user_id'] ? $selected_user['phone_number'] : $comment->phone_number}}" class="form-control custom-select-sm
+                col-md-7" maxlength="11"/>
+            </div>
+            <div class="col-md-4 row">
+                <label class="col-md-5 col-form-label text-md-left">متن</label>
+                <textarea required cols="50" rows="10" id="text" class="form-control col-md-7 mt-2 mb-2" type="text"
+                          name="text">{{$comment->text}}</textarea>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-2">
+                <input class="form-control btn btn-success" type="submit" value="ارسال پیامک">
+            </div>
+        </div>
+    </form>
+
+    <hr>
+
     @if(count($users))
         @include('dashboard.report.listUser')
     @endif
