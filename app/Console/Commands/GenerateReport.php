@@ -49,26 +49,14 @@ class GenerateReport extends Command
         $reportController = app()->make(ReportController::class);
         if ($this->option('user')) {
             UserReport::query()->truncate();
-//            $userIds = User::query()->pluck('id')->chunk(1000);
-//            $bar = $this->output->createProgressBar(count($userIds));
-//            foreach ($userIds as $userId) {
-//                $users = $reportController->getUserQuery()->whereIn('users.id', $userId->toArray())->get();
-//                UserReport::insert($users->toArray());
-//                $bar->advance();
-//            }
             $columnList = \Schema::getColumnListing('user_reports');
             $selectQuery = DB::query()->fromSub($reportController->getUserQuery()->getQuery(), 'users_query')->select($columnList);
-
             DB::table('user_reports')->insertUsing($columnList, $selectQuery);
         } elseif ($this->option('project')) {
             ProjectReport::query()->truncate();
-            $projectIds = Project::query()->pluck('id')->chunk(1000);
-            $bar = $this->output->createProgressBar(count($projectIds));
-            foreach ($projectIds as $projectId) {
-                $projects = $reportController->getProjectQuery()->whereIn('projects.id', $projectId->toArray())->get();
-                ProjectReport::insert($projects->toArray());
-                $bar->advance();
-            }
+            $columnList = \Schema::getColumnListing('project_reports');
+            $selectQuery = DB::query()->fromSub($reportController->getProjectQuery()->getQuery(), 'projects_query')->select($columnList);
+            DB::table('project_reports')->insertUsing($columnList, $selectQuery);
         }
         $end = now();
         $this->info($end);

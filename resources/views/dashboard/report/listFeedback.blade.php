@@ -6,6 +6,7 @@
             <th>تاریخ</th>
             <th>موضوع</th>
             <th>منبع</th>
+            <th>پلتفرم</th>
             <th>متن</th>
             <th>نام کاربر</th>
             <th>شماره کاربر</th>
@@ -36,6 +37,7 @@
                 <td class="ltr">{{ $feedback->date }}</td>
                 <td>{{ $feedback->title }}</td>
                 <td>{{ $feedback->source }}</td>
+                <td>{{ $feedback->platform }}</td>
                 <td>{{ $feedback->text }}</td>
                 <td>{{ $feedback->full_name }}</td>
                 <td>{{ $feedback->user_phone_number }}</td>

@@ -14,7 +14,7 @@ class CreateProjectReportsTable extends Migration
     public function up()
     {
         Schema::create('project_reports', function (Blueprint $table) {
-            $table->unsignedInteger('id');
+            $table->unsignedInteger('id')->primary();
             $table->string('name');
             $table->unsignedInteger('state_id')->nullable();
             $table->unsignedInteger('city_id')->nullable();
