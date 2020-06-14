@@ -45,6 +45,7 @@ use App\ProjectReport;
 use App\Jobs\UserReportExportJob;
 use Kavenegar;
 use App\Jobs\FeedbackResponseSms;
+use App\Constants\Platform;
 
 class ReportController extends Controller
 {
@@ -701,6 +702,7 @@ class ReportController extends Controller
             'sort_field_2' => $request->input('sort_field_2', 'date'),
             'sort_type_2' => $request->input('sort_type_2', 'DESC'),
             'scores' => $request->input('scores', []),
+            'platforms' => $request->input('platforms', []),
             'start_date' => $startDate,
             'end_date' => $endDate
         ];
@@ -757,6 +759,15 @@ class ReportController extends Controller
             ]);
         }
 
+        $platforms = collect();
+        foreach (Platform::toArray() as $item) {
+            $platforms->push([
+                'id' => $item,
+                'name' => Platform::getEnum($item),
+                'is_selected' => in_array($item, $filter['platforms'])
+            ]);
+        }
+
 
         $feedbacks = Helpers::paginateCollection($feedbacks, 100);
 
@@ -764,6 +775,7 @@ class ReportController extends Controller
             'date' => 'تاریخ',
             'title' => 'عنوان',
             'source' => 'منبع',
+            'platform' => 'پلتفرم',
             'text' => 'متن',
             'user_phone_number' => 'شماره کاربر',
             'panel_user_name' => 'کارشناس',
@@ -787,7 +799,8 @@ class ReportController extends Controller
             'sortable_fields' => $sortableFields,
             'sortable_types' => $sortableTypes,
             'panel_users' => $panelUsers,
-            'scores' => $scores
+            'scores' => $scores,
+            'platforms' => $platforms,
         ]);
     }
 
@@ -798,9 +811,15 @@ class ReportController extends Controller
             ->join('users', 'users.id', '=', 'feedback.user_id')
             ->leftJoin('feedback_responses', 'feedback_responses.id', '=', 'feedback_response_id')
             ->leftJoin('panel_users', 'feedback_responses.panel_user_id', '=', 'panel_users.id')
+            ->leftJoin('devices', 'devices.id', '=', 'feedback.device_id')
             ->where(function ($query) use ($filter) {
                 if (isset($filter['titles']) and $filter['titles'] != []) {
                     $query->whereIn('feedback_titles.id', $filter['titles']);
+                }
+            })
+            ->where(function ($query) use ($filter) {
+                if (isset($filter['platforms']) and $filter['platforms'] != []) {
+                    $query->whereIn('devices.platform', $filter['platforms']);
                 }
             })
             ->select([
@@ -820,6 +839,9 @@ class ReportController extends Controller
                 'users.family as user_family',
                 'users.phone_number as user_phone_number',
                 DB::raw("'" . FeedbackSource::APPLICATION . "'" . ' as source'),
+                'devices.platform',
+                'devices.model',
+                'devices.os_version'
             ])->getQuery();
 
         $commentSubQuery = Comment::query()
@@ -842,6 +864,9 @@ class ReportController extends Controller
                 'comments.name as user_name',
                 'comments.phone_number as user_phone_number',
                 'comments.source',
+                DB::raw('0 as platform'),
+                DB::raw("'-' as model"),
+                DB::raw("'-' as os_version")
             ])->getQuery();
 
         $feedbacks = DB::connection('mysql')->query()
@@ -886,6 +911,7 @@ class ReportController extends Controller
                     Helpers::convertDateTimeToJalali($item->response_text_update_time) :
                     null;
             $item->state = FeedbackStatus::getEnum($item->state);
+            $item->platform = Platform::getEnum($item->platform);
             return $item;
         });
 
@@ -902,6 +928,23 @@ class ReportController extends Controller
             'sort_field_2' => $request->input('sort_field_2', 'date'),
             'sort_type_2' => $request->input('sort_type_2', 'desc'),
         ];
+
+        $selectedUser = null;
+        $selectUsers = collect();
+        if ($filter['phone_number']) {
+            $phoneNumber = Helpers::getEnglishString((string)(int)$filter['phone_number']);
+            $selectUsers = User::query()
+                ->where('phone_number', 'like', '%' . $phoneNumber . '%')
+                ->where('state', 1)
+                ->selectRaw('false as is_selected, id, name, family, phone_number')->get();
+
+            if ($selectUsers->count() == 1 or $filter['user_id']) {
+                $selectedUser = $selectUsers->first();
+                $filter['user_id'] = $selectedUser->id;
+            }
+
+            $selectUsers->where('id', $filter['user_id'])->first()['is_selected'] = true;
+        }
 
         $feedbacks = $filter['user_id'] ? $this->fetchFeedbacks($filter) : [];
 
@@ -932,20 +975,6 @@ class ReportController extends Controller
 
         $panelUsers = PanelUser::all();
 
-        $selectedUser = collect();
-        $selectUsers = collect();
-
-        if ($filter['phone_number']) {
-            $selectUsers = User::query()
-                ->where('phone_number', 'like', '%' . $filter['phone_number'] . '%')
-                ->where('state', 1)
-                ->selectRaw('false as is_selected, id, name, family, phone_number')->get();
-
-            $selectUsers->where('id', $filter['user_id'])->first()['is_selected'] = true;
-            if ($selectUsers->count() == 1 or $filter['user_id']) {
-                $selectedUser = $selectUsers->first();
-            }
-        }
 
         return view('dashboard.report.newComment', [
             'id' => $id,
@@ -1228,7 +1257,7 @@ class ReportController extends Controller
         $phoneNumber = Helpers::formatPhoneNumber($request->phone_number);
         $text = $request->text;
         try {
-            $result = Kavenegar::Send(null, $phoneNumber, $text);
+            $result = Kavenegar::Send('10005000000550', $phoneNumber, $text);
             return redirect()->back()->with('success', 'با موفقیت ارسال شد');
         } catch (\Exception $exception) {
             return redirect()->back()->withInput($request->all())->withException($exception);

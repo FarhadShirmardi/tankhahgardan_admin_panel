@@ -113,6 +113,21 @@
                     @endif
                 </div>
             </div>
+            <div class="pt-3 row">
+                <div class="col-md-4 row"></div>
+                <div class="col-md-4 row"></div>
+                <div class="col-md-4 row">
+                    <label class="col-md-5 col-form-label text-md-left">پلتفرم</label>
+                    <div class="ms-list col-md-7">
+                        <select name="platforms[]" multiple="multiple" id="platforms" style="width: 100%">
+                            @foreach($platforms as $platform)
+                                <option @if($platform['is_selected']) selected @endif
+                                value="{{$platform['id']}}">{{$platform['name']}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
             <input type="hidden" name="page" value="1"/>
             <div class="pt-5 pb-3 justify-content-center align-center row">
                 <div class="col-md-2">
@@ -130,6 +145,7 @@
     </form>
 @endsection
 @section('content')
+    {{ $feedbacks->appends(request()->input())->links() }}
     @include('dashboard.report.listFeedback')
     {{ $feedbacks->appends(request()->input())->links() }}
     <script type="text/javascript">
@@ -152,6 +168,11 @@
                 width: 'element',
                 allowClear: true,
                 placeholder: 'انتخاب کاربر'
+            });
+            $('#platforms').select2({
+                width: 'element',
+                allowClear: true,
+                placeholder: 'انتخاب پلفرم'
             });
             $('#sort_field_1').select2({width: 'element'});
             $('#sort_field_2').select2({width: 'element'});

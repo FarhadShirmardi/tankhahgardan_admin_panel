@@ -15,19 +15,31 @@
             <label class="col-md-7 col-form-label text-md-right ltr">{{ $feedback_item->date }}</label>
         </div>
         <div class="row">
-            <label class="col-md-5 col-form-label text-md-left">موضوع</label>
+            <label class="col-md-5 col-form-label text-md-left">موضوع بازخورد</label>
             <label class="col-md-7 col-form-label text-md-right">{{ $feedback_item->title }}</label>
         </div>
         <div class="row">
-            <label class="col-md-5 col-form-label text-md-left">نام</label>
+            <label class="col-md-5 col-form-label text-md-left">نام کاربر</label>
             <label class="col-md-7 col-form-label text-md-right">{{ $feedback_item->full_name }}</label>
         </div>
         <div class="row">
-            <label class="col-md-5 col-form-label text-md-left">شماره تلفن</label>
+            <label class="col-md-5 col-form-label text-md-left">شماره کاربر</label>
             <label class="col-md-7 col-form-label text-md-right">{{ $feedback_item->user_phone_number }}</label>
         </div>
         <div class="row">
-            <label class="col-md-5 col-form-label text-md-left">متن</label>
+            <label class="col-md-5 col-form-label text-md-left">پلتفرم</label>
+            <label class="col-md-7 col-form-label text-md-right">{{ $feedback_item->platform }}</label>
+        </div>
+        <div class="row">
+            <label class="col-md-5 col-form-label text-md-left">مدل دستگاه</label>
+            <label class="col-md-7 col-form-label text-md-right">{{ $feedback_item->model }}</label>
+        </div>
+        <div class="row">
+            <label class="col-md-5 col-form-label text-md-left">نسخه دستگاه</label>
+            <label class="col-md-7 col-form-label text-md-right">{{ $feedback_item->os_version }}</label>
+        </div>
+        <div class="row">
+            <label class="col-md-5 col-form-label text-md-left">متن بازخورد</label>
             <div class="col-md-7 mt-2 mb-2">
                 {{ $feedback_item->text }}
             </div>

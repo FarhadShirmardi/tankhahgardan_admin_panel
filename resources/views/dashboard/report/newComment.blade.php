@@ -162,8 +162,8 @@
                        value="{{$filter['user_id'] ? $selected_user['phone_number'] : $comment->phone_number}}" class="form-control custom-select-sm
                 col-md-7" maxlength="11"/>
             </div>
-            <div class="col-md-4 row">
-                <label class="col-md-5 col-form-label text-md-left">متن</label>
+            <div class="col-md-7 row">
+                <label class="col-md-3 col-form-label text-md-left">متن</label>
                 <textarea required cols="50" rows="10" id="text" class="form-control col-md-7 mt-2 mb-2" type="text"
                           name="text">{{$comment->text}}</textarea>
             </div>
