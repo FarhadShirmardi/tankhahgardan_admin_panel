@@ -42,4 +42,9 @@ class Feedback extends Model
     {
         return $this->hasOne(Device::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -44,6 +44,7 @@ use Illuminate\Support\Str;
 use App\ProjectReport;
 use App\Jobs\UserReportExportJob;
 use Kavenegar;
+use App\Jobs\FeedbackResponseSms;
 
 class ReportController extends Controller
 {
@@ -73,7 +74,7 @@ class ReportController extends Controller
         if ($startDate) {
             $startDate = Helpers::jalaliDateStringToGregorian(Helpers::getEnglishString($startDate));
         } elseif (!$setNull) {
-            $startDate = now()->subDays(7)->toDateString();
+            $startDate = now()->subDays(6)->toDateString();
         }
         $endDate = $request->input('end_date', null);
         if ($endDate) {
@@ -1014,6 +1015,10 @@ class ReportController extends Controller
         if (trim($responseText) == '') {
             return redirect()->back()->withErrors('پاسخ بازخورد نباید خالی باشد.');
         }
+        $smsFlag = true;
+        if ($feedback->feedback_response_id) {
+            $smsFlag = false;
+        }
         $feedbackResponse = FeedbackResponse::updateOrCreate([
             'id' => $feedback->feedback_response_id,
         ], [
@@ -1025,6 +1030,11 @@ class ReportController extends Controller
         $feedback->feedback_response_id = $feedbackResponse->id;
         $feedback->state = $request->state;
         $feedback->save();
+
+        if ($smsFlag) {
+            $user = $feedback->user()->first();
+            $this->dispatch((new FeedbackResponseSms($user))->onQueue('activationSms'));
+        }
 
         return redirect()->route('dashboard.viewFeedback', ['feedback_id' => $id])->with('success', 'با موفقیت انجام شد');
     }
