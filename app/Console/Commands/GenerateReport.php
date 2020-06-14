@@ -46,28 +46,26 @@ class GenerateReport extends Command
         \Log::debug('start generate report');
         $start = now();
         $this->info($start->toDateTimeString());
-        DB::transaction(function () {
-            $reportController = app()->make(ReportController::class);
-            if ($this->option('user')) {
-                UserReport::query()->truncate();
-                $userIds = User::query()->pluck('id')->chunk(1000);
-                $bar = $this->output->createProgressBar(count($userIds));
-                foreach ($userIds as $userId) {
-                    $users = $reportController->getUserQuery()->whereIn('users.id', $userId->toArray())->get();
-                    UserReport::insert($users->toArray());
-                    $bar->advance();
-                }
-            } elseif ($this->option('project')) {
-                ProjectReport::query()->truncate();
-                $projectIds = Project::query()->pluck('id')->chunk(1000);
-                $bar = $this->output->createProgressBar(count($projectIds));
-                foreach ($projectIds as $projectId) {
-                    $projects = $reportController->getProjectQuery()->whereIn('projects.id', $projectId->toArray())->get();
-                    ProjectReport::insert($projects->toArray());
-                    $bar->advance();
-                }
+        $reportController = app()->make(ReportController::class);
+        if ($this->option('user')) {
+            UserReport::query()->truncate();
+            $userIds = User::query()->pluck('id')->chunk(1000);
+            $bar = $this->output->createProgressBar(count($userIds));
+            foreach ($userIds as $userId) {
+                $users = $reportController->getUserQuery()->whereIn('users.id', $userId->toArray())->get();
+                UserReport::insert($users->toArray());
+                $bar->advance();
             }
-        }, 3);
+        } elseif ($this->option('project')) {
+            ProjectReport::query()->truncate();
+            $projectIds = Project::query()->pluck('id')->chunk(1000);
+            $bar = $this->output->createProgressBar(count($projectIds));
+            foreach ($projectIds as $projectId) {
+                $projects = $reportController->getProjectQuery()->whereIn('projects.id', $projectId->toArray())->get();
+                ProjectReport::insert($projects->toArray());
+                $bar->advance();
+            }
+        }
         $end = now();
         $this->info($end);
         $this->info($end->diffForHumans($start));
