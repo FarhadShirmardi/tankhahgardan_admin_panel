@@ -52,7 +52,7 @@ class FeedbackResponseSms implements ShouldQueue
         $result = Kavenegar::VerifyLookup($receptor, $token1, $token2, $token3, $template, $type);
         if ($result) {
             $message = $result[0]->statustext;
-            Log::info('Send to kavenegar   ====>   ' . $this->user->phone_number . '  ' . $message);
+            Log::info('Send to kavenegar   ====>   ' . $receptor . '  ' . $message);
         }
     }
 }
