@@ -74,6 +74,16 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
             });
         });
 
+        Route::group(['middleware' => ['role:Admin']], function () {
+            Route::prefix('admin')->name('admin.')->group(function () {
+                Route::get('user_list', 'Dashboard\AdminController@userList')->name('user_list');
+                Route::get('user_item/{id?}', 'Dashboard\AdminController@userItem')->name('user_item');
+                Route::post('user_item/{id?}', 'Dashboard\AdminController@userItemUpdate')->name('user_item_update');
+                Route::get('resetPassword/{id}', 'Dashboard\AdminController@resetPasswordView')->name('resetPasswordView');
+                Route::post('resetPassword/{id}', 'Dashboard\AdminController@resetPassword')->name('resetPassword');
+            });
+        });
+
         Route::group(['middleware' => ['permission:view_feedback']], function () {
             Route::get('feedbacks', 'Dashboard\ReportController@viewFeedback')->name('feedbacks');
             Route::get('comment/new/{id?}', 'Dashboard\ReportController@commentView')->name('commentView');
