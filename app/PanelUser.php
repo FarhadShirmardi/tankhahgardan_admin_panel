@@ -12,4 +12,11 @@ class PanelUser extends Authenticatable
 
     protected $connection = 'mysql_panel';
     protected $table = 'users';
+
+    protected $fillable = [
+        'name',
+        'phone_number',
+        'password',
+        'type'
+    ];
 }

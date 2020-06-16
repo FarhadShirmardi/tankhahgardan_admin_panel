@@ -41,11 +41,13 @@ class RoleSeeder extends Seeder
         $projectActivityPermission = Permission::firstOrCreate(['name' => 'project_activity']);
         $projectActivityPermission
             ->assignRole($adminName)
-            ->assignRole($marketingName);
+            ->assignRole($marketingName)
+            ->assignRole($secretaryName);
         $userActivityPermission = Permission::firstOrCreate(['name' => 'user_activity']);
         $userActivityPermission
             ->assignRole($adminName)
-            ->assignRole($marketingName);
+            ->assignRole($marketingName)
+            ->assignRole($secretaryName);
         $allProjectActivityPermission = Permission::firstOrCreate(['name' => 'all_project_activity']);
         $allProjectActivityPermission
             ->assignRole($adminName)
