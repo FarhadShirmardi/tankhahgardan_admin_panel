@@ -2,9 +2,6 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="پنل مدیریت فروشگاه">
-    <meta name="author" content="Amir H Piri">
-    <link rel="shortcut icon" href="img/favicon.png">
     <title>پنل مدیریت تنخواه گردان</title>
 
     <!-- Icons -->
