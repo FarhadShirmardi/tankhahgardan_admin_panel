@@ -48,7 +48,6 @@
     {{-- Gets content section--}}
     @include('dashboard.layouts.main')
 
-{{--    @include('dashboard.layouts.aside_menu')--}}
 
 </div>
 
