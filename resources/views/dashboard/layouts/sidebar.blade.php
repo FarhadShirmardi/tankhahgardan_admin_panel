@@ -64,7 +64,7 @@
                     </ul>
                 </li>
             @endif
-            @if(auth()->user()->can('all_user_activity'))
+            @if(auth()->user()->can('all_user_activity') or auth()->user()->can('all_user_activity_full'))
                 <li class="nav-item nav-dropdown">
                     <a class="nav-link" href="{{ route('dashboard.report.allUsersActivity') }}"><i
                             class="icon-pie-chart"></i>گزارش وضعیت کاربران</a>
