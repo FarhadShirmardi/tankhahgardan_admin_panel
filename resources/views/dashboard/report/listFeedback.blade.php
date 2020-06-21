@@ -38,12 +38,12 @@
                 <td>{{ $feedback->title }}</td>
                 <td>{{ $feedback->source }}</td>
                 <td>{{ $feedback->platform }}</td>
-                <td>{{ $feedback->text }}</td>
+                <td class="breaking-text">{{ $feedback->text }}</td>
                 <td>{{ $feedback->full_name }}</td>
                 <td>{{ $feedback->user_phone_number }}</td>
                 <td>{{ $feedback->panel_user_name }}</td>
                 <td class="ltr">{{ $feedback->response_text_update_time }}</td>
-                <td>{{ $feedback->response_text }}</td>
+                <td class="breaking-text">{{ $feedback->response_text }}</td>
                 @if(auth()->user()->hasRole('Admin'))
                     <td>{{ $feedback->response_score }}</td>
                 @endif
