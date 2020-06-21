@@ -39,7 +39,7 @@ class AllUserExport implements FromCollection, WithStrictNullComparison,
      */
     public function map($user): array
     {
-        $dateFormat = 'j/n/Y';
+        $dateFormat = 'd/m/Y';
         $this->row++;
         return [
             $this->row,
@@ -100,9 +100,9 @@ class AllUserExport implements FromCollection, WithStrictNullComparison,
     public function columnFormats(): array
     {
         return [
-            'D' => NumberFormat::FORMAT_DATE_DMYSLASH,
+            'D' => NumberFormat::FORMAT_DATE_DDMMYYYY,
             'E' => NumberFormat::FORMAT_DATE_TIME4,
-            'F' => NumberFormat::FORMAT_DATE_DMYSLASH,
+            'F' => NumberFormat::FORMAT_DATE_DDMMYYYY,
             'G' => NumberFormat::FORMAT_DATE_TIME4,
         ];
     }
