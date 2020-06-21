@@ -100,9 +100,9 @@ class AllUserExport implements FromCollection, WithStrictNullComparison,
     public function columnFormats(): array
     {
         return [
-            'D' => NumberFormat::FORMAT_DATE_DDMMYYYY,
+            'D' => NumberFormat::FORMAT_DATE_DMYSLASH,
             'E' => NumberFormat::FORMAT_DATE_TIME4,
-            'F' => NumberFormat::FORMAT_DATE_DDMMYYYY,
+            'F' => NumberFormat::FORMAT_DATE_DMYSLASH,
             'G' => NumberFormat::FORMAT_DATE_TIME4,
         ];
     }
