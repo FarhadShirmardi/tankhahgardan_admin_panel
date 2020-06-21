@@ -39,14 +39,15 @@ class AllUserExport implements FromCollection, WithStrictNullComparison,
      */
     public function map($user): array
     {
+        $dateFormat = 'j/n/Y';
         $this->row++;
         return [
             $this->row,
             $user->name,
             $user->phone_number,
-            $this->carbon->parse($user->registered_at)->format('d/m/Y'),
+            $this->carbon->parse($user->registered_at)->format($dateFormat),
             $this->carbon->parse($user->registered_at)->toTimeString(),
-            $user->max_time ? $this->carbon->parse($user->max_time)->format('d/m/Y') : ' - ',
+            $user->max_time ? $this->carbon->parse($user->max_time)->format($dateFormat) : ' - ',
             $user->max_time ? $this->carbon->parse($user->max_time)->toTimeString() : ' - ',
             $user->project_count,
             $user->own_project_count,
