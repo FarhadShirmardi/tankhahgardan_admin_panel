@@ -1057,11 +1057,12 @@ class ReportController extends Controller
     {
         $feedback = Feedback::query()->findOrFail($id);
         $responseText = $request->input('response', '');
-        if (trim($responseText) == '') {
+        $isSpam = $request->state == FeedbackStatus::SPAM;
+        if (trim($responseText) == '' and !$isSpam) {
             return redirect()->back()->withErrors('پاسخ بازخورد نباید خالی باشد.');
         }
         $smsFlag = true;
-        if ($feedback->feedback_response_id) {
+        if ($feedback->feedback_response_id or $isSpam) {
             $smsFlag = false;
         }
         $feedbackResponse = FeedbackResponse::updateOrCreate([
