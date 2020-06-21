@@ -115,7 +115,18 @@
             </div>
             <div class="pt-3 row">
                 <div class="col-md-4 row"></div>
-                <div class="col-md-4 row"></div>
+                <div class="col-md-4 row">
+                    <label class="col-md-5 col-form-label text-md-left">وضعیت
+                        بازخورد</label>
+                    <div class="ms-list col-md-7">
+                        <select name="states[]" multiple="multiple" id="states" style="width: 100%">
+                            @foreach($states as $state)
+                                <option @if($state['is_selected']) selected @endif
+                                value="{{$state['id']}}">{{$state['name']}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
                 <div class="col-md-4 row">
                     <label class="col-md-5 col-form-label text-md-left">پلتفرم</label>
                     <div class="ms-list col-md-7">
@@ -174,10 +185,16 @@
                 allowClear: true,
                 placeholder: 'انتخاب پلفرم'
             });
+            $('#states').select2({
+                width: 'element',
+                allowClear: true,
+                placeholder: 'انتخاب وضعیت'
+            });
             $('#sort_field_1').select2({width: 'element'});
             $('#sort_field_2').select2({width: 'element'});
             $('#sort_type_1').select2({width: 'element'});
             $('#sort_type_2').select2({width: 'element'});
         });
+
     </script>
 @endsection

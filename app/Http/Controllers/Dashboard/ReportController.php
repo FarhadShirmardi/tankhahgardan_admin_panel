@@ -703,6 +703,7 @@ class ReportController extends Controller
             'sort_type_2' => $request->input('sort_type_2', 'DESC'),
             'scores' => $request->input('scores', []),
             'platforms' => $request->input('platforms', []),
+            'states' => $request->input('states', []),
             'start_date' => $startDate,
             'end_date' => $endDate
         ];
@@ -768,6 +769,15 @@ class ReportController extends Controller
             ]);
         }
 
+        $states = collect();
+        foreach (FeedbackStatus::toArray() as $item) {
+            $states->push([
+                'id' => $item,
+                'name' => FeedbackStatus::getEnum($item),
+                'is_selected' => in_array($item, $filter['states'])
+            ]);
+        }
+
 
         $feedbacks = Helpers::paginateCollection($feedbacks, 100);
 
@@ -801,6 +811,7 @@ class ReportController extends Controller
             'panel_users' => $panelUsers,
             'scores' => $scores,
             'platforms' => $platforms,
+            'states' => $states,
         ]);
     }
 
@@ -895,6 +906,11 @@ class ReportController extends Controller
             ->where(function ($query) use ($filter) {
                 if (isset($filter['scores']) and $filter['scores'] != []) {
                     $query->whereIn('response_score', $filter['scores']);
+                }
+            })
+            ->where(function ($query) use ($filter) {
+                if (isset($filter['states']) and $filter['states'] != []) {
+                    $query->whereIn('state', $filter['states']);
                 }
             })
             ->orderBy($filter['sort_field_1'], $filter['sort_type_1'])
