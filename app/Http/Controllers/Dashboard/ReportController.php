@@ -1065,15 +1065,17 @@ class ReportController extends Controller
         if ($feedback->feedback_response_id or $isSpam) {
             $smsFlag = false;
         }
-        $feedbackResponse = FeedbackResponse::updateOrCreate([
-            'id' => $feedback->feedback_response_id,
-        ], [
-            'panel_user_id' => auth()->id(),
-            'text' => trim($responseText),
-            'response_updated_at' => now(),
-            'read_at' => null,
-        ]);
-        $feedback->feedback_response_id = $feedbackResponse->id;
+        if (trim($responseText) == '') {
+            $feedbackResponse = FeedbackResponse::updateOrCreate([
+                'id' => $feedback->feedback_response_id,
+            ], [
+                'panel_user_id' => auth()->id(),
+                'text' => trim($responseText),
+                'response_updated_at' => now(),
+                'read_at' => null,
+            ]);
+            $feedback->feedback_response_id = $feedbackResponse->id;
+        }
         $feedback->state = $request->state;
         $feedback->save();
 
