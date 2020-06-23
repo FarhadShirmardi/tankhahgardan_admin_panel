@@ -690,11 +690,9 @@ class ReportController extends Controller
             $startDate = Feedback::query()->selectRaw('min(Date(created_at)) as date')->first()->date;
         }
 
-        $feedbackTitles = FeedbackTitle::all(['id'])->pluck('id')->toArray();
-
         $filter = [
-            'source_type' => $request->input('source_type', FeedbackSource::toArray()),
-            'titles' => $request->input('titles', $feedbackTitles),
+            'source_type' => $request->input('source_type', []),
+            'titles' => $request->input('titles', []),
             'user_id' => $request->input('user_id', null),
             'panel_user_ids' => $request->input('panel_user_ids', []),
             'sort_field_1' => $request->input('sort_field_1', 'state'),
@@ -955,7 +953,11 @@ class ReportController extends Controller
                 ->selectRaw('false as is_selected, id, name, family, phone_number')->get();
 
             if ($selectUsers->count() == 1 or $filter['user_id']) {
-                $selectedUser = $selectUsers->first();
+                if ($filter['user_id']) {
+                    $selectedUser = $selectUsers->where('id', $filter['user_id'])->first();
+                } else {
+                    $selectedUser = $selectUsers->first();
+                }
                 $filter['user_id'] = $selectedUser->id;
             }
 
