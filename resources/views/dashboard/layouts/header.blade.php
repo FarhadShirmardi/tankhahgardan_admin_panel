@@ -5,7 +5,7 @@
 
     <ul class="nav navbar-nav d-md-down-none">
         <li class="nav-item px-3">
-            <a class="nav-link" href="#">میزکار</a>
+            <a class="nav-link" href="{{ route('dashboard.home') }}">میزکار</a>
         </li>
     </ul>
     <ul class="nav navbar-nav ml-auto">

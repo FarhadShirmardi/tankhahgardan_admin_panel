@@ -10903,10 +10903,10 @@ base-chart.chart {
   padding: 0.5rem 1rem;
   margin-right: 0;
   background-color: #736e96;
-  background-image: url(/images/logo.png?a961dfbf36f110092c3f2d35778fa3db);
+  background-image: url(/images/logo.png?520dae2ac4e8148fc8a32d82a4812e81);
   background-repeat: no-repeat;
   background-position: center center;
-  background-size: 70px auto;
+  background-size: 70px 90%;
   border-bottom: 1px solid #c2cfd6;
 }
 
