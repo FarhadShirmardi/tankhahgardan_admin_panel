@@ -165,7 +165,7 @@
             <div class="col-md-7 row">
                 <label class="col-md-3 col-form-label text-md-left">متن</label>
                 <textarea required cols="50" rows="10" id="text" class="form-control col-md-7 mt-2 mb-2" type="text"
-                          name="text">{{$comment->text}}</textarea>
+                          name="text"></textarea>
             </div>
         </div>
 
