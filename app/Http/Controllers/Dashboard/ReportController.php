@@ -969,12 +969,6 @@ class ReportController extends Controller
         $users = $filter['user_id'] ? UserReport::query()->where('id', $filter['user_id'])->paginate() : [];
 
         $comment = Comment::find($id);
-        if (isset($comment['date'])) {
-            $comment['date'] = Helpers::convertDateTimeToJalali($comment->date);
-        }
-        if (isset($comment['response_date'])) {
-            $comment['response_date'] = Helpers::convertDateTimeToJalali($comment->response_date);
-        }
         $comment = $comment == null ? new Comment() : $comment;
 
         $sourceTypes = collect();

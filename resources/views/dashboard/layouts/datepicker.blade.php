@@ -18,7 +18,7 @@
             format: "YYYY/MM/DD H:m",
             altFormat: "YYYY/MM/DD H:m",
             initialValue: true,
-            initialValueType: 'persian',
+            initialValueType: 'gregorian',
             autoClose: true,
             calendar: {
                 persian: {
