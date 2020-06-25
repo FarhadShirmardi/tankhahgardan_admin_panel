@@ -1067,7 +1067,7 @@ class ReportController extends Controller
         if ($feedback->feedback_response_id or $isSpam) {
             $smsFlag = false;
         }
-        if (trim($responseText) == '') {
+        if (trim($responseText) != '') {
             $feedbackResponse = FeedbackResponse::updateOrCreate([
                 'id' => $feedback->feedback_response_id,
             ], [
