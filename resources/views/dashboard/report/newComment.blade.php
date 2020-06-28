@@ -77,7 +77,7 @@
             </div>
             <div class="col-md-4 row">
                 <label class="col-md-5 col-form-label text-md-left">موضوع</label>
-                <select required id="feedback_title_id" name="feedback_title_id"
+                <select id="feedback_title_id" name="feedback_title_id"
                         class="form-control custom-select-sm col-md-7">
                     <option></option>
                     @foreach($feedback_titles as $feedbackTitle)
