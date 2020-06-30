@@ -12,6 +12,7 @@ class FeedbackSource
     const LANDING_CONTACT = 3;
     const TELEGRAM = 4;
     const STORES = 5;
+    const MARKETING_CALL = 6;
 
     /**
      * @return array
@@ -36,6 +37,8 @@ class FeedbackSource
                 return 'استورها';
             case self::LANDING_CONTACT:
                 return 'نظرات لندینگ';
+            case self::MARKETING_CALL:
+                return 'تماس واحد بازاریابی';
             default:
                 return '';
         }
