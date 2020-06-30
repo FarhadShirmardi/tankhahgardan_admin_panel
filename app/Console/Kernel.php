@@ -99,7 +99,7 @@ class Kernel extends ConsoleKernel
                 ->everyThirtyMinutes();
         }
         $schedule->command('generate:report --user')
-            ->dailyAt('02:00')
+            ->hourly()
             ->then(function () {
                 $this->call('generate:report --project');
             })

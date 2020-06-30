@@ -969,12 +969,6 @@ class ReportController extends Controller
         $users = $filter['user_id'] ? UserReport::query()->where('id', $filter['user_id'])->paginate() : [];
 
         $comment = Comment::find($id);
-        if (isset($comment['date'])) {
-            $comment['date'] = Helpers::convertDateTimeToJalali($comment->date);
-        }
-        if (isset($comment['response_date'])) {
-            $comment['response_date'] = Helpers::convertDateTimeToJalali($comment->response_date);
-        }
         $comment = $comment == null ? new Comment() : $comment;
 
         $sourceTypes = collect();
@@ -1011,9 +1005,11 @@ class ReportController extends Controller
 
     public function addComment(Request $request, $id = null)
     {
-        $request->merge([
-            'state' => FeedbackStatus::CLOSED
-        ]);
+        $feedbackTitle = $request->feedback_title_id;
+        $isSpam = $request->state == FeedbackStatus::SPAM;
+        if (!$isSpam and !$feedbackTitle) {
+            return redirect()->back()->withErrors('موضوع بازخورد باید انتخاب شود.');
+        }
         $request['date'] =
             Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->date));
         $request['response_date'] = $request->response_date ?
