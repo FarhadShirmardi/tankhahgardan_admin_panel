@@ -102,8 +102,7 @@ class Kernel extends ConsoleKernel
             ->hourly()
             ->then(function () {
                 $this->call('generate:report --project');
-            })
-            ->runInBackground();
+            });
     }
 
     /**
