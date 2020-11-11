@@ -8,6 +8,7 @@
 @endsection
 @section('content')
     <form method="post"
+          enctype="multipart/form-data"
           action="{{ route('dashboard.responseFeedback', ['feedback_id' => $feedback_item->feedback_id]) }}">
         {{ csrf_field() }}
         <div class="row">
@@ -44,9 +45,48 @@
                 {{ $feedback_item->text }}
             </div>
         </div>
+        <div class="row">
+            <label class="col-md-5 col-form-label text-md-left">عکس‌ها</label>
+            <div class="col-md-7">
+                <div class="row">
+                    @foreach($feedback_item->images as $image)
+                        <div class="col-md-3 clickableRow table-row-clickable"
+                             data-href="{{ env('TANKHAH_URL') . '/panel/' .  env('TANKHAH_TOKEN') . '/images?path=' . $image['path'] }}">
+                            <img style="width: 100%; height: 100%"
+                                src="{{ env('TANKHAH_URL') . '/panel/' .  env('TANKHAH_TOKEN') . '/images?path=' . $image['path'] }}"
+                                alt="">
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
         <div class="row pt-3">
             <label class="col-md-5 col-form-label text-md-left">پاسخ</label>
             <textarea class="col-md-6" rows="10" name="response">{{ $feedback_item->response_text }}</textarea>
+        </div>
+        <div class="row">
+            <label class="col-md-5 col-form-label text-md-left">عکس‌های پاسخ</label>
+            <div class="col-md-7">
+                @if($feedback_item->responseImages != [])
+                <div class="row pt-3">
+                    <input class="col-md-1 form-control d-inline-block" type="checkbox" name="delete_image"/>
+                    <label class="align-middle col-form-label text-md-right">پاک کردن عکس‌ها</label>
+                </div>
+                @endif
+                <div class="row pt-2">
+                    @foreach($feedback_item->responseImages as $image)
+                        <div class="col-md-3 clickableRow table-row-clickable"
+                             data-href="{{ env('TANKHAH_URL') . '/panel/' .  env('TANKHAH_TOKEN') . '/images?path=' . $image['path'] }}">
+                            <img style="width: 100%; height: 100%"
+                                 src="{{ env('TANKHAH_URL') . '/panel/' .  env('TANKHAH_TOKEN') . '/images?path=' . $image['path'] }}"
+                                 alt="">
+                        </div>
+                    @endforeach
+                </div>
+                <div class="row pt-2 pb-3">
+                    <input type="file" name="response_images[]" multiple accept="image/*"/>
+                </div>
+            </div>
         </div>
         <div class="row pt-1">
             <label class="col-md-5 col-form-label text-md-left">وضعیت</label>

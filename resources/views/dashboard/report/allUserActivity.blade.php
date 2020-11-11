@@ -1,8 +1,19 @@
 @extends('dashboard.layouts.master')
 
 @section('title')
-    <i class="fa fa-bar-chart"></i>
-    وضعیت کاربران
+    <div class="row">
+        <div class="col-md-6">
+            <i class="fa fa-bar-chart"></i>
+            وضعیت کاربران
+        </div>
+        <div class="col-md-6 ltr">
+            @if(auth()->user()->hasRole('Admin'))
+                <a href="{{ route('dashboard.generateReport') }}">
+                    <i class="fa fa-refresh"></i>
+                </a>
+            @endif
+        </div>
+    </div>
 @endsection
 @section('filter')
     @include('dashboard.layouts.link_message')
@@ -88,11 +99,42 @@
         <div class="col-md-8"><p>تعداد {{ $users->total() }} کاربر با شرایط فوق پیدا شد.</p></div>
     </div>
     @include('dashboard.report.listUser')
-    {{ $users }}
+    {{ $users->appends(request()->input())->links() }}
+    <hr>
+    <div class="row">
+        <div class="col-md-2">
+            <a class="form-control btn btn-success"
+               href="{{ route('dashboard.campaignUser', ['userIds' => $userIds]) }}">افزودن
+                کد تخفیف</a>
+        </div>
+        <div class="col-md-2">
+            <a class="form-control btn btn-success"
+               href="{{ route('dashboard.announcementItem', ['id' => 0, 'userIds' => $userIds]) }}">افزودن
+                اعلان</a>
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <form action="{{ route('dashboard.extractUserIds') }}" enctype="multipart/form-data" method="POST">
+                    {{ csrf_field() }}
+                    <div class="row">
+                        <input class="col-md-8 form-control form-control-file"
+                               type="file" name="users" accept=".xlsx, .xls" required>
+                        <input class="col-md-4 btn btn-primary" type="submit" value="تبدیل">
+                    </div>
+                </form>
+            </div>
+            <div class="row">
+                <a href="{{ asset('users.xlsx') }}">نمونه فایل</a>
+            </div>
+        </div>
+    </div>
+    <hr>
     <div id="dateChart" style="width:100%;"></div>
+    <div id="rangeCount" class="my-5" style="width:100%;"></div>
 @endsection
 @section('chart')
     @include('dashboard.report.charts.allUserActivity')
+    @include('dashboard.report.charts.rangeCount')
 @endsection
 @section('scripts')
     <script>

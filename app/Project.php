@@ -9,46 +9,15 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use App\Helpers\Helpers;
 
-/**
- * App\Project
- *
- * @property int $id
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @method static Builder|Projects whereCreatedAt($value)
- * @method static Builder|Projects whereId($value)
- * @method static Builder|Projects whereUpdatedAt($value)
- * @mixin Eloquent
- * @property string $name
- * @property string $description
- * @property int $user_id
- * @property string|null $deleted_at
- * @method static Builder|Projects whereDeletedAt($value)
- * @method static Builder|Projects whereDescription($value)
- * @method static Builder|Projects whereName($value)
- * @method static Builder|Projects whereUserId($value)
- * @property-read Collection|AccountTitle[] $accountTitles
- * @property-read User $user
- * @property-read Collection|Imprest[] $imprests
- * @property-read Collection|User[] $users
- * @method static bool|null forceDelete()
- * @method static \Illuminate\Database\Query\Builder|Projects onlyTrashed()
- * @method static bool|null restore()
- * @method static \Illuminate\Database\Query\Builder|Projects withTrashed()
- * @method static \Illuminate\Database\Query\Builder|Projects withoutTrashed()
- * @property int|null $accounting_software_id
- * @method static Builder|Projects whereAccountingSoftwareId($value)
- * @property-read AccountingSoftware|null $accountingSoftware
- * @property-read Collection|Note[] $notes
- * @property-read Collection|Payment[] $payments
- * @property-read Collection|Receive[] $receives
- */
 class Project extends Model
 {
     use SoftDeletes;
 
     protected $connection = 'mysql';
+
+    protected $with = ['projectStatus'];
 
     protected $fillable = [
         'name',
@@ -56,9 +25,35 @@ class Project extends Model
         'city_id'
     ];
 
-    public function accountTitles()
+    public function setStartDateAttribute($value)
     {
-        return $this->hasMany(AccountTitle::class);
+        $this->attributes['start_date'] =
+            Helpers::jalaliDateStringToGregorian($value);
+    }
+
+    public function getStartDateAttribute($value)
+    {
+        return Helpers::gregorianDateStringToJalali($value);
+    }
+
+    public function getPremiumStateAttribute($value)
+    {
+        return Helpers::getProjectStatus($this);
+    }
+
+    public function state()
+    {
+        return $this->hasOne(State::class, 'id', 'state_id');
+    }
+
+    public function city()
+    {
+        return $this->hasOne(City::class, 'id', 'city_id');
+    }
+
+    public function constructionComponents()
+    {
+        return $this->hasMany(ConstructionComponent::class);
     }
 
     public function notes()
@@ -117,27 +112,6 @@ class Project extends Model
         return $this->hasMany(File::class);
     }
 
-    public function state()
-    {
-        return $this->hasOne(State::class, 'id', 'state_id');
-    }
-
-    public function city()
-    {
-        return $this->hasOne(City::class, 'id', 'city_id');
-    }
-
-    public function accountingCodes()
-    {
-        return $this->morphMany(
-            AccountingCode::class,
-            'hasAccountingCode',
-            'model_type',
-            'model_id',
-            $this->pivot->id
-        );
-    }
-
     public function reminders()
     {
         return $this->hasMany(Reminder::class);
@@ -146,5 +120,35 @@ class Project extends Model
     public function projectUser()
     {
         return $this->hasMany(ProjectUser::class, 'project_id', 'id');
+    }
+
+    public function images()
+    {
+        return $this->hasMany(Image::class);
+    }
+
+    public function projectInviteNotification()
+    {
+        return $this->hasMany(ProjectInviteNotification::class, 'project_id', 'id');
+    }
+
+    public function projectStatus()
+    {
+        return $this->hasMany(ProjectStatus::class)->orderBy('end_date', 'DESC');
+    }
+
+    public function projectStatusLog()
+    {
+        return $this->hasMany(ProjectStatusLog::class)->whereNotNull('transaction_id');
+    }
+
+    public function projectStatusLogNull()
+    {
+        return $this->hasMany(ProjectStatusLog::class);
+    }
+
+    public function getCurrencyTextAttribute($value)
+    {
+        return Currencies::getCurrency($this->currency)['symbol_fa'];
     }
 }

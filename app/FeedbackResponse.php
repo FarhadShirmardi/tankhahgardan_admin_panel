@@ -20,4 +20,14 @@ class FeedbackResponse extends Model
     {
         return $this->hasOne(PanelUser::class, 'id', 'panel_user_id');
     }
+
+    public function images()
+    {
+        return $this->morphMany(
+            Image::class,
+            'hasImage',
+            'model_type',
+            'model_id'
+        );
+    }
 }

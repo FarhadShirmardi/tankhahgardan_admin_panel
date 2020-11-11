@@ -17,7 +17,6 @@ use App\Project;
 use App\Receive;
 use App\State;
 use App\User;
-use Cache;
 use Carbon\Carbon;
 use DB;
 use Faker\Provider\Uuid;
@@ -30,22 +29,22 @@ use Validator;
 use App\File;
 use App\ProjectUser;
 use App\StepByStep;
-use Illuminate\Database\Eloquent\Model;
 use App\Constants\ProjectUserState;
 use App\Constants\FeedbackSource;
 use App\Comment;
 use App\Constants\FeedbackStatus;
 use App\FeedbackTitle;
 use App\UserReport;
-use App\Exports\AllUserExport;
-use Maatwebsite\Excel\Facades\Excel;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
-use Illuminate\Support\Str;
 use App\ProjectReport;
 use App\Jobs\UserReportExportJob;
 use Kavenegar;
 use App\Jobs\FeedbackResponseSms;
 use App\Constants\Platform;
+use Storage;
+use Exception;
+use URL;
+use App\ProjectStatus;
+use App\Constants\ProjectPremiumState;
 
 class ReportController extends Controller
 {
@@ -69,7 +68,7 @@ class ReportController extends Controller
         ]);
     }
 
-    protected function normalizeDate(Request &$request, $setNull = false)
+    public function normalizeDate(Request $request, $setNull = false)
     {
         $startDate = $request->input('start_date', null);
         if ($startDate) {
@@ -154,11 +153,15 @@ class ReportController extends Controller
 
         $usersQuery = $this->applyFilterUserQuery($usersQuery, $filter);
 
-//        dd($usersQuery->toSql());
+        $rangeUserQuery = clone $usersQuery;
+
+        $userIds = $usersQuery->pluck('id')->toArray();
 
         $users = $usersQuery->paginate(100);
 
         $counts = $this->getUserTypeCounts();
+
+        $rangeCounts = $this->getRangeCounts($rangeUserQuery);
 
         list($sortableFields, $sortableTypes) = $this->getUserSortFields();
 
@@ -168,29 +171,30 @@ class ReportController extends Controller
                 'colors' => $this->colors(),
                 'filter' => $filter,
                 'sortable_fields' => $sortableFields,
-                'sortable_types' => $sortableTypes
+                'sortable_types' => $sortableTypes,
+                'range_counts' => $rangeCounts,
+                'userIds' => implode(',', $userIds)
             ]
         );
     }
 
-    private function getAllUserActivityFilter(Request &$request)
+    private function getAllUserActivityFilter(Request $request)
     {
         list($startDate, $endDate) = $this->normalizeDate($request, true);
         if (!$startDate) {
             $startDate = UserReport::query()->selectRaw('min(Date(registered_at)) as date')->first()->date;
         }
 
-        $filter = [
+        return [
             'user_type' => $request->input('user_type', null),
             'sort_field' => $request->input('sort_field', 'registered_at'),
             'sort_type' => $request->input('sort_type', 'DESC'),
             'phone_number' => Helpers::getEnglishString($request->input('phone_number', '')),
             'name' => $request->input('name', ''),
             'start_date' => $startDate,
-            'end_date' => $endDate
+            'end_date' => $endDate,
+            'user_ids' => $request->input('user_ids', [])
         ];
-
-        return $filter;
     }
 
     public function applyFilterUserQuery(&$usersQuery, array $filter)
@@ -201,7 +205,8 @@ class ReportController extends Controller
             $usersQuery = $usersQuery->where('user_type', $filter['user_type']);
         }
         if (!empty($filter['phone_number'])) {
-            $phoneNumber = '%' . Helpers::getEnglishString((string)(int)$filter['phone_number']) . '%';
+            $phoneNumber = ltrim(Helpers::getEnglishString($filter['phone_number']), '0');
+            $phoneNumber = '%' . $phoneNumber . '%';
             $usersQuery = $usersQuery->where('phone_number', 'like', $phoneNumber);
         }
         if (!empty($filter['name'])) {
@@ -213,6 +218,9 @@ class ReportController extends Controller
         }
         if ($filter['end_date']) {
             $usersQuery = $usersQuery->where('registered_at', '<=', $filter['end_date']);
+        }
+        if (isset($filter['user_ids']) and $filter['user_ids'] != []) {
+            $usersQuery = $usersQuery->whereIn('id', $filter['user_ids']);
         }
 
         return $usersQuery;
@@ -231,6 +239,36 @@ class ReportController extends Controller
         }
 
         return $counts;
+    }
+
+    private function getRangeCounts($rangeUserQuery)
+    {
+        $rangeCounts = [];
+        foreach (range(0, 5) as $time) {
+            $paymentSubQuery = Payment::withoutTrashed()->whereIn('creator_user_id', $rangeUserQuery->select('id'))
+                ->whereRaw('substr(created_at, 12, 2) between ' . $time * 4 . ' AND ' . ($time + 1) * 4)
+                ->selectRaw('count(*)')->getQuery();
+            $receiveSubQuery = Receive::withoutTrashed()->whereIn('creator_user_id', $rangeUserQuery->select('id'))
+                ->whereRaw('substr(created_at, 12, 2) between ' . $time * 4 . ' AND ' . ($time + 1) * 4)
+                ->selectRaw('count(*)')->getQuery();
+            $noteSubQuery = Note::withoutTrashed()->whereIn('creator_user_id', $rangeUserQuery->select('id'))
+                ->whereRaw('substr(created_at, 12, 2) between ' . $time * 4 . ' AND ' . ($time + 1) * 4)
+                ->selectRaw('count(*)')->getQuery();
+            $imprestSubQuery = Imprest::withoutTrashed()->whereIn('creator_user_id', $rangeUserQuery->select('id'))
+                ->whereRaw('substr(created_at, 12, 2) between ' . $time * 4 . ' AND ' . ($time + 1) * 4)
+                ->selectRaw('count(*)')->getQuery();
+
+            $result = DB::query()
+                ->selectSub($paymentSubQuery, 'payments_count')
+                ->selectSub($receiveSubQuery, 'receives_count')
+                ->selectSub($noteSubQuery, 'notes_count')
+                ->selectSub($imprestSubQuery, 'imprests_count')
+                ->get();
+
+            $rangeCounts[($time * 4) . ' - ' . (($time + 1) * 4)] = $result->first();
+        }
+
+        return $rangeCounts;
     }
 
     private function getUserSortFields()
@@ -278,7 +316,7 @@ class ReportController extends Controller
         $filter = $this->getAllUserActivityFilter($request);
 
 //        $users = $usersQuery->get();
-        $link = \URL::temporarySignedRoute('dashboard.report.export.download', now()->addHour(), ['filename' => 'users.xlsx']);
+        $link = URL::temporarySignedRoute('dashboard.report.export.download', now()->addHour(), ['filename' => 'users.xlsx']);
         $this->dispatch((new UserReportExportJob($filter, $link))->onQueue('activationSms'));
 
         return redirect()->back()->with('success', 'فایل در حال ساخته شدن میباشد.')->with('link', $link);
@@ -286,19 +324,19 @@ class ReportController extends Controller
 
     public function getProjectQuery()
     {
-        $paymentCountQuery = Payment::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $receiveCountQuery = Receive::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $noteCountQuery = Note::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $imprestCountQuery = Imprest::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $paymentCountQuery = Payment::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
+        $receiveCountQuery = Receive::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
+        $noteCountQuery = Note::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
+        $imprestCountQuery = Imprest::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
 
-        $paymentMaxQuery = Payment::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
-        $receiveMaxQuery = Receive::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
-        $noteMaxQuery = Note::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
-        $imprestMaxQuery = Imprest::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
+        $paymentMaxQuery = Payment::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('MAX(created_at)')->toSql();
+        $receiveMaxQuery = Receive::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('MAX(created_at)')->toSql();
+        $noteMaxQuery = Note::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('MAX(created_at)')->toSql();
+        $imprestMaxQuery = Imprest::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('MAX(created_at)')->toSql();
 
-        $userCount = ProjectUser::whereColumn('project_id', 'projects.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $activeUserCount = ProjectUser::whereColumn('project_id', 'projects.id')->withoutTrashed()->where('state', ProjectUserState::ACTIVE)->selectRaw('count(*)')->getQuery();
-        $notActiveUserCount = ProjectUser::whereColumn('project_id', 'projects.id')->withoutTrashed()->where('state', '<>', ProjectUserState::ACTIVE)->selectRaw('count(*)')->getQuery();
+        $userCount = ProjectUser::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
+        $activeUserCount = ProjectUser::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('state', ProjectUserState::ACTIVE)->selectRaw('count(*)')->getQuery();
+        $notActiveUserCount = ProjectUser::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('state', '<>', ProjectUserState::ACTIVE)->selectRaw('count(*)')->getQuery();
 
         $maxTimeQuery = Project::query()
             ->selectRaw(
@@ -324,14 +362,31 @@ class ReportController extends Controller
             }
         }
 
+        $projectStateQuery = ProjectStatus::query()
+            ->whereColumn('project_id', 'projects.id')
+            ->orderBy('end_date', 'DESC')
+            ->limit(1)
+            ->selectRaw("
+                IF(
+                    project_statuses.end_date < '" . now()->toDateTimeString() . "',
+                    " . ProjectPremiumState::EXPIRED_PREMIUM . ",
+                    IF(
+                        project_statuses.end_date < '" . now()->addDays(5)->toDateTimeString() . "',
+                        " . ProjectPremiumState::NEAR_ENDING_PREMIUM . ",
+                        " . ProjectPremiumState::PREMIUM . "
+                    )
+                )
+        ");
 
-        $projectsQuery = Project::query()
+
+        return Project::query()
             ->joinSub($maxTimeQuery, 'MaxTime', 'MaxTime.project_id', '=', 'projects.id')
             ->addSelect('projects.name as name')
             ->addSelect('projects.id as id')
             ->addSelect('projects.city_id as city_id')
             ->addSelect('projects.state_id as state_id')
             ->addSelect('projects.created_at as created_at')
+            ->selectRaw("IFNULL( (" . $projectStateQuery->toSql() . " ), " . ProjectPremiumState::FREE . ") as project_state")
             ->selectSub($paymentCountQuery, 'payment_count')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($noteCountQuery, 'note_count')
@@ -341,8 +396,6 @@ class ReportController extends Controller
             ->selectSub($notActiveUserCount, 'not_active_user_count')
             ->selectRaw('MaxTime.max_time as max_time')
             ->selectRaw($projectTypeQuery);
-
-        return $projectsQuery;
     }
 
     private function times()
@@ -357,27 +410,27 @@ class ReportController extends Controller
 
     public function getUserQuery()
     {
-        $paymentCountQuery = Payment::whereColumn('creator_user_id', 'users.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $receiveCountQuery = Receive::whereColumn('creator_user_id', 'users.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $noteCountQuery = Note::whereColumn('creator_user_id', 'users.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $imprestCountQuery = Imprest::whereColumn('creator_user_id', 'users.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $fileCountQuery = File::whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
-        $imageCountQuery = Image::whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
-        $deviceCountQuery = Device::whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
-        $feedbackCountQuery = Feedback::whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $paymentCountQuery = Payment::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $receiveCountQuery = Receive::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $noteCountQuery = Note::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $imprestCountQuery = Imprest::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $fileCountQuery = File::query()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $imageCountQuery = Image::query()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $deviceCountQuery = Device::query()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $feedbackCountQuery = Feedback::query()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
 
-        $paymentMaxQuery = Payment::whereColumn('creator_user_id', 'users.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
-        $receiveMaxQuery = Receive::whereColumn('creator_user_id', 'users.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
-        $noteMaxQuery = Note::whereColumn('creator_user_id', 'users.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
-        $imprestMaxQuery = Imprest::whereColumn('creator_user_id', 'users.id')->withoutTrashed()->selectRaw('MAX(created_at)')->toSql();
+        $paymentMaxQuery = Payment::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('MAX(created_at)')->toSql();
+        $receiveMaxQuery = Receive::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('MAX(created_at)')->toSql();
+        $noteMaxQuery = Note::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('MAX(created_at)')->toSql();
+        $imprestMaxQuery = Imprest::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('MAX(created_at)')->toSql();
 
         $imageSizeQuery = Image::whereColumn('user_id', 'users.id')->selectRaw('IFNULL(sum(size), 0) / 1024 / 1024')->getQuery();
 
-        $projectCount = ProjectUser::whereColumn('user_id', 'users.id')->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $ownProjectCount = ProjectUser::whereColumn('user_id', 'users.id')->withoutTrashed()->where('is_owner', true)->selectRaw('count(*)')->getQuery();
-        $notOwnProjectCount = ProjectUser::whereColumn('user_id', 'users.id')->withoutTrashed()->where('is_owner', false)->selectRaw('count(*)')->getQuery();
+        $projectCount = ProjectUser::withoutTrashed()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $ownProjectCount = ProjectUser::withoutTrashed()->whereColumn('user_id', 'users.id')->where('is_owner', true)->selectRaw('count(*)')->getQuery();
+        $notOwnProjectCount = ProjectUser::withoutTrashed()->whereColumn('user_id', 'users.id')->where('is_owner', false)->selectRaw('count(*)')->getQuery();
 
-        $stepByStep = StepByStep::whereColumn('user_id', 'users.id')->selectRaw('IFNULL(step, 0)')->getQuery();
+        $stepByStep = StepByStep::query()->whereColumn('user_id', 'users.id')->selectRaw('IFNULL(step, 0)')->getQuery();
 
         $maxTimeQuery = User::query()
             ->selectRaw(
@@ -404,7 +457,7 @@ class ReportController extends Controller
         }
 
 
-        $usersQuery = User::query()
+        return User::query()
             ->joinSub($maxTimeQuery, 'MaxTime', 'MaxTime.user_id', '=', 'users.id')
             ->selectRaw("CONCAT_WS(' ', IFNULL(users.name, ''), IFNULL(users.family, '')) as name")
             ->addSelect('users.id as id')
@@ -425,22 +478,37 @@ class ReportController extends Controller
             ->selectSub($notOwnProjectCount, 'not_own_project_count')
             ->selectRaw('MaxTime.max_time as max_time')
             ->selectRaw($userTypeQuery);
-
-        return $usersQuery;
     }
 
-    public function userActivity(Request $request, $id)
+    public function userActivity($id)
     {
+        /** @var User $user */
         $user = User::with('projects')->findOrFail($id);
 
-        $paymentCountQuery = Payment::whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
-            ->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $receiveCountQuery = Receive::whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
-            ->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $noteCountQuery = Note::whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
-            ->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $imprestCountQuery = Imprest::whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
-            ->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $paymentCountQuery = Payment::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
+            ->selectRaw('count(*)')->getQuery();
+        $receiveCountQuery = Receive::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
+            ->selectRaw('count(*)')->getQuery();
+        $noteCountQuery = Note::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
+            ->selectRaw('count(*)')->getQuery();
+        $imprestCountQuery = Imprest::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
+            ->selectRaw('count(*)')->getQuery();
+        $imageCountQuery = Image::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('user_id', $id)
+            ->selectRaw('count(*)')->getQuery();
+        $imageSizeQuery = Image::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('user_id', $id)
+            ->selectRaw('IFNULL(sum(size), 0) / 1024 / 1024')->getQuery();
+        $projectStateQuery = ProjectStatus::query()->whereColumn('project_id', 'projects.id')->orderBy('end_date', 'DESC')->limit(1)
+            ->selectRaw("
+                IF(
+                    project_statuses.end_date < '" . now()->toDateTimeString() . "',
+                    " . ProjectPremiumState::EXPIRED_PREMIUM . ",
+                    IF(
+                        project_statuses.end_date < '" . now()->addDays(5)->toDateTimeString() . "',
+                        " . ProjectPremiumState::NEAR_ENDING_PREMIUM . ",
+                        " . ProjectPremiumState::PREMIUM . "
+                    )
+                )
+        ");
 
         $projectsQuery = Project::query()
             ->join('project_user', function ($join) use ($id) {
@@ -450,39 +518,25 @@ class ReportController extends Controller
             ->addSelect('project_user.is_owner as is_owner')
             ->addSelect('projects.name as name')
             ->addSelect('projects.id as id')
+            ->selectRaw("IFNULL( (" . $projectStateQuery->toSql() . " ), " . ProjectPremiumState::FREE . ") as project_state")
+            ->addSelect('projects.is_archived')
+            ->addSelect('project_user.state as status')
             ->selectSub($paymentCountQuery, 'payment_count')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($noteCountQuery, 'note_count')
             ->selectSub($imprestCountQuery, 'imprest_count')
+            ->selectSub($imageCountQuery, 'image_count')
+            ->selectSub($imageSizeQuery, 'image_size')
             ->orderBy('projects.created_at');
 
         $projects = $projectsQuery->get();
 
-        $rangeCounts = [];
-        foreach (range(0, 5) as $time) {
-            $paymentSubQuery = Payment::where('creator_user_id', $id)
-                ->whereRaw('substr(created_at, 12, 2) between ' . $time * 4 . ' AND ' . ($time + 1) * 4)->withoutTrashed()->selectRaw('count(*)')->getQuery();
-            $receiveSubQuery = Receive::where('creator_user_id', $id)
-                ->whereRaw('substr(created_at, 12, 2) between ' . $time * 4 . ' AND ' . ($time + 1) * 4)->withoutTrashed()->selectRaw('count(*)')->getQuery();
-            $noteSubQuery = Note::where('creator_user_id', $id)
-                ->whereRaw('substr(created_at, 12, 2) between ' . $time * 4 . ' AND ' . ($time + 1) * 4)->withoutTrashed()->selectRaw('count(*)')->getQuery();
-            $imprestSubQuery = Imprest::where('creator_user_id', $id)
-                ->whereRaw('substr(created_at, 12, 2) between ' . $time * 4 . ' AND ' . ($time + 1) * 4)->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $rangeCounts = $this->getRangeCounts(User::query()->where('id', $id));
 
-            $result = DB::query()
-                ->selectSub($paymentSubQuery, 'payments_count')
-                ->selectSub($receiveSubQuery, 'receives_count')
-                ->selectSub($noteSubQuery, 'notes_count')
-                ->selectSub($imprestSubQuery, 'imprests_count')
-                ->get();
-
-            $rangeCounts[($time * 4) . ' - ' . (($time + 1) * 4)] = $result->first();
-        }
-
-        $paymentSubQuery = Payment::where('creator_user_id', $id)->withoutTrashed()->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
-        $receiveSubQuery = Receive::where('creator_user_id', $id)->withoutTrashed()->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
-        $noteSubQuery = Note::where('creator_user_id', $id)->withoutTrashed()->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
-        $imprestSubQuery = Imprest::where('creator_user_id', $id)->withoutTrashed()->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
+        $paymentSubQuery = Payment::withoutTrashed()->where('creator_user_id', $id)->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
+        $receiveSubQuery = Receive::withoutTrashed()->where('creator_user_id', $id)->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
+        $noteSubQuery = Note::withoutTrashed()->where('creator_user_id', $id)->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
+        $imprestSubQuery = Imprest::withoutTrashed()->where('creator_user_id', $id)->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
 
         $dateCounts = DB::connection('mysql')->query()
             ->selectRaw('count(*) as c, date, project_id')
@@ -517,12 +571,15 @@ class ReportController extends Controller
             return Helpers::gregorianDateStringToJalali($item);
         });
 
+        $devices = $user->devices()->get();
+
         return view('dashboard.report.userActivity', [
             'user' => $user,
             'projects' => $projects,
             'range_counts' => $rangeCounts,
             'date_counts' => $dateCounts,
-            'dates' => $dates
+            'dates' => $dates,
+            'devices' => $devices
         ]);
     }
 
@@ -541,6 +598,15 @@ class ReportController extends Controller
 
         list($sortableFields, $sortableTypes) = $this->getProjectSortFields();
 
+        $projectStates = collect();
+        foreach (ProjectPremiumState::toArray() as $item) {
+            $projectStates->push([
+                'id' => $item,
+                'name' => ProjectPremiumState::getEnum($item),
+                'is_selected' => in_array($item, $filter['project_states'])
+            ]);
+        }
+
         return view('dashboard.report.allProjectActivity', [
             'projects' => $projects,
             'counts' => $counts,
@@ -549,22 +615,22 @@ class ReportController extends Controller
             'filter' => $filter,
             'colors' => $this->colors(),
             'sortable_fields' => $sortableFields,
-            'sortable_types' => $sortableTypes
+            'sortable_types' => $sortableTypes,
+            'project_states' => $projectStates
         ]);
     }
 
     private function getAllProjectActivity(Request &$request)
     {
-        $filter = [
+        return [
             'project_type' => $request->input('project_type', null),
             'sort_field' => $request->input('sort_field', 'created_at'),
             'sort_type' => $request->input('sort_type', 'DESC'),
             'state_id' => $request->input('state_id', 0),
             'city_id' => $request->input('city_id', 0),
             'name' => $request->input('name', ''),
+            'project_states' => $request->input('project_states', [])
         ];
-
-        return $filter;
     }
 
     public function applyFilterProjectQuery(&$projectsQuery, array $filter)
@@ -583,6 +649,10 @@ class ReportController extends Controller
         }
         if ($filter['city_id']) {
             $projectsQuery = $projectsQuery->where('city_id', $filter['city_id']);
+        }
+
+        if (isset($filter['project_states']) and $filter['project_states'] != []) {
+            $projectsQuery = $projectsQuery->whereIn('project_state', $filter['project_states']);
         }
 
         return $projectsQuery;
@@ -630,6 +700,7 @@ class ReportController extends Controller
             'created_at' => 'تاریخ ایجاد پروژه',
             'max_time' => 'آخرین ثبت',
             'user_count' => 'تعداد کاربران پروژه',
+            'project_state' => 'وضعیت پروژه',
             'active_user_count' => 'تعداد کاربران فعال',
             'not_active_user_count' => 'تعداد کاربران غیرفعال',
             'payment_count' => 'تعداد پرداخت',
@@ -658,6 +729,10 @@ class ReportController extends Controller
             ->withoutTrashed()->selectRaw('count(*)')->getQuery();
         $imprestCountQuery = Imprest::whereColumn('creator_user_id', 'users.id')->where('project_id', $projectId)
             ->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $imageCountQuery = Image::whereColumn('user_id', 'users.id')->where('project_id', $projectId)
+            ->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $imageSizeQuery = Image::whereColumn('user_id', 'users.id')->where('project_id', $projectId)
+            ->withoutTrashed()->selectRaw('IFNULL(sum(size), 0) / 1024 / 1024')->getQuery();
 
         $usersQuery = User::query()
             ->join('project_user', function ($join) use ($projectId) {
@@ -673,6 +748,8 @@ class ReportController extends Controller
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($noteCountQuery, 'note_count')
             ->selectSub($imprestCountQuery, 'imprest_count')
+            ->selectSub($imageCountQuery, 'image_count')
+            ->selectSub($imageSizeQuery, 'image_size')
             ->orderBy('users.created_at');
 
         $users = $usersQuery->get();
@@ -946,7 +1023,7 @@ class ReportController extends Controller
         $selectedUser = null;
         $selectUsers = collect();
         if ($filter['phone_number']) {
-            $phoneNumber = Helpers::getEnglishString((string)(int)$filter['phone_number']);
+            $phoneNumber = ltrim(Helpers::getEnglishString($filter['phone_number']), '0');
             $selectUsers = User::query()
                 ->where('phone_number', 'like', '%' . $phoneNumber . '%')
                 ->where('state', 1)
@@ -1026,7 +1103,15 @@ class ReportController extends Controller
 
     public function responseFeedbackView($id)
     {
+        /** @var Feedback $feedback */
         $feedback = Feedback::query()->findOrFail($id);
+        $images = $feedback->images()->get()->toArray();
+        $responseImages = [];
+        /** @var FeedbackResponse $feedbackResponse */
+        $feedbackResponse = $feedback->feedbackResponse()->first();
+        if ($feedbackResponse) {
+            $responseImages = $feedbackResponse->images()->get()->toArray();
+        }
         $filter = [
             'user_id' => $feedback->user_id,
             'sort_field_1' => 'date',
@@ -1040,6 +1125,8 @@ class ReportController extends Controller
         $users = UserReport::query()->where('id', $feedback->user_id)->paginate();
 
         $feedback = $feedbacks->where('feedback_id', $id)->first();
+        $feedback['images'] = $images;
+        $feedback->responseImages = $responseImages;
 
         $feedbacks->where('feedback_id', $id)->first()->is_selected = true;
 
@@ -1064,6 +1151,7 @@ class ReportController extends Controller
             $smsFlag = false;
         }
         if (trim($responseText) != '') {
+            /** @var FeedbackResponse $feedbackResponse */
             $feedbackResponse = FeedbackResponse::updateOrCreate([
                 'id' => $feedback->feedback_response_id,
             ], [
@@ -1073,6 +1161,33 @@ class ReportController extends Controller
                 'read_at' => null,
             ]);
             $feedback->feedback_response_id = $feedbackResponse->id;
+            $feedback->save();
+
+            if ($request->delete_image) {
+                $feedbackResponse->images()->delete();
+            }
+            if ($request->hasFile('response_images')) {
+                foreach ($request->file('response_images') as $image) {
+                    $image->storeAs('/', $image->getClientOriginalName());
+                    $http = new Client;
+                    $response = $http->post(
+                        env('TANKHAH_URL') . '/panel/' . env('TANKHAH_TOKEN') . '/feedback/' . $id . '/image',
+                        [
+                            'headers' => [
+                                'Accept' => 'application/json',
+                            ],
+                            'multipart' => [
+                                [
+                                    'name' => 'image',
+                                    'filename' => $image->getClientOriginalName(),
+                                    'contents' => file_get_contents(storage_path() . '/app/' . $image->getClientOriginalName())
+                                ]
+                            ]
+                        ]
+                    );
+                    Storage::delete('/' . $image->getClientOriginalName());
+                }
+            }
         }
         $feedback->state = $request->state;
         $feedback->save();
@@ -1276,7 +1391,7 @@ class ReportController extends Controller
         try {
             $result = Kavenegar::Send('10005000000550', $phoneNumber, $text);
             return redirect()->back()->with('success', 'با موفقیت ارسال شد');
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return redirect()->back()->withInput($request->all())->withException($exception);
         }
     }

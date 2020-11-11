@@ -30,6 +30,14 @@ use Illuminate\Validation\Validator;
 use Log;
 use RangeException;
 use Storage;
+use App\Constants\ProjectUserState;
+use App\Constants\PremiumConstants;
+use App\Constants\ProjectPremiumState;
+use App\ProjectStatus;
+use Illuminate\Support\Facades\DB;
+use App\ProjectStatusLog;
+use Illuminate\Support\Str;
+use App\PromoCode;
 
 class Helpers
 {
@@ -581,5 +589,150 @@ class Helpers
 
             }
         }
+    }
+
+    public static function getPremiumCounts(User &$user, Project &$project)
+    {
+        $userCounts = self::getUserCounts($user);
+        $projectCounts = self::getProjectCounts($project);
+        $counts = collect();
+        $counts = $counts->merge($userCounts)->merge($projectCounts);
+        return $counts;
+    }
+
+    public static function getUserCounts(User &$user)
+    {
+        /** @var Project $projects */
+        $projects = $user->projects()->where('state', ProjectUserState::ACTIVE)->where('is_owner', true)->get();
+
+        $userCount = [
+            'free_project_used' => 0,
+            'free_project_remain' => 0,
+            'wallet' => $user->wallet_amount,
+            'reference_charge_amount' => PremiumConstants::REFERENCE_CHARGE_AMOUNT
+        ];
+        $projects->each(function ($project, $key) use (&$userCount) {
+            if (in_array($project->premium_state, [ProjectPremiumState::FREE, ProjectPremiumState::EXPIRED_PREMIUM])) {
+                $userCount['free_project_used']++;
+            }
+        });
+        $userCount['free_project_remain'] = PremiumConstants::FREE_PROJECT_LIMIT - $userCount['free_project_used'];
+        unset($userCount['free_project_used']);
+        return $userCount;
+    }
+
+    public static function getProjectStatus(Project &$project)
+    {
+        $projectState = $project->projectStatus->first();
+        if (!$projectState) {
+            return ProjectPremiumState::FREE;
+        } else {
+            $carbon = new Carbon();
+            $endDate = $carbon->parse($projectState->end_date);
+            if ($endDate->lt(now())) {
+                return ProjectPremiumState::EXPIRED_PREMIUM;
+            } elseif ($endDate->diffInDays(now()) < PremiumConstants::NEAR_END_THRESHOLD) {
+                return ProjectPremiumState::NEAR_ENDING_PREMIUM;
+            } else {
+                return ProjectPremiumState::PREMIUM;
+            }
+        }
+    }
+
+    public static function getProjectCounts(Project &$project)
+    {
+        /** @var ProjectStatus $projectStatus */
+        $projectStatus = $project->projectStatus
+            ->where('start_date', '<=', now()->toDateTimeString())
+            ->where('end_date', '>=', now()->toDateTimeString())
+            ->first();
+        $limits = [
+            'volume_size_limit' => PremiumConstants::FREE_VOLUME_SIZE,
+            'user_count_limit' => PremiumConstants::FREE_USER_COUNT,
+            'image_count_limit' => PremiumConstants::IMAGE_COUNT_LIMIT,
+            'pdf_count_limit' => PremiumConstants::PDF_COUNT_LIMIT,
+            'activity_count_limit' => PremiumConstants::ACTIVITY_COUNT_LIMIT,
+        ];
+        if ($projectStatus) {
+            $limits = [
+                'volume_size_limit' => $projectStatus->volume_size,
+                'user_count_limit' => $projectStatus->user_count,
+                'image_count_limit' => 1000000,
+                'activity_count_limit' => 1000000,
+                'pdf_count_limit' => 1000000
+            ];
+        }
+        $activity = $project->activities()->selectRaw('count(*)')->getQuery();
+        $imagesSize = $project->images()->selectRaw('ROUND(sum(size)/1024/1024)')->getQuery();
+        $imagesCount = $project->images()->selectRaw('count(*)')->getQuery();
+        $userCount = $project->projectUser()->where('is_owner', false)
+            ->where('project_user.state', '<>', ProjectUserState::INACTIVE)
+            ->selectRaw('count(*)')->getQuery();
+        $pdfCount = $project->files()
+            ->where('type', 'like', '%PDF')
+            ->whereDate('created_at', now()->toDateString())
+            ->selectRaw('count(*)')
+            ->getQuery();
+        $query = DB::query()
+            ->selectSub($imagesSize, 'volume_size')
+            ->selectSub($imagesCount, 'image_count')
+            ->selectSub($activity, 'activity_count')
+            ->selectSub($userCount, 'user_count')
+            ->selectSub($pdfCount, 'pdf_count');
+        $results = $query->first();
+        $counts = collect();
+        $r = new ReflectionClass(PremiumConstants::class);
+        foreach ($results as $key => $used) {
+            $limit = $r->getConstant(strtoupper($key) . '_LIMIT');
+            if (!$limit) {
+                $counts = $counts->merge([
+                    $key . '_remain' => $limits[$key . '_limit'] - $used,
+                    $key . '_limit' => $limits[$key . '_limit']
+                ]);
+            } else {
+                if ($projectStatus) {
+                    $counts = $counts->merge([
+                        $key . '_remain' => $limits[$key . '_limit'] - $used,
+                        $key . '_limit' => $limit
+                    ]);
+                } else {
+                    $counts = $counts->merge([
+                        $key . '_remain' => $limit - $used,
+                        $key . '_limit' => $limit
+                    ]);
+                }
+            }
+        }
+        return $counts;
+    }
+
+    public static function calculatePayableAmount(ProjectStatusLog &$projectStatusLog)
+    {
+        $totalAmount = $projectStatusLog->total_amount;
+        $addedValueAmount = $projectStatusLog->added_value_amount;
+        $discountAmount = $projectStatusLog->discount_amount;
+        $walletAmount = $projectStatusLog->wallet_amount;
+
+        return self::getPayableAmount($totalAmount, $addedValueAmount, $discountAmount, $walletAmount);
+    }
+
+    public static function getPayableAmount($totalAmount, $addedValueAmount, $discountAmount, $walletAmount)
+    {
+        return 10 * floor(($totalAmount + $addedValueAmount - $discountAmount - $walletAmount) / 10);
+    }
+
+    public static function getTextWithCurrency(Project &$project, $text)
+    {
+        return $text . ' (' . $project->currency_text . ')';
+    }
+
+    public static function generatePromoCode()
+    {
+        do {
+            $code = Str::random(7);
+            $promoCode = PromoCode::where('code', $code)->exists();
+        } while ($promoCode);
+
+        return $code;
     }
 }

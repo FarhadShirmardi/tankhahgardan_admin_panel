@@ -78,7 +78,32 @@
             </li>
             @if(auth()->user()->hasRole('Admin'))
                 <li class="nav-item nav-dropdown">
-                    <a class="nav-link" href="{{ route('dashboard.admin.user_list') }}"><i class="icon-people"></i>کاربران پنل</a>
+                    <a class="nav-link" href="{{ route('dashboard.admin.user_list') }}"><i class="icon-people"></i>کاربران
+                        پنل</a>
+                </li>
+            @endif
+            @if(auth()->user()->can('view_transactions'))
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link" href="{{ route('dashboard.transactions') }}"><i class="icon-calculator"></i>تراکنش‌ها</a>
+                </li>
+            @endif
+            @if(auth()->user()->can('view_promo_codes'))
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-notebook"></i>کد تخفیف و کمپین</a>
+                    <ul class="nav-dropdown-items">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard.campaigns') }}">
+                                <i class="icon-list"></i>
+                                کمپین‌ها
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard.promoCodes') }}">
+                                <i class="icon-list"></i>
+                                کدهای تخفیف
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             @endif
         </ul>
