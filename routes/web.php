@@ -10,7 +10,9 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+Route::get('', function () {
+ echo "hello";
+});
 Route::prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('login', 'Dashboard\AuthController@login')->name('login');
     Route::post('authenticate', 'Dashboard\AuthController@authenticate')->name('authenticate');
