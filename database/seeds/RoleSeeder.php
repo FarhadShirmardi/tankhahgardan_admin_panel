@@ -69,6 +69,12 @@ class RoleSeeder extends Seeder
         $deleteNotificationPermission = Permission::firstOrCreate(['name' => 'delete_notification']);
         $deleteNotificationPermission->assignRole($adminName)->assignRole($marketingName);
 
+        $viewPromoCodesPermission = Permission::firstOrCreate(['name' => 'view_promo_codes']);
+        $viewPromoCodesPermission->assignRole($adminName)->assignRole($marketingName)->assignRole($secretaryName);
+
+        $viewTransactions = Permission::firstOrCreate(['name' => 'view_transactions']);
+        $viewTransactions->assignRole($adminName)->assignRole($marketingName)->assignRole($secretaryName);
+
         $adminUsers = PanelUser::where('type', PanelUserType::ADMIN)->get();
         foreach ($adminUsers as $adminUser) {
             $adminUser->syncRoles([]);

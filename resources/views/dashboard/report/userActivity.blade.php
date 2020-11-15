@@ -5,7 +5,32 @@
     وضعیت کاربر - {{ $user->full_name }}
 @endsection
 @section('filter')
-
+    <div class="row pb-5">
+        <div class="col-md-2">
+            <a class="form-control btn btn-info" href="{{ route('dashboard.promoCodes', ['user_id' => $user->id]) }}">کد تخفیف‌های کاربر</a>
+        </div>
+        <div class="col-md-2">
+            <a class="form-control btn btn-success" href="{{ route('dashboard.campaignUser', ['userIds' => $user->id]) }}">افزودن
+                کد تخفیف</a>
+        </div>
+        <div class="col-md-2">
+            <a class="form-control btn btn-info" href="{{ route('dashboard.transactions', ['user_id' => $user->id]) }}">تراکنش‌های
+                کاربر</a>
+        </div>
+        <div class="col-md-2">
+            <a class="form-control btn btn-light" href="{{ route('dashboard.feedbacks', ['user_id' => $user->id]) }}">بازخوردهای
+                کاربر</a>
+        </div>
+        <div class="col-md-2">
+            <a class="form-control btn btn-success"
+               href="{{ route('dashboard.newComment', ['phone_number' => $user->phone_number, 'user_id' => $user->id]) }}">افزودن
+                بازخورد</a>
+        </div>
+        <div class="col-md-2">
+            <a class="form-control btn btn-success"
+               href="{{ route('dashboard.announcementItem', ['id' => 0, 'userIds' => $user->id]) }}">افزودن اعلان</a>
+        </div>
+    </div>
 @endsection
 @section('content')
     <div id="ajax-table">
@@ -15,15 +40,21 @@
                 <th>ردیف</th>
                 <th>نام پروژه</th>
                 <th>مالک پروژه</th>
+                <th>وضعیت کاربر در پروژه</th>
+                <th>وضعیت پروژه</th>
                 <th>تعداد پرداخت</th>
                 <th>تعداد دریافت</th>
                 <th>تعداد یادداشت</th>
                 <th>تعداد تنخواه</th>
+                <th>تعداد عکس</th>
+                <th>حجم عکس</th>
+                <th>وضعیت آرشیو</th>
             </tr>
             </thead>
             <tbody>
             @foreach($projects as $project)
-                <tr class="clickableRow table-row-clickable" data-href="{{ route('dashboard.report.projectActivity', ['id' => $project->id]) }}">
+                <tr class="clickableRow table-row-clickable"
+                    data-href="{{ route('dashboard.report.projectActivity', ['id' => $project->id]) }}">
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $project->name }}</td>
                     <td>
@@ -31,27 +62,46 @@
                         @else <img src="{{ asset('dashboard/icons/icon_uncheck.png') }}">
                         @endif
                     </td>
+                    <td>{{ \App\Constants\ProjectUserState::getEnum($project->status) }}</td>
+                    <td>{{ \App\Constants\ProjectPremiumState::getEnum($project->project_state) }}</td>
                     <td>{{ $project->payment_count }}</td>
                     <td>{{ $project->receive_count }}</td>
                     <td>{{ $project->note_count }}</td>
                     <td>{{ $project->imprest_count }}</td>
+                    <td>{{ $project->image_count }}</td>
+                    <td>{{ $project->image_size }}</td>
+                    <td>
+                        @if($project->is_archived) <img src="{{ asset('dashboard/icons/icon_check.png') }}">
+                        @else <img src="{{ asset('dashboard/icons/icon_uncheck.png') }}">
+                        @endif
+                    </td>
                 </tr>
             @endforeach
             <tr class="table-primary">
                 <td></td>
                 <td>جمع</td>
                 <td></td>
+                <td></td>
+                <td></td>
                 <td>{{ $projects->pluck('payment_count')->sum() }}</td>
                 <td>{{ $projects->pluck('receive_count')->sum() }}</td>
                 <td>{{ $projects->pluck('note_count')->sum() }}</td>
                 <td>{{ $projects->pluck('imprest_count')->sum() }}</td>
+                <td>{{ $projects->pluck('image_count')->sum() }}</td>
+                <td>{{ $projects->pluck('image_size')->sum() }}</td>
+                <td></td>
             </tr>
             </tbody>
         </table>
     </div>
-    <div id="chart" class="my-5" style="width:100%;"></div>
+    <hr class="pt-4 pb-2">
+    <h5 class="text-center">دستگاه‌های کاربر</h5>
+    @include('dashboard.report.listDevices')
+    <hr>
+    <div id="rangeCount" class="my-5" style="width:100%;"></div>
     <div id="chart2" class="my-5" style="width:100%;"></div>
 @endsection
 @section('chart')
-    @include('dashboard.report.charts.userActivity')
+    @include('dashboard.report.charts.rangeCount')
+    @include('dashboard.report.charts.dateCount')
 @endsection

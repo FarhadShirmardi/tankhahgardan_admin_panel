@@ -111,4 +111,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(ProjectUser::class, 'user_id', 'id');
     }
+
+    public function devices()
+    {
+        return $this->hasMany(Device::class);
+    }
 }

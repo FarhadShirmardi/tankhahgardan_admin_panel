@@ -3,7 +3,7 @@
 
 /**
  * A helper file for Laravel 5, to provide autocomplete information to your IDE
- * Generated for Laravel 6.18.1 on 2020-03-17 13:18:34.
+ * Generated for Laravel 6.18.3 on 2020-11-05 10:08:42.
  *
  * This file should not be included in your code, only analyzed by your IDE!
  *
@@ -2730,7 +2730,6 @@ namespace Illuminate\Support\Facades {
          *
          * @param mixed $command
          * @return mixed 
-         * @throws \RuntimeException
          * @static 
          */ 
         public static function dispatchToQueue($command)
@@ -8554,6 +8553,10 @@ namespace Illuminate\Support\Facades {
     /**
      * 
      *
+     * @method static \Illuminate\Redis\Limiters\ConcurrencyLimiterBuilder funnel(string $name)
+     * @method static \Illuminate\Redis\Limiters\DurationLimiterBuilder throttle(string $name)
+     * @see \Illuminate\Redis\RedisManager
+     * @see \Illuminate\Contracts\Redis\Factory
      */ 
     class Redis {
         
@@ -15147,6 +15150,1232 @@ namespace Illuminate\Support {
  
 }
 
+namespace Telegram\Bot\Laravel\Facades { 
+
+    /**
+     * Class Telegram.
+     *
+     */ 
+    class Telegram {
+        
+        /**
+         * Returns the TelegramClient service.
+         *
+         * @return \Telegram\Bot\TelegramClient 
+         * @static 
+         */ 
+        public static function getClient()
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->getClient();
+        }
+        
+        /**
+         * Returns Telegram Bot API Access Token.
+         *
+         * @return string 
+         * @static 
+         */ 
+        public static function getAccessToken()
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->getAccessToken();
+        }
+        
+        /**
+         * Returns the last response returned from API request.
+         *
+         * @return \Telegram\Bot\TelegramResponse 
+         * @static 
+         */ 
+        public static function getLastResponse()
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->getLastResponse();
+        }
+        
+        /**
+         * Sets the bot access token to use with API requests.
+         *
+         * @param string $accessToken The bot access token to save.
+         * @throws \InvalidArgumentException
+         * @return \Telegram\Bot\Api 
+         * @static 
+         */ 
+        public static function setAccessToken($accessToken)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->setAccessToken($accessToken);
+        }
+        
+        /**
+         * Make this request asynchronous (non-blocking).
+         *
+         * @param bool $isAsyncRequest
+         * @return \Telegram\Bot\Api 
+         * @static 
+         */ 
+        public static function setAsyncRequest($isAsyncRequest)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->setAsyncRequest($isAsyncRequest);
+        }
+        
+        /**
+         * Check if this is an asynchronous request (non-blocking).
+         *
+         * @return bool 
+         * @static 
+         */ 
+        public static function isAsyncRequest()
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->isAsyncRequest();
+        }
+        
+        /**
+         * Returns SDK's Command Bus.
+         *
+         * @return \Telegram\Bot\CommandBus 
+         * @static 
+         */ 
+        public static function getCommandBus()
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->getCommandBus();
+        }
+        
+        /**
+         * Add Telegram Command to the Command Bus.
+         *
+         * @param \Telegram\Bot\CommandInterface|string $command
+         * @return \Telegram\Bot\CommandBus 
+         * @static 
+         */ 
+        public static function addCommand($command)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->addCommand($command);
+        }
+        
+        /**
+         * Add Telegram Commands to the Command Bus.
+         *
+         * @param array $commands
+         * @return \Telegram\Bot\CommandBus 
+         * @static 
+         */ 
+        public static function addCommands($commands)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->addCommands($commands);
+        }
+        
+        /**
+         * Remove Telegram Command to the Command Bus.
+         *
+         * @param string $name
+         * @return \Telegram\Bot\CommandBus 
+         * @static 
+         */ 
+        public static function removeCommand($name)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->removeCommand($name);
+        }
+        
+        /**
+         * Remove Telegram Commands from the Command Bus.
+         *
+         * @param array $names
+         * @return \Telegram\Bot\CommandBus 
+         * @static 
+         */ 
+        public static function removeCommands($names)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->removeCommands($names);
+        }
+        
+        /**
+         * Returns list of available commands.
+         *
+         * @return \Telegram\Bot\Commands\Command[] 
+         * @static 
+         */ 
+        public static function getCommands()
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->getCommands();
+        }
+        
+        /**
+         * A simple method for testing your bot's auth token.
+         * 
+         * Returns basic information about the bot in form of a User object.
+         *
+         * @link https://core.telegram.org/bots/api#getme
+         * @return \Telegram\Bot\User 
+         * @static 
+         */ 
+        public static function getMe()
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->getMe();
+        }
+        
+        /**
+         * Send text messages.
+         * 
+         * <code>
+         * $params = [
+         *   'chat_id'                  => '',
+         *   'text'                     => '',
+         *   'parse_mode'               => '',
+         *   'disable_web_page_preview' => '',
+         *   'reply_to_message_id'      => '',
+         *   'reply_markup'             => '',
+         * ];
+         * </code>
+         *
+         * @link https://core.telegram.org/bots/api#sendmessage
+         * @param array $params
+         * @var int|string $params ['chat_id']
+         * @var string     $params ['text']
+         * @var string     $params ['parse_mode']
+         * @var bool       $params ['disable_web_page_preview']
+         * @var int        $params ['reply_to_message_id']
+         * @var string     $params ['reply_markup']
+         * @return \Telegram\Bot\Message 
+         * @static 
+         */ 
+        public static function sendMessage($params)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->sendMessage($params);
+        }
+        
+        /**
+         * Forward messages of any kind.
+         * 
+         * <code>
+         * $params = [
+         *   'chat_id'      => '',
+         *   'from_chat_id' => '',
+         *   'message_id'   => '',
+         * ];
+         * </code>
+         *
+         * @link https://core.telegram.org/bots/api#forwardmessage
+         * @param array $params
+         * @var int|string $params ['chat_id']
+         * @var int        $params ['from_chat_id']
+         * @var int        $params ['message_id']
+         * @return \Telegram\Bot\Message 
+         * @static 
+         */ 
+        public static function forwardMessage($params)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->forwardMessage($params);
+        }
+        
+        /**
+         * Send Photos.
+         * 
+         * <code>
+         * $params = [
+         *   'chat_id'             => '',
+         *   'photo'               => '',
+         *   'caption'             => '',
+         *   'reply_to_message_id' => '',
+         *   'reply_markup'        => '',
+         * ];
+         * </code>
+         *
+         * @link https://core.telegram.org/bots/api#sendphoto
+         * @param array $params
+         * @var int|string $params ['chat_id']
+         * @var string     $params ['photo']
+         * @var string     $params ['caption']
+         * @var int        $params ['reply_to_message_id']
+         * @var string     $params ['reply_markup']
+         * @return \Telegram\Bot\Message 
+         * @static 
+         */ 
+        public static function sendPhoto($params)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->sendPhoto($params);
+        }
+        
+        /**
+         * Send regular audio files.
+         * 
+         * <code>
+         * $params = [
+         *   'chat_id'             => '',
+         *   'audio'               => '',
+         *   'duration'            => '',
+         *   'performer'           => '',
+         *   'title'               => '',
+         *   'reply_to_message_id' => '',
+         *   'reply_markup'        => '',
+         * ];
+         * </code>
+         *
+         * @link https://core.telegram.org/bots/api#sendaudio
+         * @param array $params
+         * @var int|string $params ['chat_id']
+         * @var string     $params ['audio']
+         * @var int        $params ['duration']
+         * @var string     $params ['performer']
+         * @var string     $params ['title']
+         * @var int        $params ['reply_to_message_id']
+         * @var string     $params ['reply_markup']
+         * @return \Telegram\Bot\Message 
+         * @static 
+         */ 
+        public static function sendAudio($params)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->sendAudio($params);
+        }
+        
+        /**
+         * Send general files.
+         * 
+         * <code>
+         * $params = [
+         *   'chat_id'             => '',
+         *   'document'            => '',
+         *   'reply_to_message_id' => '',
+         *   'reply_markup'        => '',
+         * ];
+         * </code>
+         *
+         * @link https://core.telegram.org/bots/api#senddocument
+         * @param array $params
+         * @var int|string $params ['chat_id']
+         * @var string     $params ['document']
+         * @var int        $params ['reply_to_message_id']
+         * @var string     $params ['reply_markup']
+         * @return \Telegram\Bot\Message 
+         * @static 
+         */ 
+        public static function sendDocument($params)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->sendDocument($params);
+        }
+        
+        /**
+         * Send .webp stickers.
+         * 
+         * <code>
+         * $params = [
+         *   'chat_id' => '',
+         *   'sticker' => '',
+         *   'reply_to_message_id' => '',
+         *   'reply_markup' => '',
+         * ];
+         * </code>
+         *
+         * @link https://core.telegram.org/bots/api#sendsticker
+         * @param array $params
+         * @var int|string $params ['chat_id']
+         * @var string     $params ['sticker']
+         * @var int        $params ['reply_to_message_id']
+         * @var string     $params ['reply_markup']
+         * @throws TelegramSDKException
+         * @return \Telegram\Bot\Message 
+         * @static 
+         */ 
+        public static function sendSticker($params)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->sendSticker($params);
+        }
+        
+        /**
+         * Send Video File, Telegram clients support mp4 videos (other formats may be sent as Document).
+         * 
+         * <code>
+         * $params = [
+         *   'chat_id'             => '',
+         *   'video'               => '',
+         *   'duration'            => '',
+         *   'caption'             => '',
+         *   'reply_to_message_id' => '',
+         *   'reply_markup'        => '',
+         * ];
+         * </code>
+         *
+         * @see sendDocument
+         * @link https://core.telegram.org/bots/api#sendvideo
+         * @param array $params
+         * @var int|string $params ['chat_id']
+         * @var string     $params ['video']
+         * @var int        $params ['duration']
+         * @var string     $params ['caption']
+         * @var int        $params ['reply_to_message_id']
+         * @var string     $params ['reply_markup']
+         * @return \Telegram\Bot\Message 
+         * @static 
+         */ 
+        public static function sendVideo($params)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->sendVideo($params);
+        }
+        
+        /**
+         * Send voice audio files.
+         * 
+         * <code>
+         * $params = [
+         *   'chat_id'             => '',
+         *   'voice'               => '',
+         *   'duration'            => '',
+         *   'reply_to_message_id' => '',
+         *   'reply_markup'        => '',
+         * ];
+         * </code>
+         *
+         * @link https://core.telegram.org/bots/api#sendaudio
+         * @param array $params
+         * @var int|string $params ['chat_id']
+         * @var string     $params ['voice']
+         * @var int        $params ['duration']
+         * @var int        $params ['reply_to_message_id']
+         * @var string     $params ['reply_markup']
+         * @return \Telegram\Bot\Message 
+         * @static 
+         */ 
+        public static function sendVoice($params)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->sendVoice($params);
+        }
+        
+        /**
+         * Send point on the map.
+         * 
+         * <code>
+         * $params = [
+         *   'chat_id'             => '',
+         *   'latitude'            => '',
+         *   'longitude'           => '',
+         *   'reply_to_message_id' => '',
+         *   'reply_markup'        => '',
+         * ];
+         * </code>
+         *
+         * @link https://core.telegram.org/bots/api#sendlocation
+         * @param array $params
+         * @var int|string $params ['chat_id']
+         * @var float      $params ['latitude']
+         * @var float      $params ['longitude']
+         * @var int        $params ['reply_to_message_id']
+         * @var string     $params ['reply_markup']
+         * @return \Telegram\Bot\Message 
+         * @static 
+         */ 
+        public static function sendLocation($params)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->sendLocation($params);
+        }
+        
+        /**
+         * Broadcast a Chat Action.
+         * 
+         * <code>
+         * $params = [
+         *   'chat_id' => '',
+         *   'action'  => '',
+         * ];
+         * </code>
+         *
+         * @link https://core.telegram.org/bots/api#sendchataction
+         * @param array $params
+         * @var int|string $params ['chat_id']
+         * @var string     $params ['action']
+         * @throws TelegramSDKException
+         * @return \Telegram\Bot\TelegramResponse 
+         * @static 
+         */ 
+        public static function sendChatAction($params)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->sendChatAction($params);
+        }
+        
+        /**
+         * Returns a list of profile pictures for a user.
+         * 
+         * <code>
+         * $params = [
+         *   'user_id' => '',
+         *   'offset'  => '',
+         *   'limit'   => '',
+         * ];
+         * </code>
+         *
+         * @link https://core.telegram.org/bots/api#getuserprofilephotos
+         * @param array $params
+         * @var int     $params ['user_id']
+         * @var int     $params ['offset']
+         * @var int     $params ['limit']
+         * @return \Telegram\Bot\UserProfilePhotos 
+         * @static 
+         */ 
+        public static function getUserProfilePhotos($params)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->getUserProfilePhotos($params);
+        }
+        
+        /**
+         * Returns basic info about a file and prepare it for downloading.
+         * 
+         * <code>
+         * $params = [
+         *   'file_id' => '',
+         * ];
+         * </code>
+         * 
+         * The file can then be downloaded via the link
+         * https://api.telegram.org/file/bot<token>/<file_path>,
+         * where <file_path> is taken from the response.
+         *
+         * @link https://core.telegram.org/bots/api#getFile
+         * @param array $params
+         * @var string  $params ['file_id']
+         * @return \File 
+         * @static 
+         */ 
+        public static function getFile($params)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->getFile($params);
+        }
+        
+        /**
+         * Set a Webhook to receive incoming updates via an outgoing webhook.
+         * 
+         * <code>
+         * $params = [
+         *   'url'         => '',
+         *   'certificate' => '',
+         * ];
+         * </code>
+         *
+         * @link https://core.telegram.org/bots/api#setwebhook
+         * @param array $params
+         * @var string  $params ['url']         HTTPS url to send updates to.
+         * @var string  $params ['certificate'] Upload your public key certificate so that the root certificate in
+         *                                      use can be checked.
+         * @throws TelegramSDKException
+         * @return \Telegram\Bot\TelegramResponse 
+         * @static 
+         */ 
+        public static function setWebhook($params)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->setWebhook($params);
+        }
+        
+        /**
+         * Returns webhook updates sent by Telegram.
+         * 
+         * Works only if you set a webhook.
+         *
+         * @see setWebhook
+         * @return \Telegram\Bot\Update 
+         * @static 
+         */ 
+        public static function getWebhookUpdates()
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->getWebhookUpdates();
+        }
+        
+        /**
+         * Removes the outgoing webhook (if any).
+         *
+         * @return \Telegram\Bot\TelegramResponse 
+         * @static 
+         */ 
+        public static function removeWebhook()
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->removeWebhook();
+        }
+        
+        /**
+         * Use this method to receive incoming updates using long polling.
+         * 
+         * <code>
+         * $params = [
+         *   'offset'  => '',
+         *   'limit'   => '',
+         *   'timeout' => '',
+         * ];
+         * </code>
+         *
+         * @link https://core.telegram.org/bots/api#getupdates
+         * @param array $params
+         * @var int|null $params ['offset']
+         * @var int|null $params ['limit']
+         * @var int|null $params ['timeout']
+         * @return \Telegram\Bot\Update[] 
+         * @static 
+         */ 
+        public static function getUpdates($params = [])
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->getUpdates($params);
+        }
+        
+        /**
+         * Builds a custom keyboard markup.
+         * 
+         * <code>
+         * $params = [
+         *   'keyboard'          => '',
+         *   'resize_keyboard'   => '',
+         *   'one_time_keyboard' => '',
+         *   'selective'         => '',
+         * ];
+         * </code>
+         *
+         * @link https://core.telegram.org/bots/api#replykeyboardmarkup
+         * @param array $params
+         * @var array   $params ['keyboard']
+         * @var bool    $params ['resize_keyboard']
+         * @var bool    $params ['one_time_keyboard']
+         * @var bool    $params ['selective']
+         * @return string 
+         * @static 
+         */ 
+        public static function replyKeyboardMarkup($params)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->replyKeyboardMarkup($params);
+        }
+        
+        /**
+         * Hide the current custom keyboard and display the default letter-keyboard.
+         * 
+         * <code>
+         * $params = [
+         *   'hide_keyboard' => true,
+         *   'selective'     => false,
+         * ];
+         * </code>
+         *
+         * @link https://core.telegram.org/bots/api#replykeyboardhide
+         * @param array $params
+         * @var bool    $params ['hide_keyboard']
+         * @var bool    $params ['selective']
+         * @return string 
+         * @static 
+         */ 
+        public static function replyKeyboardHide($params = [])
+        {
+                        return \Telegram\Bot\Api::replyKeyboardHide($params);
+        }
+        
+        /**
+         * Display a reply interface to the user (act as if the user has selected the bot‘s message and tapped ’Reply').
+         * 
+         * <code>
+         * $params = [
+         *   'force_reply' => true,
+         *   'selective'   => false,
+         * ];
+         * </code>
+         *
+         * @link https://core.telegram.org/bots/api#forcereply
+         * @param array $params
+         * @var bool    $params ['force_reply']
+         * @var bool    $params ['selective']
+         * @return string 
+         * @static 
+         */ 
+        public static function forceReply($params = [])
+        {
+                        return \Telegram\Bot\Api::forceReply($params);
+        }
+        
+        /**
+         * Processes Inbound Commands.
+         *
+         * @param bool $webhook
+         * @return \Telegram\Bot\Update|\Telegram\Bot\Update[] 
+         * @static 
+         */ 
+        public static function commandsHandler($webhook = false)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->commandsHandler($webhook);
+        }
+        
+        /**
+         * Determine if a given type is the message.
+         *
+         * @param string $type
+         * @param \Telegram\Bot\Update|\Telegram\Bot\Message $object
+         * @return bool 
+         * @static 
+         */ 
+        public static function isMessageType($type, $object)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->isMessageType($type, $object);
+        }
+        
+        /**
+         * Detect Message Type Based on Update or Message Object.
+         *
+         * @param \Telegram\Bot\Update|\Telegram\Bot\Message $object
+         * @return string|null 
+         * @static 
+         */ 
+        public static function detectMessageType($object)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->detectMessageType($object);
+        }
+        
+        /**
+         * Set the IoC Container.
+         *
+         * @param $container Container instance
+         * @return void 
+         * @static 
+         */ 
+        public static function setContainer($container)
+        {
+                        \Telegram\Bot\Api::setContainer($container);
+        }
+        
+        /**
+         * Get the IoC Container.
+         *
+         * @return \Telegram\Bot\Container 
+         * @static 
+         */ 
+        public static function getContainer()
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->getContainer();
+        }
+        
+        /**
+         * Check if IoC Container has been set.
+         *
+         * @return boolean 
+         * @static 
+         */ 
+        public static function hasContainer()
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->hasContainer();
+        }
+        
+        /**
+         * 
+         *
+         * @return int 
+         * @static 
+         */ 
+        public static function getTimeOut()
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->getTimeOut();
+        }
+        
+        /**
+         * 
+         *
+         * @param int $timeOut
+         * @return \Telegram\Bot\Api 
+         * @static 
+         */ 
+        public static function setTimeOut($timeOut)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->setTimeOut($timeOut);
+        }
+        
+        /**
+         * 
+         *
+         * @return int 
+         * @static 
+         */ 
+        public static function getConnectTimeOut()
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->getConnectTimeOut();
+        }
+        
+        /**
+         * 
+         *
+         * @param int $connectTimeOut
+         * @return \Telegram\Bot\Api 
+         * @static 
+         */ 
+        public static function setConnectTimeOut($connectTimeOut)
+        {
+                        /** @var \Telegram\Bot\Api $instance */
+                        return $instance->setConnectTimeOut($connectTimeOut);
+        }
+         
+    }
+ 
+}
+
+namespace Maatwebsite\Excel\Facades { 
+
+    /**
+     * 
+     *
+     */ 
+    class Excel {
+        
+        /**
+         * 
+         *
+         * @param object $export
+         * @param string|null $fileName
+         * @param string $writerType
+         * @param array $headers
+         * @throws \PhpOffice\PhpSpreadsheet\Exception
+         * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+         * @return \Maatwebsite\Excel\BinaryFileResponse 
+         * @static 
+         */ 
+        public static function download($export, $fileName, $writerType = null, $headers = [])
+        {
+                        /** @var \Maatwebsite\Excel\Excel $instance */
+                        return $instance->download($export, $fileName, $writerType, $headers);
+        }
+        
+        /**
+         * 
+         *
+         * @param object $export
+         * @param string $filePath
+         * @param string|null $disk
+         * @param string $writerType
+         * @param mixed $diskOptions
+         * @throws \PhpOffice\PhpSpreadsheet\Exception
+         * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+         * @return bool 
+         * @static 
+         */ 
+        public static function store($export, $filePath, $diskName = null, $writerType = null, $diskOptions = [])
+        {
+                        /** @var \Maatwebsite\Excel\Excel $instance */
+                        return $instance->store($export, $filePath, $diskName, $writerType, $diskOptions);
+        }
+        
+        /**
+         * 
+         *
+         * @param object $export
+         * @param string $filePath
+         * @param string|null $disk
+         * @param string $writerType
+         * @param mixed $diskOptions
+         * @return \Maatwebsite\Excel\PendingDispatch 
+         * @static 
+         */ 
+        public static function queue($export, $filePath, $disk = null, $writerType = null, $diskOptions = [])
+        {
+                        /** @var \Maatwebsite\Excel\Excel $instance */
+                        return $instance->queue($export, $filePath, $disk, $writerType, $diskOptions);
+        }
+        
+        /**
+         * 
+         *
+         * @param object $export
+         * @param string $writerType
+         * @return string 
+         * @static 
+         */ 
+        public static function raw($export, $writerType)
+        {
+                        /** @var \Maatwebsite\Excel\Excel $instance */
+                        return $instance->raw($export, $writerType);
+        }
+        
+        /**
+         * 
+         *
+         * @param object $import
+         * @param string|\Maatwebsite\Excel\UploadedFile $filePath
+         * @param string|null $disk
+         * @param string|null $readerType
+         * @return \Maatwebsite\Excel\Reader|\Maatwebsite\Excel\PendingDispatch 
+         * @static 
+         */ 
+        public static function import($import, $filePath, $disk = null, $readerType = null)
+        {
+                        /** @var \Maatwebsite\Excel\Excel $instance */
+                        return $instance->import($import, $filePath, $disk, $readerType);
+        }
+        
+        /**
+         * 
+         *
+         * @param object $import
+         * @param string|\Maatwebsite\Excel\UploadedFile $filePath
+         * @param string|null $disk
+         * @param string|null $readerType
+         * @return array 
+         * @static 
+         */ 
+        public static function toArray($import, $filePath, $disk = null, $readerType = null)
+        {
+                        /** @var \Maatwebsite\Excel\Excel $instance */
+                        return $instance->toArray($import, $filePath, $disk, $readerType);
+        }
+        
+        /**
+         * 
+         *
+         * @param object $import
+         * @param string|\Maatwebsite\Excel\UploadedFile $filePath
+         * @param string|null $disk
+         * @param string|null $readerType
+         * @return \Maatwebsite\Excel\Collection 
+         * @static 
+         */ 
+        public static function toCollection($import, $filePath, $disk = null, $readerType = null)
+        {
+                        /** @var \Maatwebsite\Excel\Excel $instance */
+                        return $instance->toCollection($import, $filePath, $disk, $readerType);
+        }
+        
+        /**
+         * 
+         *
+         * @param \Maatwebsite\Excel\ShouldQueue $import
+         * @param string|\Maatwebsite\Excel\UploadedFile $filePath
+         * @param string|null $disk
+         * @param string $readerType
+         * @return \Maatwebsite\Excel\PendingDispatch 
+         * @static 
+         */ 
+        public static function queueImport($import, $filePath, $disk = null, $readerType = null)
+        {
+                        /** @var \Maatwebsite\Excel\Excel $instance */
+                        return $instance->queueImport($import, $filePath, $disk, $readerType);
+        }
+        
+        /**
+         * 
+         *
+         * @param string $concern
+         * @param callable $handler
+         * @param string $event
+         * @static 
+         */ 
+        public static function extend($concern, $handler, $event = 'Maatwebsite\Excel\Events\BeforeWriting')
+        {
+                        return \Maatwebsite\Excel\Excel::extend($concern, $handler, $event);
+        }
+        
+        /**
+         * When asserting downloaded, stored, queued or imported, use regular expression
+         * to look for a matching file path.
+         *
+         * @return void 
+         * @static 
+         */ 
+        public static function matchByRegex()
+        {
+                        /** @var \Maatwebsite\Excel\Fakes\ExcelFake $instance */
+                        $instance->matchByRegex();
+        }
+        
+        /**
+         * When asserting downloaded, stored, queued or imported, use regular string
+         * comparison for matching file path.
+         *
+         * @return void 
+         * @static 
+         */ 
+        public static function doNotMatchByRegex()
+        {
+                        /** @var \Maatwebsite\Excel\Fakes\ExcelFake $instance */
+                        $instance->doNotMatchByRegex();
+        }
+        
+        /**
+         * 
+         *
+         * @param string $fileName
+         * @param callable|null $callback
+         * @static 
+         */ 
+        public static function assertDownloaded($fileName, $callback = null)
+        {
+                        /** @var \Maatwebsite\Excel\Fakes\ExcelFake $instance */
+                        return $instance->assertDownloaded($fileName, $callback);
+        }
+        
+        /**
+         * 
+         *
+         * @param string $filePath
+         * @param string|callable|null $disk
+         * @param callable|null $callback
+         * @static 
+         */ 
+        public static function assertStored($filePath, $disk = null, $callback = null)
+        {
+                        /** @var \Maatwebsite\Excel\Fakes\ExcelFake $instance */
+                        return $instance->assertStored($filePath, $disk, $callback);
+        }
+        
+        /**
+         * 
+         *
+         * @param string $filePath
+         * @param string|callable|null $disk
+         * @param callable|null $callback
+         * @static 
+         */ 
+        public static function assertQueued($filePath, $disk = null, $callback = null)
+        {
+                        /** @var \Maatwebsite\Excel\Fakes\ExcelFake $instance */
+                        return $instance->assertQueued($filePath, $disk, $callback);
+        }
+        
+        /**
+         * 
+         *
+         * @param string $filePath
+         * @param string|callable|null $disk
+         * @param callable|null $callback
+         * @static 
+         */ 
+        public static function assertImported($filePath, $disk = null, $callback = null)
+        {
+                        /** @var \Maatwebsite\Excel\Fakes\ExcelFake $instance */
+                        return $instance->assertImported($filePath, $disk, $callback);
+        }
+         
+    }
+ 
+}
+
+namespace Kavenegar\Laravel { 
+
+    /**
+     * 
+     *
+     */ 
+    class Facade {
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function Send($sender, $receptor, $message, $date = null, $type = null, $localid = null)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->Send($sender, $receptor, $message, $date, $type, $localid);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function SendArray($sender, $receptor, $message, $date = null, $type = null, $localmessageid = null)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->SendArray($sender, $receptor, $message, $date, $type, $localmessageid);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function Status($messageid)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->Status($messageid);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function StatusLocalMessageId($localid)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->StatusLocalMessageId($localid);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function Select($messageid)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->Select($messageid);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function SelectOutbox($startdate, $enddate, $sender)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->SelectOutbox($startdate, $enddate, $sender);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function LatestOutbox($pagesize, $sender)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->LatestOutbox($pagesize, $sender);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function CountOutbox($startdate, $enddate, $status = 0)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->CountOutbox($startdate, $enddate, $status);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function Cancel($messageid)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->Cancel($messageid);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function Receive($linenumber, $isread = 0)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->Receive($linenumber, $isread);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function CountInbox($startdate, $enddate, $linenumber, $isread = 0)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->CountInbox($startdate, $enddate, $linenumber, $isread);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function CountPostalcode($postalcode)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->CountPostalcode($postalcode);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function SendbyPostalcode($sender, $postalcode, $message, $mcistartindex, $mcicount, $mtnstartindex, $mtncount, $date)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->SendbyPostalcode($sender, $postalcode, $message, $mcistartindex, $mcicount, $mtnstartindex, $mtncount, $date);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function AccountInfo()
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->AccountInfo();
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function AccountConfig($apilogs, $dailyreport, $debug, $defaultsender, $mincreditalarm, $resendfailed)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->AccountConfig($apilogs, $dailyreport, $debug, $defaultsender, $mincreditalarm, $resendfailed);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function VerifyLookup($receptor, $token, $token2, $token3, $template, $type = null)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->VerifyLookup($receptor, $token, $token2, $token3, $template, $type);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */ 
+        public static function CallMakeTTS($receptor, $message, $date = null, $localid = null)
+        {
+                        /** @var \Kavenegar\KavenegarApi $instance */
+                        return $instance->CallMakeTTS($receptor, $message, $date, $localid);
+        }
+         
+    }
+ 
+}
+
 namespace Facade\Ignition\Facades { 
 
     /**
@@ -15406,205 +16635,6 @@ namespace Facade\Ignition\Facades {
         {
                         /** @var \Facade\FlareClient\Flare $instance */
                         return $instance->group($groupName, $properties);
-        }
-         
-    }
- 
-}
-
-namespace Kavenegar\Laravel { 
-
-    /**
-     * 
-     *
-     */ 
-    class Facade {
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function Send($sender, $receptor, $message, $date = null, $type = null, $localid = null)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->Send($sender, $receptor, $message, $date, $type, $localid);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function SendArray($sender, $receptor, $message, $date = null, $type = null, $localmessageid = null)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->SendArray($sender, $receptor, $message, $date, $type, $localmessageid);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function Status($messageid)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->Status($messageid);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function StatusLocalMessageId($localid)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->StatusLocalMessageId($localid);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function Select($messageid)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->Select($messageid);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function SelectOutbox($startdate, $enddate, $sender)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->SelectOutbox($startdate, $enddate, $sender);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function LatestOutbox($pagesize, $sender)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->LatestOutbox($pagesize, $sender);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function CountOutbox($startdate, $enddate, $status = 0)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->CountOutbox($startdate, $enddate, $status);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function Cancel($messageid)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->Cancel($messageid);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function Receive($linenumber, $isread = 0)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->Receive($linenumber, $isread);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function CountInbox($startdate, $enddate, $linenumber, $isread = 0)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->CountInbox($startdate, $enddate, $linenumber, $isread);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function CountPostalcode($postalcode)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->CountPostalcode($postalcode);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function SendbyPostalcode($sender, $postalcode, $message, $mcistartindex, $mcicount, $mtnstartindex, $mtncount, $date)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->SendbyPostalcode($sender, $postalcode, $message, $mcistartindex, $mcicount, $mtnstartindex, $mtncount, $date);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function AccountInfo()
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->AccountInfo();
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function AccountConfig($apilogs, $dailyreport, $debug, $defaultsender, $mincreditalarm, $resendfailed)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->AccountConfig($apilogs, $dailyreport, $debug, $defaultsender, $mincreditalarm, $resendfailed);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function VerifyLookup($receptor, $token, $token2, $token3, $template, $type = null)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->VerifyLookup($receptor, $token, $token2, $token3, $template, $type);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */ 
-        public static function CallMakeTTS($receptor, $message, $date = null, $localid = null)
-        {
-                        /** @var \Kavenegar\KavenegarApi $instance */
-                        return $instance->CallMakeTTS($receptor, $message, $date, $localid);
         }
          
     }
@@ -18507,9 +19537,13 @@ namespace  {
 
     class View extends \Illuminate\Support\Facades\View {}
 
-    class Flare extends \Facade\Ignition\Facades\Flare {}
+    class Telegram extends \Telegram\Bot\Laravel\Facades\Telegram {}
+
+    class Excel extends \Maatwebsite\Excel\Facades\Excel {}
 
     class Kavenegar extends \Kavenegar\Laravel\Facade {}
+
+    class Flare extends \Facade\Ignition\Facades\Flare {}
  
 }
 
