@@ -13,7 +13,7 @@ class AdminController extends Controller
     public function userList()
     {
         $users = PanelUser::where('id', '<>', auth()->id())->get();
-        return view('admin.user_list', [
+        return view('dashboard.admin.user_list', [
             'users' => $users
         ]);
     }
@@ -23,7 +23,7 @@ class AdminController extends Controller
         $user = PanelUser::query()->firstWhere([
             'id' => $id
         ]);
-        return view('admin.user_item', [
+        return view('dashboard.admin.user_item', [
             'user' => $user,
             'roles' => Role::query()->orderByDesc('id')->get()
         ]);
