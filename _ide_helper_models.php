@@ -308,7 +308,6 @@ namespace App{
  * @property-read \App\Device $device
  * @property-read \App\FeedbackResponse $feedbackResponse
  * @property-read \App\FeedbackTitle $feedbackTitles
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Image[] $images
  * @property-read int|null $images_count
  * @property-read \App\User $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Feedback newModelQuery()
