@@ -1125,7 +1125,7 @@ class ReportController extends Controller
         $users = UserReport::query()->where('id', $feedback->user_id)->paginate();
 
         $feedback = $feedbacks->where('feedback_id', $id)->first();
-        $feedback['images'] = $images;
+        $feedback->images = $images;
         $feedback->responseImages = $responseImages;
 
         $feedbacks->where('feedback_id', $id)->first()->is_selected = true;
