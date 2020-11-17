@@ -4,6 +4,7 @@ namespace App;
 
 use App\Helpers\UtilHelpers;
 use Illuminate\Database\Eloquent\Model;
+use App\Helpers\Helpers;
 
 class ProjectStatusLog extends Model
 {
@@ -42,6 +43,6 @@ class ProjectStatusLog extends Model
 
     public function getPayableAmountAttribute($value)
     {
-        return UtilHelpers::calculatePayableAmount($this);
+        return Helpers::calculatePayableAmount($this);
     }
 }
