@@ -45,6 +45,7 @@ use Exception;
 use URL;
 use App\ProjectStatus;
 use App\Constants\ProjectPremiumState;
+use GuzzleHttp\Client;
 
 class ReportController extends Controller
 {
