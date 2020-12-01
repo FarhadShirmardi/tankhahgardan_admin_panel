@@ -23,6 +23,8 @@ use GuzzleHttp\Client;
 use Storage;
 use Exception;
 use Artisan;
+use App\Jobs\SendFirebaseNotificationJob;
+use App\Constants\NotificationType;
 
 class ManagementController extends Controller
 {
@@ -399,9 +401,18 @@ class ManagementController extends Controller
                     return redirect()->back()->withErrors($validator);
                 }
             }
-            $campaign->promoCodes()->updateOrCreate([
+            $promoCode = $campaign->promoCodes()->updateOrCreate([
                 'id' => $id
             ], $request->all());
+
+            if ($id == 0) {
+                dispatch(
+                    (new SendFirebaseNotificationJob([
+                        'type' => NotificationType::PROMO_CODE,
+                        'promo_code_id' => $promoCode->id
+                ]))->onQueue('activationSms')
+                );
+            }
         } else {
             foreach ($users as $user) {
                 $code = UtilHelpers::generatePromoCode();
@@ -410,7 +421,7 @@ class ManagementController extends Controller
                     'user_id' => $user->id,
                     'max_count' => 1
                 ]);
-                $campaign->promoCodes()->firstOrCreate(['id' => $id], $request->all());
+                $promoCode = $campaign->promoCodes()->firstOrCreate(['id' => $id], $request->all());
 
                 if (!$id and isset($request->template) and $request->template != '') {
                     $this->dispatch((new PromoCodeSmsJob($user->full_phone_number, $request->template, $code))->onQueue('activationSms'));
@@ -420,6 +431,14 @@ class ManagementController extends Controller
                         'type' => PromoCode::class,
                         'text' => $request->template . ' - ' . $code
                     ]);
+                }
+                if ($id == 0) {
+                    dispatch(
+                        (new SendFirebaseNotificationJob([
+                            'type' => NotificationType::PROMO_CODE,
+                            'promo_code_id' => $promoCode->id
+                        ]))->onQueue('activationSms')
+                    );
                 }
             }
         }
