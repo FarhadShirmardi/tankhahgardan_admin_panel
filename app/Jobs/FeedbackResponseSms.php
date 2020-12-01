@@ -11,6 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Log;
 use Kavenegar;
+use App\Constants\NotificationType;
 
 class FeedbackResponseSms implements ShouldQueue
 {
@@ -56,6 +57,7 @@ class FeedbackResponseSms implements ShouldQueue
 //        }
         dispatch(
             (new SendFirebaseNotificationJob([
+                'type' => NotificationType::FEEDBACK_RESPONSE,
                 'receiver_id' => $this->user->id
             ]))->onQueue('activationSms')
         );
