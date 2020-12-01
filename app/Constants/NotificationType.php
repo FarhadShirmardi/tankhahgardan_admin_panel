@@ -32,4 +32,6 @@ class NotificationType
     public const REJECT_INVITE_PROJECT = 232;
 
     public const FILE_READY = 241;
+
+    public const PROMO_CODE = 251;
 }
