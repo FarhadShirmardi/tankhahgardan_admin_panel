@@ -15,7 +15,6 @@ use App\Constants\PremiumBanks;
 use App\Constants\PremiumPrices;
 use App\Transaction;
 use App\Constants\PurchaseType;
-use App\Helpers\UtilHelpers;
 use App\Jobs\PromoCodeSmsJob;
 use App\SmsLog;
 use App\Banner;
@@ -208,7 +207,7 @@ class ManagementController extends Controller
         /** @var Campaign $campaign */
         $campaign = Campaign::query()->findOrFail($campaignId);
         $promoCode = collect();
-        $promoCode['code'] = UtilHelpers::generatePromoCode();
+        $promoCode['code'] = Helpers::generatePromoCode();
         $user = null;
         if ($userIds) {
             $userIds = explode(',', $userIds);
@@ -391,7 +390,7 @@ class ManagementController extends Controller
         if (!$userIds) {
             if (!isset($request->code)) {
                 $request->merge([
-                    'code' => UtilHelpers::generatePromoCode()
+                    'code' => Helpers::generatePromoCode()
                 ]);
             } else {
                 $promoCode = PromoCode::query()->where('id', '<>', $id)->where('code', $request->code)->first();
@@ -415,7 +414,7 @@ class ManagementController extends Controller
             }
         } else {
             foreach ($users as $user) {
-                $code = UtilHelpers::generatePromoCode();
+                $code = Helpers::generatePromoCode();
                 $request->merge([
                     'code' => $code,
                     'user_id' => $user->id,
