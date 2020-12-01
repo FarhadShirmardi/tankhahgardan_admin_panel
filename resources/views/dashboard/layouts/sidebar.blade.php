@@ -73,9 +73,19 @@
                             class="icon-pie-chart"></i>گزارش وضعیت پروژه</a>
                 </li>
             @endif
-            <li class="nav-item nav-dropdown">
-                <a class="nav-link" href="{{ route('dashboard.feedbacks') }}"><i class="icon-user"></i>بازخوردها</a>
-            </li>
+            @if(auth()->user()->can('view_feedback'))
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link" href="{{ route('dashboard.feedbacks') }}"><i class="icon-user"></i>بازخوردها</a>
+                </li>
+            @endif
+            @if(auth()->user()->can('view_notifications'))
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link" href="{{ route('dashboard.notifications') }}"><i class="icon-bell"></i>تبلیغ‌ها</a>
+                </li>
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link" href="{{ route('dashboard.announcements') }}"><i class="icon-bell"></i>اعلان‌ها</a>
+                </li>
+            @endif
             @if(auth()->user()->hasRole('Admin'))
                 <li class="nav-item nav-dropdown">
                     <a class="nav-link" href="{{ route('dashboard.admin.user_list') }}"><i class="icon-people"></i>کاربران

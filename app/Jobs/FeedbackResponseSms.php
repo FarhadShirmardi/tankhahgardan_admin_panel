@@ -49,10 +49,15 @@ class FeedbackResponseSms implements ShouldQueue
         $token3 = '';
         $template = 'tankhah-feedback';
         $type = "sms";//sms | call
-        $result = Kavenegar::VerifyLookup($receptor, $token1, $token2, $token3, $template, $type);
-        if ($result) {
-            $message = $result[0]->statustext;
-            Log::info('Send to kavenegar   ====>   ' . $receptor . '  ' . $message);
-        }
+//        $result = Kavenegar::VerifyLookup($receptor, $token1, $token2, $token3, $template, $type);
+//        if ($result) {
+//            $message = $result[0]->statustext;
+//            Log::info('Send to kavenegar   ====>   ' . $receptor . '  ' . $message);
+//        }
+        dispatch(
+            (new SendFirebaseNotificationJob([
+                'receiver_id' => $this->user->id
+            ]))->onQueue('activationSms')
+        );
     }
 }
