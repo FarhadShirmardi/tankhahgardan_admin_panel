@@ -85,15 +85,6 @@
                 </div>
             </div>
             <div class="col-md-4 row">
-                <label class="col-md-5 col-form-label text-md-left">وضعیت پروژه</label>
-                <div class="ms-list col-md-7">
-                    <select name="project_states[]" multiple="multiple" id="project_states" style="width: 100%">
-                        @foreach($project_states as $projectState)
-                            <option @if($projectState['is_selected']) selected @endif
-                            value="{{$projectState['id']}}">{{$projectState['name']}}</option>
-                        @endforeach
-                    </select>
-                </div>
             </div>
         </div>
         <div class="row pb-5 pt-2 justify-content-center">
@@ -109,7 +100,6 @@
             <tr style="cursor: pointer;">
                 <th>ردیف</th>
                 <th onclick="sortTable('name')">نام پروژه</th>
-                <th onclick="sortTable('project_type')">وضعیت پروژه</th>
                 <th>استان</th>
                 <th>شهر</th>
                 <th onclick="sortTable('created_at')">تاریخ ایجاد پروژه</th>
@@ -130,7 +120,6 @@
                     style="background-color: {{ $colors[$project['project_type']][0] }}">
                     <td>{{($projects->currentPage() - 1) * $projects->perPage() + $loop->iteration}}</td>
                     <td>{{ $project->name }}</td>
-                    <td>{{ \App\Constants\ProjectPremiumState::getEnum($project->project_state) }}</td>
                     <td>{{ $states->firstWhere('id', $project->state_id)['name'] }}</td>
                     <td>{{ $cities->firstWhere('id', $project->city_id)['name'] }}</td>
                     <td>{{ \App\Helpers\Helpers::convertDateTimeToJalali($project->created_at) }}</td>
@@ -162,8 +151,6 @@
 
             document.getElementById('filter').submit();
         }
-
-        $('#project_states').select2({width: 'element'});
 
         $('#state_id').select2({
             width: 'element',

@@ -12,11 +12,14 @@ class PremiumDuration
 {
     const MONTH = 1;
     const HALF_MONTH = 2;
+    const ONE_WEEK = 3;
     const YEAR = 4;
 
     public static function getTitle($enum)
     {
         switch ($enum) {
+            case self::ONE_WEEK:
+                return trans('names.one_week');
             case self::MONTH:
                 return trans('names.one_month');
             case self::YEAR:
@@ -31,6 +34,8 @@ class PremiumDuration
     public static function getSecondTitle($enum)
     {
         switch ($enum) {
+            case self::ONE_WEEK:
+                return trans('names.one_week_2');
             case self::MONTH:
                 return trans('names.one_month_2');
             case self::YEAR:

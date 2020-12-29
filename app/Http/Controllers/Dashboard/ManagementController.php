@@ -9,7 +9,7 @@ use App\Campaign;
 use Validator;
 use App\PromoCode;
 use App\User;
-use App\ProjectStatusLog;
+use App\UserStatusLog;
 use App\Constants\ProjectStatusType;
 use App\Constants\PremiumBanks;
 use App\Constants\PremiumPrices;
@@ -109,7 +109,7 @@ class ManagementController extends Controller
 
     private function usedPromoCodeQuery()
     {
-        return ProjectStatusLog::query()
+        return UserStatusLog::query()
             ->where('status', ProjectStatusType::SUCCEED)
             ->whereColumn('promo_code_id', 'promo_codes.id')
             ->selectRaw('count(*)')
@@ -244,15 +244,9 @@ class ManagementController extends Controller
 
     public function fetchTransactions($filter)
     {
-        $transactions = ProjectStatusLog::query()
-            ->leftJoin('transactions', 'transactions.id', 'project_status_logs.transaction_id')
-            ->join('project_user', function ($join) {
-                $join->on('project_status_logs.project_id', 'project_user.project_id')
-                    ->whereNull('project_user.deleted_at')
-                    ->where('project_user.is_owner', true);
-            })
-            ->join('users', 'users.id', 'project_user.user_id')
-            ->join('projects', 'projects.id', 'project_user.project_id')
+        $transactions = UserStatusLog::query()
+            ->leftJoin('transactions', 'transactions.id', 'user_status_logs.transaction_id')
+            ->join('users', 'users.id', 'user_status_logs.user_id')
             ->where(function ($query) use ($filter) {
                 if (isset($filter['bank_ids']) and $filter['bank_ids'] != []) {
                     $query->whereIn('transactions.bank_id', $filter['bank_ids']);
@@ -260,22 +254,22 @@ class ManagementController extends Controller
             })
             ->where(function ($query) use ($filter) {
                 if (isset($filter['types']) and $filter['types'] != []) {
-                    $query->whereIn('project_status_logs.type', $filter['types']);
+                    $query->whereIn('user_status_logs.type', $filter['types']);
                 }
             })
             ->where(function ($query) use ($filter) {
                 if (isset($filter['states']) and $filter['states'] != []) {
-                    $query->whereIn('project_status_logs.status', $filter['states']);
+                    $query->whereIn('user_status_logs.status', $filter['states']);
                 }
             })
             ->where(function ($query) use ($filter) {
                 if (isset($filter['plan_ids']) and $filter['plan_ids'] != []) {
-                    $query->whereIn('project_status_logs.price_id', $filter['plan_ids']);
+                    $query->whereIn('user_status_logs.price_id', $filter['plan_ids']);
                 }
             })
             ->where(function ($query) use ($filter) {
                 if (isset($filter['promo_code_id'])) {
-                    $query->where('project_status_logs.promo_code_id', $filter['promo_code_id']);
+                    $query->where('user_status_logs.promo_code_id', $filter['promo_code_id']);
                 }
             })
             ->when(!empty($filter['phone_number']), function ($query) use ($filter) {
@@ -297,27 +291,26 @@ class ManagementController extends Controller
                 }
             })
             ->orderBy($filter['sort_field'], $filter['sort_type'])
-            ->selectRaw("IFNULL(transactions.created_at, project_status_logs.created_at) as date")
+            ->selectRaw("IFNULL(transactions.created_at, user_status_logs.created_at) as date")
             ->addSelect([
-                'project_status_logs.project_id',
-                'projects.name as project_name',
+                'user_status_logs.user_id',
                 'users.name as user_name',
                 'users.family as user_family',
                 'users.phone_number',
-                'project_status_logs.price_id as plan_id',
-                'project_status_logs.start_date as start_date',
-                'project_status_logs.end_date as end_date',
-                'project_status_logs.trace_number as mapsa_ref',
+                'user_status_logs.price_id as plan_id',
+                'user_status_logs.start_date as start_date',
+                'user_status_logs.end_date as end_date',
+                'user_status_logs.trace_number as mapsa_ref',
                 'transactions.trace_no as bank_ref',
-                'project_status_logs.type',
-                'project_status_logs.user_count',
-                'project_status_logs.volume_size',
-                'project_status_logs.status as state',
+                'user_status_logs.type',
+                'user_status_logs.user_count',
+                'user_status_logs.volume_size',
+                'user_status_logs.status as state',
                 'transactions.bank_id as bank',
-                'project_status_logs.wallet_amount',
-                'project_status_logs.total_amount',
-                'project_status_logs.discount_amount',
-                'project_status_logs.added_value_amount',
+                'user_status_logs.wallet_amount',
+                'user_status_logs.total_amount',
+                'user_status_logs.discount_amount',
+                'user_status_logs.added_value_amount',
             ])->get();
 
         $transactions = $transactions->map(function ($item) {

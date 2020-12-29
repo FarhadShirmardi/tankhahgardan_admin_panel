@@ -17,8 +17,6 @@ class Project extends Model
 
     protected $connection = 'mysql';
 
-    protected $with = ['projectStatus'];
-
     protected $fillable = [
         'name',
         'state_id',
@@ -130,21 +128,6 @@ class Project extends Model
     public function projectInviteNotification()
     {
         return $this->hasMany(ProjectInviteNotification::class, 'project_id', 'id');
-    }
-
-    public function projectStatus()
-    {
-        return $this->hasMany(ProjectStatus::class)->orderBy('end_date', 'DESC');
-    }
-
-    public function projectStatusLog()
-    {
-        return $this->hasMany(ProjectStatusLog::class)->whereNotNull('transaction_id');
-    }
-
-    public function projectStatusLogNull()
-    {
-        return $this->hasMany(ProjectStatusLog::class);
     }
 
     public function getCurrencyTextAttribute($value)

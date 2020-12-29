@@ -63,7 +63,7 @@
                         @endif
                     </td>
                     <td>{{ \App\Constants\ProjectUserState::getEnum($project->status) }}</td>
-                    <td>{{ \App\Constants\ProjectPremiumState::getEnum($project->project_state) }}</td>
+                    <td>{{ \App\Constants\UserPremiumState::getEnum($project->project_state) }}</td>
                     <td>{{ $project->payment_count }}</td>
                     <td>{{ $project->receive_count }}</td>
                     <td>{{ $project->note_count }}</td>

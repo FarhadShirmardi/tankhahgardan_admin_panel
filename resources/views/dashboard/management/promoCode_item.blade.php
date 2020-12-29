@@ -9,7 +9,7 @@
     @endif
     @if($userIds)
         @if($user)
-            @include('dashboard.layouts.username')
+            <span class="ltr">{{ $user->fullname }}</span>
         @else
             {{ 'جمعی از کابران' }}
         @endif

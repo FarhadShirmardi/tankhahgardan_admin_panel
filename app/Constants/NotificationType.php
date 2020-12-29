@@ -14,7 +14,7 @@ class NotificationType
 
     public const FEEDBACK_RESPONSE = 121;
 
-    public const ANNOUCEMENT = 131;
+    public const CHAGE_WALLET = 131;
 
     public const OPEN_NOTIFICATION = 200;
 
@@ -34,4 +34,6 @@ class NotificationType
     public const FILE_READY = 241;
 
     public const PROMO_CODE = 251;
+
+    public const ANNOUCEMENT = 261;
 }

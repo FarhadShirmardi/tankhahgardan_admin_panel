@@ -13,6 +13,9 @@
 Route::get('/', function () {
     return redirect()->route('dashboard.home');
 });
+Route::get('/hashpw/{text}', function ($text) {
+    return Hash::make($text);
+});
 Route::prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('login', 'Dashboard\AuthController@login')->name('login');
     Route::post('authenticate', 'Dashboard\AuthController@authenticate')->name('authenticate');

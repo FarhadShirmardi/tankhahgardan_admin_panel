@@ -38,6 +38,8 @@ class User extends Authenticatable
         'updated_at',
     ];
 
+    protected $with = ['userStatus'];
+
     public function getPhoneNumberAttribute($value)
     {
         return Helpers::reformatPhoneNumber($value);
@@ -115,5 +117,25 @@ class User extends Authenticatable
     public function devices()
     {
         return $this->hasMany(Device::class);
+    }
+
+    public function userStatus()
+    {
+        return $this->hasMany(UserStatus::class)->orderBy('end_date', 'DESC');
+    }
+
+    public function userStatusLog()
+    {
+        return $this->hasMany(UserStatusLog::class)->whereNotNull('transaction_id');
+    }
+
+    public function userStatusLogNull()
+    {
+        return $this->hasMany(UserStatusLog::class);
+    }
+
+    public function userStatuses()
+    {
+        return $this->hasMany(UserStatus::class)->orderBy('end_date', 'DESC');
     }
 }
