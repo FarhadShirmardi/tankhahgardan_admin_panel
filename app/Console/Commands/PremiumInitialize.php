@@ -24,6 +24,8 @@ use App\Exports\AllUserExport;
 use App\Exports\ReleaseSmsExport;
 use App\UserReport;
 use Illuminate\Support\Collection;
+use Exception;
+use DB;
 
 class PremiumInitialize extends Command
 {
@@ -61,7 +63,7 @@ class PremiumInitialize extends Command
     {
         $this->call('generate:report', ['--project']);
 
-        \DB::beginTransaction();
+        DB::beginTransaction();
 
         /** @var Collection $activeUserList */
         $activeUserList = collect();
@@ -88,7 +90,7 @@ class PremiumInitialize extends Command
 
             $this->output->write(" | user count : " . $userCount);
 
-            if (!$activeUserList->has($owner->id)) {
+            if (!$activeUserList->contains($owner->id)) {
                 $this->createUser($owner->id, $userCount);
             }
 
@@ -158,7 +160,7 @@ https://bitn.ir/8Ziik';
                 'discount_percent' => 40,
                 'max_discount' => null,
                 'start_at' => now()->toDateTimeString(),
-                'expire_at' => '2020-12-30 23:59:59',
+                'expire_at' => '2021-01-29 23:59:59',
                 'text' => 'هدیه به کاربران قدیمی',
             ]);
 
@@ -293,7 +295,7 @@ https://bitn.ir/IIS6x
         return;
         try {
             $result = Kavenegar::Send('10005000000550', $receptor, $text);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->error('Error in sending sms to ' . $receptor);
             $this->error($exception->getMessage());
         }
