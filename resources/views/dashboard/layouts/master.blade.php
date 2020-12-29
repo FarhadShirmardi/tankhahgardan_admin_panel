@@ -48,7 +48,6 @@
     {{-- Gets content section--}}
     @include('dashboard.layouts.main')
 
-    @include('dashboard.layouts.aside_menu')
 
 </div>
 
@@ -56,6 +55,12 @@
 @include('dashboard.layouts.footer')
 
 @include('dashboard.layouts.scripts')
+
+@yield('chart')
+
+@include('dashboard.layouts.datepicker')
+
+@yield('scripts')
 
 </body>
 

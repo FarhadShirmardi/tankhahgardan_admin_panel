@@ -191,3 +191,8 @@ input, button, select, optgroup, textarea {
     position: relative;
     bottom: 200px;
 }
+
+.breaking-text {
+    max-width: 300px;
+    word-wrap: break-word;
+}

@@ -6,12 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Feedback extends Model
 {
+
+    protected $connection = 'mysql';
+
     protected $fillable = [
         'user_id',
         'feedback_title_id',
         'text',
         'device_id',
-        'application_version'
+        'application_version',
+        'state'
     ];
 
     public function feedbackTitles()
@@ -37,5 +41,10 @@ class Feedback extends Model
     public function device()
     {
         return $this->hasOne(Device::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

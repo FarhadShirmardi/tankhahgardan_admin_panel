@@ -1,5 +1,5 @@
 @extends('dashboard.layouts.master')
 
 @section('content')
-    This is the main page.
+    <h5>{{ auth()->user()->name }} به پنل مدیریت تنخواه‌گردان خوش آمدید.</h5>
 @endsection

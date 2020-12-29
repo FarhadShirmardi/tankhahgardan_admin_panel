@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class StepByStep extends Model
 {
+
+    protected $connection = 'mysql';
+
     protected $fillable = [
         'code',
     ];

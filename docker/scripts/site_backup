@@ -1,0 +1,21 @@
+#!/bin/bash
+# Scripts to create mizbano site backup
+
+# Confiration value
+site_path=/usr/share/nginx/html/home
+site_name=mizbano
+backup_path=/backup/site
+expired=10                       #how many days before the backup directory will be removed
+
+today=`date +%Y-%m-%d`
+
+if [ ! -d $backup_path/$today ]
+then
+        mkdir -p $backup_path/$today
+fi
+
+env GZIP=-9 tar cvzf $backup_path/$today/$site_name-$(date +%Y-%m-%d).tar.gz $site_path
+
+# Remove folder which more than 3 days
+find $backup_path -type d -mtime +$expired | xargs rm -Rf
+echo 'Backup completed successfuly.'

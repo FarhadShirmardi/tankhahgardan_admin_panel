@@ -22,11 +22,11 @@
         "vue-template-compiler": "^2.6.11"
     },
     "dependencies": {
-        "@popperjs/core": "^2.1.0",
         "cropper": "^4.0.0",
         "cropperjs": "^1.5.5",
+        "highcharts": "^8.0.4",
         "jquery-cropper": "^1.0.0",
         "node-sass": "^4.12.0",
-        "popper.js": "^1.12"
+        "popper.js": "^1.12.3"
     }
 }

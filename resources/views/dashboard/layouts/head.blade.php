@@ -2,14 +2,11 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="پنل مدیریت فروشگاه">
-    <meta name="author" content="Amir H Piri">
-    <link rel="shortcut icon" href="img/favicon.png">
     <title>پنل مدیریت تنخواه گردان</title>
 
     <!-- Icons -->
-    <link href="{{ url('/') }}/dashboard/css/font-awesome.min.css" rel="stylesheet">
-    <link href="{{ url('/') }}/dashboard/css/simple-line-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('dashboard/css/font-awesome.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('dashboard/css/simple-line-icons.css') }}"/>
 
     {{--    <link rel="stylesheet" href="{{ asset('dashboard/css/selectr.css') }}">--}}
     <link rel="stylesheet" href="{{ asset('dashboard/css/jstree.min.css') }}"/>

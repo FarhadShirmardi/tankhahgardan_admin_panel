@@ -1,0 +1,44 @@
+FROM centos:7
+
+WORKDIR /usr/share/nginx/html/home
+
+RUN yum -y update && \
+    yum -y install epel-release && \
+    yum install -y initscripts && \
+    yum -y install nginx \
+    yum -y install https://$(rpm -E '%{?centos:centos}%{!?centos:rhel}%{rhel}').iuscommunity.org/ius-release.rpm && \
+    yum -y install php72u-xml \
+        php72u-cli \
+        php72u-json \
+        php72u-mbstring \
+        php72u-pdo \
+        php72u-mysqlnd \
+        php72u-mcrypt \
+        php72u-process \
+        php72u-pecl-redis \
+        supervisor \
+    	crontabs \
+        ntp \
+        vim \
+        libsodium \
+        php72u-gmp \
+        wget
+
+RUN yum -y localinstall https://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm && \
+    yum -y install mysql-community-server
+
+
+COPY ./docker/php.ini /etc/php.ini
+COPY ./docker/supervisord_backup.conf /etc/supervisord.conf
+
+# comment out PAM
+RUN sed -i -e '/pam_loginuid.so/s/^/#/' /etc/pam.d/crond
+
+COPY ./docker/laravel_backup /etc/cron.d/laravel_backup
+RUN chmod 0644 /etc/cron.d/laravel_backup && \
+    crontab /etc/cron.d/laravel_backup && \
+    yes | cp /usr/share/zoneinfo/Asia/Tehran /etc/localtime
+
+#CMD ["nginx", "-g", "daemon off;"]
+CMD ["/usr/bin/supervisord", "-n"]
+
