@@ -13,7 +13,7 @@ services:
     ports:
       - "7979:80"
     networks:
-      tankhahgardan_vpcbr::
+      tankhahgardan_vpcbr:
         ipv4_address: 10.4.0.100
     restart: always
 
