@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class ProjectStatus extends Model
+class UserStatus extends Model
 {
     protected $connection = 'mysql';
     use SoftDeletes;

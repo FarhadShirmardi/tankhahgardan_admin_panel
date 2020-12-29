@@ -8,7 +8,6 @@
 
 namespace App\Helpers;
 
-use App;
 use App\Constants\UserActivationConstant;
 use App\Jobs\UserActivationSmsJob;
 use App\Project;
@@ -32,12 +31,16 @@ use RangeException;
 use Storage;
 use App\Constants\ProjectUserState;
 use App\Constants\PremiumConstants;
-use App\Constants\ProjectPremiumState;
-use App\ProjectStatus;
+use App\Constants\UserPremiumState;
+use App\UserStatus;
 use Illuminate\Support\Facades\DB;
-use App\ProjectStatusLog;
+use App\UserStatusLog;
 use Illuminate\Support\Str;
 use App\PromoCode;
+use App\Image;
+use App\SentImage;
+use App\ProjectUser;
+use App\File;
 
 class Helpers
 {
@@ -602,46 +605,117 @@ class Helpers
 
     public static function getUserCounts(User &$user)
     {
-        /** @var Project $projects */
-        $projects = $user->projects()->where('state', ProjectUserState::ACTIVE)->where('is_owner', true)->get();
-
-        $userCount = [
-            'free_project_used' => 0,
-            'free_project_remain' => 0,
-            'wallet' => $user->wallet_amount,
-            'reference_charge_amount' => PremiumConstants::REFERENCE_CHARGE_AMOUNT
+        $projects = $user->projects()->where('is_owner', true)->get();
+        $projectIds = $projects->pluck('id')->toArray();
+        /** @var UserStatus $userStatus */
+        $userStatus = $user->userStatuses()
+            ->where('start_date', '<=', now()->toDateTimeString())
+            ->where('end_date', '>=', now()->toDateTimeString())
+            ->first();
+        $limits = [
+            'volume_size_limit' => PremiumConstants::FREE_VOLUME_SIZE,
+            'user_count_limit' => PremiumConstants::FREE_USER_COUNT,
+            'image_count_limit' => PremiumConstants::IMAGE_COUNT_LIMIT,
+            'pdf_count_limit' => PremiumConstants::PDF_COUNT_LIMIT,
+            'excel_count_limit' => 0,
         ];
-        $projects->each(function ($project, $key) use (&$userCount) {
-            if (in_array($project->premium_state, [ProjectPremiumState::FREE, ProjectPremiumState::EXPIRED_PREMIUM])) {
-                $userCount['free_project_used']++;
+        if ($userStatus) {
+            $limits = [
+                'volume_size_limit' => $userStatus->volume_size,
+                'user_count_limit' => $userStatus->user_count,
+                'image_count_limit' => 1000000,
+                'activity_count_limit' => 1000000,
+                'pdf_count_limit' => 1000000,
+                'excel_count_limit' => 1,
+            ];
+        }
+
+        $images = DB::query()
+            ->selectRaw("CONCAT_WS('-',count(*),IFNULL(ROUND(sum(size) / 1024 / 1024),0))")
+            ->fromSub(
+                DB::query()->fromSub(
+                    Image::query()
+                        ->withoutTrashed()
+                        ->whereIn('project_id', $projectIds)
+                        ->select(['path', 'size'])
+                        ->getQuery()
+                        ->unionAll(
+                            SentImage::query()
+                                ->withoutTrashed()
+                                ->whereIn('project_id', $projectIds)
+                                ->select(['path', 'size'])->getQuery()
+                        ),
+                    'joined_images'
+                )->groupBy('path'),
+                'images'
+            );
+        $userCount = ProjectUser::query()
+            ->withoutTrashed()
+            ->whereIn('project_id', $projectIds)
+            ->where('is_owner', false)
+            ->whereNotIn('project_user.state', [ProjectUserState::INACTIVE, ProjectUserState::FORBIDDEN])
+            ->selectRaw('count(*)')->getQuery();
+        $pdfCount = File::query()
+            ->whereIn('project_id', $projectIds)
+            ->where('type', 'like', '%PDF')
+            ->whereDate('created_at', now()->toDateString())
+            ->selectRaw('count(*)')
+            ->getQuery();
+        $query = DB::query()
+            ->selectSub($images, 'images')
+            ->selectSub($userCount, 'user_count')
+            ->selectSub($pdfCount, 'pdf_count');
+        $results = $query->first();
+        list($results->image_count, $results->volume_size) = explode('-', $results->images);
+        unset($results->images);
+        $counts = collect();
+        $r = new \ReflectionClass(PremiumConstants::class);
+        $results->excel_count = 0;
+        foreach ($results as $key => $used) {
+            $limit = $r->getConstant(strtoupper($key) . '_LIMIT');
+            if (!$limit) {
+                $counts = $counts->merge([
+                    $key . '_remain' => $limits[$key . '_limit'] - $used,
+                    $key . '_limit' => $limits[$key . '_limit']
+                ]);
+            } else {
+                $counts = $userStatus ? $counts->merge([
+                    $key . '_remain' => $limits[$key . '_limit'] - $used,
+                    $key . '_limit' => $limit
+                ]) : $counts->merge([
+                    $key . '_remain' => $limit - $used,
+                    $key . '_limit' => $limit
+                ]);
             }
-        });
-        $userCount['free_project_remain'] = PremiumConstants::FREE_PROJECT_LIMIT - $userCount['free_project_used'];
-        unset($userCount['free_project_used']);
-        return $userCount;
+        }
+        \Log::info($counts);
+        $counts['free_project_remain'] = 100;
+        $counts['wallet'] = $user->wallet_amount;
+        $counts['reference_charge_amount'] = PremiumConstants::REFERENCE_CHARGE_AMOUNT;
+        return $counts;
     }
 
     public static function getProjectStatus(Project &$project)
     {
         $projectState = $project->projectStatus->first();
         if (!$projectState) {
-            return ProjectPremiumState::FREE;
+            return UserPremiumState::FREE;
         } else {
             $carbon = new Carbon();
             $endDate = $carbon->parse($projectState->end_date);
             if ($endDate->lt(now())) {
-                return ProjectPremiumState::EXPIRED_PREMIUM;
+                return UserPremiumState::EXPIRED_PREMIUM;
             } elseif ($endDate->diffInDays(now()) < PremiumConstants::NEAR_END_THRESHOLD) {
-                return ProjectPremiumState::NEAR_ENDING_PREMIUM;
+                return UserPremiumState::NEAR_ENDING_PREMIUM;
             } else {
-                return ProjectPremiumState::PREMIUM;
+                return UserPremiumState::PREMIUM;
             }
         }
     }
 
     public static function getProjectCounts(Project &$project)
     {
-        /** @var ProjectStatus $projectStatus */
+        /** @var UserStatus $projectStatus */
         $projectStatus = $project->projectStatus
             ->where('start_date', '<=', now()->toDateTimeString())
             ->where('end_date', '>=', now()->toDateTimeString())
@@ -706,12 +780,12 @@ class Helpers
         return $counts;
     }
 
-    public static function calculatePayableAmount(ProjectStatusLog &$projectStatusLog)
+    public static function calculatePayableAmount(UserStatusLog &$userStatusLog)
     {
-        $totalAmount = $projectStatusLog->total_amount;
-        $addedValueAmount = $projectStatusLog->added_value_amount;
-        $discountAmount = $projectStatusLog->discount_amount;
-        $walletAmount = $projectStatusLog->wallet_amount;
+        $totalAmount = $userStatusLog->total_amount;
+        $addedValueAmount = $userStatusLog->added_value_amount;
+        $discountAmount = $userStatusLog->discount_amount;
+        $walletAmount = $userStatusLog->wallet_amount;
 
         return self::getPayableAmount($totalAmount, $addedValueAmount, $discountAmount, $walletAmount);
     }

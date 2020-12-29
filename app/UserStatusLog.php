@@ -6,7 +6,7 @@ use App\Helpers\UtilHelpers;
 use Illuminate\Database\Eloquent\Model;
 use App\Helpers\Helpers;
 
-class ProjectStatusLog extends Model
+class UserStatusLog extends Model
 {
     protected $connection = 'mysql';
     protected $fillable = [

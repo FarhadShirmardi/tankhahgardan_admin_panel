@@ -5,7 +5,6 @@
             <th>ردیف</th>
             <th onclick="sortTable('full_name')">نام کاربر</th>
             <th onclick="sortTable('phone_number')">شماره کاربر</th>
-            <th onclick="sortTable('project_name')">نام پروژه</th>
             <th onclick="sortTable('date')">تاریخ پرداخت</th>
             <th onclick="sortTable('bank_ref')">شماره تراکنش بانک</th>
             <th onclick="sortTable('mapsa_ref')">شماره تراکنش مپسا</th>
@@ -26,7 +25,7 @@
         <tbody>
         @foreach($transactions as $transaction)
             <tr class="clickableRow table-row-clickable align-center"
-                data-href="{{ route('dashboard.report.projectActivity', ['id' => $transaction->project_id]) }}"
+                data-href="{{ route('dashboard.report.userActivity', ['id' => $transaction->user_id]) }}"
             >
                 @if($transactions instanceof \Illuminate\Pagination\LengthAwarePaginator)
                     <td>{{ ($transactions->currentPage() - 1) * $transactions->perPage() + $loop->iteration }}</td>
@@ -35,7 +34,6 @@
                 @endif
                 <td>{{ $transaction->full_name }}</td>
                 <td nowrap="nowrap" class="ltr">{{ $transaction->phone_number }}</td>
-                <td>{{ $transaction->project_name }}</td>
                 <td nowrap="nowrap" class="ltr">{{ $transaction->date }}</td>
                 <td nowrap="nowrap" class="ltr">{{ $transaction->bank_ref }}</td>
                 <td nowrap="nowrap" class="ltr">{{ $transaction->mapsa_ref }}</td>

@@ -43,9 +43,10 @@ use App\Constants\Platform;
 use Storage;
 use Exception;
 use URL;
-use App\ProjectStatus;
-use App\Constants\ProjectPremiumState;
+use App\UserStatus;
+use App\Constants\UserPremiumState;
 use GuzzleHttp\Client;
+use App\Constants\PremiumConstants;
 
 class ReportController extends Controller
 {
@@ -164,6 +165,15 @@ class ReportController extends Controller
 
         $rangeCounts = $this->getRangeCounts($rangeUserQuery);
 
+        $userStates = collect();
+        foreach (UserPremiumState::toArray() as $item) {
+            $userStates->push([
+                'id' => $item,
+                'name' => UserPremiumState::getEnum($item),
+                'is_selected' => in_array($item, $filter['user_states'])
+            ]);
+        }
+
         list($sortableFields, $sortableTypes) = $this->getUserSortFields();
 
         return view('dashboard.report.allUserActivity', [
@@ -174,7 +184,8 @@ class ReportController extends Controller
                 'sortable_fields' => $sortableFields,
                 'sortable_types' => $sortableTypes,
                 'range_counts' => $rangeCounts,
-                'userIds' => implode(',', $userIds)
+                'userIds' => implode(',', $userIds),
+                'user_states' => $userStates
             ]
         );
     }
@@ -194,7 +205,8 @@ class ReportController extends Controller
             'name' => $request->input('name', ''),
             'start_date' => $startDate,
             'end_date' => $endDate,
-            'user_ids' => $request->input('user_ids', [])
+            'user_ids' => $request->input('user_ids', []),
+            'user_states' => $request->input('user_states', [])
         ];
     }
 
@@ -222,6 +234,9 @@ class ReportController extends Controller
         }
         if (isset($filter['user_ids']) and $filter['user_ids'] != []) {
             $usersQuery = $usersQuery->whereIn('id', $filter['user_ids']);
+        }
+        if (isset($filter['user_states']) and $filter['user_states'] != []) {
+            $usersQuery = $usersQuery->whereIn('user_state', $filter['user_states']);
         }
 
         return $usersQuery;
@@ -363,23 +378,6 @@ class ReportController extends Controller
             }
         }
 
-        $projectStateQuery = ProjectStatus::query()
-            ->whereColumn('project_id', 'projects.id')
-            ->orderBy('end_date', 'DESC')
-            ->limit(1)
-            ->selectRaw("
-                IF(
-                    project_statuses.end_date < '" . now()->toDateTimeString() . "',
-                    " . ProjectPremiumState::EXPIRED_PREMIUM . ",
-                    IF(
-                        project_statuses.end_date < '" . now()->addDays(5)->toDateTimeString() . "',
-                        " . ProjectPremiumState::NEAR_ENDING_PREMIUM . ",
-                        " . ProjectPremiumState::PREMIUM . "
-                    )
-                )
-        ");
-
-
         return Project::query()
             ->joinSub($maxTimeQuery, 'MaxTime', 'MaxTime.project_id', '=', 'projects.id')
             ->addSelect('projects.name as name')
@@ -387,7 +385,6 @@ class ReportController extends Controller
             ->addSelect('projects.city_id as city_id')
             ->addSelect('projects.state_id as state_id')
             ->addSelect('projects.created_at as created_at')
-            ->selectRaw("IFNULL( (" . $projectStateQuery->toSql() . " ), " . ProjectPremiumState::FREE . ") as project_state")
             ->selectSub($paymentCountQuery, 'payment_count')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($noteCountQuery, 'note_count')
@@ -456,6 +453,21 @@ class ReportController extends Controller
                 $userTypeQuery .= 'IF(MaxTime.max_time ' . $time[0] . ' \'' . $time[1] . '\', ' . $time[2] . ', ';
             }
         }
+        $userStateQuery = UserStatus::query()
+            ->whereColumn('user_id', 'users.id')
+            ->orderBy('end_date', 'DESC')
+            ->limit(1)
+            ->selectRaw("
+                IF(
+                    user_statuses.end_date < '" . now()->toDateTimeString() . "',
+                    " . UserPremiumState::EXPIRED_PREMIUM . ",
+                    IF(
+                        user_statuses.end_date < '" . now()->addDays(PremiumConstants::NEAR_END_THRESHOLD)->toDateTimeString() . "',
+                        " . UserPremiumState::NEAR_ENDING_PREMIUM . ",
+                        " . UserPremiumState::PREMIUM . "
+                    )
+                )
+        ");
 
 
         return User::query()
@@ -477,6 +489,7 @@ class ReportController extends Controller
             ->selectSub($projectCount, 'project_count')
             ->selectSub($ownProjectCount, 'own_project_count')
             ->selectSub($notOwnProjectCount, 'not_own_project_count')
+            ->selectRaw("IFNULL( (" . $userStateQuery->toSql() . " ), " . UserPremiumState::FREE . ") as user_state")
             ->selectRaw('MaxTime.max_time as max_time')
             ->selectRaw($userTypeQuery);
     }
@@ -498,18 +511,6 @@ class ReportController extends Controller
             ->selectRaw('count(*)')->getQuery();
         $imageSizeQuery = Image::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('user_id', $id)
             ->selectRaw('IFNULL(sum(size), 0) / 1024 / 1024')->getQuery();
-        $projectStateQuery = ProjectStatus::query()->whereColumn('project_id', 'projects.id')->orderBy('end_date', 'DESC')->limit(1)
-            ->selectRaw("
-                IF(
-                    project_statuses.end_date < '" . now()->toDateTimeString() . "',
-                    " . ProjectPremiumState::EXPIRED_PREMIUM . ",
-                    IF(
-                        project_statuses.end_date < '" . now()->addDays(5)->toDateTimeString() . "',
-                        " . ProjectPremiumState::NEAR_ENDING_PREMIUM . ",
-                        " . ProjectPremiumState::PREMIUM . "
-                    )
-                )
-        ");
 
         $projectsQuery = Project::query()
             ->join('project_user', function ($join) use ($id) {
@@ -519,7 +520,6 @@ class ReportController extends Controller
             ->addSelect('project_user.is_owner as is_owner')
             ->addSelect('projects.name as name')
             ->addSelect('projects.id as id')
-            ->selectRaw("IFNULL( (" . $projectStateQuery->toSql() . " ), " . ProjectPremiumState::FREE . ") as project_state")
             ->addSelect('projects.is_archived')
             ->addSelect('project_user.state as status')
             ->selectSub($paymentCountQuery, 'payment_count')
@@ -599,15 +599,6 @@ class ReportController extends Controller
 
         list($sortableFields, $sortableTypes) = $this->getProjectSortFields();
 
-        $projectStates = collect();
-        foreach (ProjectPremiumState::toArray() as $item) {
-            $projectStates->push([
-                'id' => $item,
-                'name' => ProjectPremiumState::getEnum($item),
-                'is_selected' => in_array($item, $filter['project_states'])
-            ]);
-        }
-
         return view('dashboard.report.allProjectActivity', [
             'projects' => $projects,
             'counts' => $counts,
@@ -616,8 +607,7 @@ class ReportController extends Controller
             'filter' => $filter,
             'colors' => $this->colors(),
             'sortable_fields' => $sortableFields,
-            'sortable_types' => $sortableTypes,
-            'project_states' => $projectStates
+            'sortable_types' => $sortableTypes
         ]);
     }
 
@@ -629,8 +619,7 @@ class ReportController extends Controller
             'sort_type' => $request->input('sort_type', 'DESC'),
             'state_id' => $request->input('state_id', 0),
             'city_id' => $request->input('city_id', 0),
-            'name' => $request->input('name', ''),
-            'project_states' => $request->input('project_states', [])
+            'name' => $request->input('name', '')
         ];
     }
 
@@ -650,10 +639,6 @@ class ReportController extends Controller
         }
         if ($filter['city_id']) {
             $projectsQuery = $projectsQuery->where('city_id', $filter['city_id']);
-        }
-
-        if (isset($filter['project_states']) and $filter['project_states'] != []) {
-            $projectsQuery = $projectsQuery->whereIn('project_state', $filter['project_states']);
         }
 
         return $projectsQuery;

@@ -53,7 +53,7 @@ class PanelUserSeeder extends Seeder
         ], [
             'phone_number' => '9382204247',
             'password' => Hash::make('pP12345678'),
-            'type' => PanelUserType::MARKETING,
+            'type' => PanelUserType::ADMIN,
         ]);
         PanelUser::query()->updateOrInsert([
             'name' => 'امیرحسین پیری',

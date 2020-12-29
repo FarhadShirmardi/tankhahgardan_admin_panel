@@ -11,7 +11,7 @@ namespace App\Constants;
 use ReflectionClass;
 use ReflectionException;
 
-class ProjectPremiumState
+class UserPremiumState
 {
     const FREE = 1;
     const PREMIUM = 2;

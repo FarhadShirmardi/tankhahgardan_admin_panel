@@ -81,7 +81,19 @@
                            value="{{$filter['end_date']}}">
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12 pr-2"></div>
+            <div class="col-md-3 col-sm-12 pr-2">
+                <div class="row">
+                    <label class="col-md-5 col-form-label text-md-left">وضعیت کاربر</label>
+                    <div class="ms-list col-md-7">
+                        <select name="user_states[]" multiple="multiple" id="user_states" style="width: 100%">
+                            @foreach($user_states as $userState)
+                                <option @if($userState['is_selected']) selected @endif
+                                value="{{$userState['id']}}">{{$userState['name']}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
             <input type="hidden" name="page" value="1"/>
             <div class="row pt-2">
                 <input class="btn btn-info" type="submit" value="اعمال فیلتر">
@@ -153,6 +165,8 @@
             document.getElementById('filter').submit();
             form.action = '';
         }
+
+        $('#user_states').select2({width: 'element'});
 
         $('#sort_field').select2({
             width: 'element',

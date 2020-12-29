@@ -9,6 +9,8 @@ class SentImage extends Model
 {
     use SoftDeletes;
 
+    protected $connection = 'mysql';
+
     protected $fillable = [
         'path',
         'size',

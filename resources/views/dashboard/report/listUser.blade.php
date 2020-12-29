@@ -5,6 +5,7 @@
             <th>ردیف</th>
             <th onclick="sortTable('name')">نام و نام خانوادگی</th>
             <th onclick="sortTable('phone_number')">شماره تلفن</th>
+            <th onclick="sortTable('project_type')">وضعیت کاربر</th>
             <th onclick="sortTable('registered_at')">تاریخ و ساعت ثبت نام</th>
             <th onclick="sortTable('max_time')">آخرین ثبت</th>
             <th onclick="sortTable('project_count')">تعداد کل پروژه</th>
@@ -30,6 +31,7 @@
                 <td>{{($users->currentPage() - 1) * $users->perPage() + $loop->iteration}}</td>
                 <td>{{ $user->name }}</td>
                 <td>{{ $user->phone_number }}</td>
+                <td>{{ \App\Constants\UserPremiumState::getEnum($user->user_state) }}</td>
                 <td>{{ \App\Helpers\Helpers::convertDateTimeToJalali($user->registered_at) }}</td>
                 <td>{{ $user->max_time ? \App\Helpers\Helpers::convertDateTimeToJalali($user->max_time) : ' - ' }}</td>
                 <td>{{ $user->project_count }}</td>
