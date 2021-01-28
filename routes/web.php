@@ -13,6 +13,9 @@
 Route::get('/', function () {
     return redirect()->route('dashboard.home');
 });
+Route::get('_ping', function () {
+    return 'ok';
+});
 Route::get('/hashpw/{text}', function ($text) {
     return Hash::make($text);
 });
