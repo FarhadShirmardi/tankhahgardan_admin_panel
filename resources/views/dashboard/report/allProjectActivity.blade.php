@@ -16,6 +16,7 @@
     </div>
 @endsection
 @section('filter')
+    @include('dashboard.layouts.link_message')
     <form id="filter" method="get" action="">
         {{ csrf_field() }}
         <div class="row pt-5 justify-content-center">
@@ -89,6 +90,9 @@
         </div>
         <div class="row pb-5 pt-2 justify-content-center">
             <input class="btn btn-info pt-2" type="submit" value="اعمال فیلتر">
+            @if(auth()->user()->hasRole('Admin'))
+                <input class="btn btn-warning mr-2" type="button" value="فایل خروجی" onclick="exportClick()">
+            @endif
         </div>
     </form>
 @endsection
@@ -102,6 +106,7 @@
                 <th onclick="sortTable('name')">نام پروژه</th>
                 <th>استان</th>
                 <th>شهر</th>
+                <th onclick="sortTable('type')">نوع پروژه</th>
                 <th onclick="sortTable('created_at')">تاریخ ایجاد پروژه</th>
                 <th onclick="sortTable('max_time')">آخرین ثبت</th>
                 <th onclick="sortTable('user_count')">تعداد کل کاربران</th>
@@ -122,6 +127,7 @@
                     <td>{{ $project->name }}</td>
                     <td>{{ $states->firstWhere('id', $project->state_id)['name'] }}</td>
                     <td>{{ $cities->firstWhere('id', $project->city_id)['name'] }}</td>
+                    <td>{{ $project->type ? \App\Constants\ProjectTypes::getProjectType($project->type)['text'] : '' }}</td>
                     <td>{{ \App\Helpers\Helpers::convertDateTimeToJalali($project->created_at) }}</td>
                     <td>{{ $project->max_time ? \App\Helpers\Helpers::convertDateTimeToJalali($project->max_time) : ' - ' }}</td>
                     <td>{{ $project->user_count }}</td>
@@ -202,6 +208,14 @@
                     citySelect.appendChild(opt);
                 }
             }
+        }
+
+        function exportClick() {
+            var form = document.getElementById('filter');
+            form.action = '{{ route('dashboard.report.export.allProjectsActivity') }}';
+
+            document.getElementById('filter').submit();
+            form.action = '';
         }
 
     </script>

@@ -76,6 +76,10 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
                 Route::middleware(['permission:all_user_activity_full', 'signed'])
                     ->get('download/{filename}', 'Dashboard\ReportController@downloadReport')
                     ->name('download');
+
+                Route::middleware(['permission:all_project_activity_full'])
+                    ->get('projectActivity', 'Dashboard\ReportController@exportAllProjectsActivity')
+                    ->name('allProjectsActivity');
             });
         });
 

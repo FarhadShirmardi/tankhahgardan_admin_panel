@@ -12,26 +12,30 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use App\State;
+use App\City;
+use App\Constants\ProjectTypes;
+use Illuminate\Support\Collection;
 
-class AllUserExport implements FromCollection, WithStrictNullComparison,
+class AllProjectExport implements FromCollection, WithStrictNullComparison,
     WithMapping, WithHeadingRow, WithHeadings, WithColumnFormatting
 {
-    protected $users, $row;
+    protected $projects, $row;
     private $carbon;
 
-    public function __construct($users)
+    public function __construct($projects)
     {
-        $this->users = $users;
+        $this->projects = $projects;
         $this->row = 0;
         $this->carbon = new Carbon();
     }
 
     /**
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function collection()
     {
-        return $this->users;
+        return $this->projects;
     }
 
     /**
@@ -44,24 +48,20 @@ class AllUserExport implements FromCollection, WithStrictNullComparison,
         return [
             $this->row,
             $project->name,
-            $project->phone_number,
-            $this->carbon->parse($project->registered_at)->format($dateFormat),
-            $this->carbon->parse($project->registered_at)->toTimeString(),
+            State::query()->firstWhere('id', $project->state_id)['name'],
+            City::query()->firstWhere('id', $project->city_id)['name'],
+            $project->type ? ProjectTypes::getProjectType($project->type)['text'] : '',
+            $project->created_at ? $this->carbon->parse($project->created_at)->format($dateFormat) : ' - ',
+            $project->created_at ? $this->carbon->parse($project->created_at)->toTimeString() : ' - ',
             $project->max_time ? $this->carbon->parse($project->max_time)->format($dateFormat) : ' - ',
             $project->max_time ? $this->carbon->parse($project->max_time)->toTimeString() : ' - ',
-            $project->project_count,
-            $project->own_project_count,
-            $project->not_own_project_count,
+            $project->user_count,
+            $project->active_user_count,
+            $project->not_active_user_count,
             $project->payment_count,
             $project->receive_count,
             $project->note_count,
-            $project->imprest_count,
-            $project->file_count,
-            $project->image_count,
-            $project->image_size ? round($project->image_size, 2) : ' - ',
-            $project->feedback_count,
-            $project->device_count,
-            $project->step_by_step,
+            $project->imprest_count
         ];
     }
 
@@ -72,25 +72,21 @@ class AllUserExport implements FromCollection, WithStrictNullComparison,
     {
         return [
             'ردیف',
-            'نام و نام خانوادگی',
-            'شماره تلفن',
-            'تاریخ ثبت‌نام',
-            'ساعت ثبت‌نام',
+            'نام پروژه',
+            'استان',
+            'شهر',
+            'نوع پروژه',
+            'تاریخ ایجاد',
+            'ساعت ایجاد',
             'تاریخ آخرین ثبت',
             'ساعت آخرین ثبت',
-            'تعداد کل پروژه',
-            'تعداد پروژه مالک',
-            'تعداد پروژه اشتراکی',
+            'تعداد کاربر',
+            'تعداد کاربر فعال',
+            'تعداد کاربر غیرفعال',
             'تعداد پرداخت',
             'تعداد دریافت',
             'تعداد یادداشت',
-            'تعداد تنخواه',
-            'تعداد فایل‌ها',
-            'تعداد عکس‌ها',
-            'حجم عکس‌ها',
-            'تعداد بازخورد',
-            'تعداد دستگاه‌ها',
-            'گام به گام',
+            'تعداد تنخواه'
         ];
     }
 
@@ -100,10 +96,10 @@ class AllUserExport implements FromCollection, WithStrictNullComparison,
     public function columnFormats(): array
     {
         return [
-            'D' => NumberFormat::FORMAT_DATE_DDMMYYYY,
-            'E' => NumberFormat::FORMAT_DATE_TIME4,
             'F' => NumberFormat::FORMAT_DATE_DDMMYYYY,
             'G' => NumberFormat::FORMAT_DATE_TIME4,
+            'H' => NumberFormat::FORMAT_DATE_DDMMYYYY,
+            'I' => NumberFormat::FORMAT_DATE_TIME4,
         ];
     }
 }
