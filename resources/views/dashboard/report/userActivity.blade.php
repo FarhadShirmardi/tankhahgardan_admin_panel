@@ -2,7 +2,8 @@
 
 @section('title')
     <i class="fa fa-bar-chart"></i>
-    وضعیت کاربر - {{ $user->full_name }}
+    وضعیت کاربر -
+    @include('dashboard.layouts.username')
 @endsection
 @section('filter')
     <div class="row pb-5">

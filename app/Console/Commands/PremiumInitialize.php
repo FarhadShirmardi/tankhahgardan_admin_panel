@@ -63,11 +63,11 @@ class PremiumInitialize extends Command
     {
         $this->call('generate:report', ['--project']);
 
-        DB::beginTransaction();
+//        DB::beginTransaction();
 
         /** @var Collection $activeUserList */
         $activeUserList = collect();
-        $projects = ProjectReport::query()->where('project_type', '<>', 4)->pluck('id')->toArray();
+        $projects = ProjectReport::query()->where('project_type', '<>', 4)->limit(50)->pluck('id')->toArray();
         $totalProjectCount = count($projects);
 
         foreach ($projects as $key => $projectId) {
@@ -118,7 +118,7 @@ class PremiumInitialize extends Command
             ->pluck('id')->toArray();
         $inactiveUsers = User::query()
             ->where('state', 1)
-            ->whereNotIn('id', $inactiveUserIds)
+            ->whereIn('id', $inactiveUserIds)
             ->get();
         $this->info('inactive User count : ' . count($inactiveUsers));
 
