@@ -47,6 +47,7 @@ use App\UserStatus;
 use App\Constants\UserPremiumState;
 use GuzzleHttp\Client;
 use App\Constants\PremiumConstants;
+use App\Jobs\ProjectReportExportJob;
 
 class ReportController extends Controller
 {
@@ -338,6 +339,17 @@ class ReportController extends Controller
         return redirect()->back()->with('success', 'فایل در حال ساخته شدن میباشد.')->with('link', $link);
     }
 
+    public function exportAllProjectsActivity(Request $request)
+    {
+        $filter = $this->getAllProjectActivityFilter($request);
+
+//        $users = $usersQuery->get();
+        $link = URL::temporarySignedRoute('dashboard.report.export.download', now()->addHour(), ['filename' => 'projects.xlsx']);
+        $this->dispatch((new ProjectReportExportJob($filter, $link))->onQueue('activationSms'));
+
+        return redirect()->back()->with('success', 'فایل در حال ساخته شدن میباشد.')->with('link', $link);
+    }
+
     public function getProjectQuery()
     {
         $paymentCountQuery = Payment::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
@@ -385,6 +397,7 @@ class ReportController extends Controller
             ->addSelect('projects.city_id as city_id')
             ->addSelect('projects.state_id as state_id')
             ->addSelect('projects.created_at as created_at')
+            ->addSelect('projects.type as type')
             ->selectSub($paymentCountQuery, 'payment_count')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($noteCountQuery, 'note_count')
@@ -586,7 +599,7 @@ class ReportController extends Controller
 
     public function allProjectsActivity(Request $request)
     {
-        $filter = $this->getAllProjectActivity($request);
+        $filter = $this->getAllProjectActivityFilter($request);
 
         $projectsQuery = ProjectReport::query();
         $projectsQuery = $this->applyFilterProjectQuery($projectsQuery, $filter);
@@ -611,7 +624,7 @@ class ReportController extends Controller
         ]);
     }
 
-    private function getAllProjectActivity(Request &$request)
+    private function getAllProjectActivityFilter(Request &$request)
     {
         return [
             'project_type' => $request->input('project_type', null),
@@ -693,6 +706,7 @@ class ReportController extends Controller
             'receive_count' => 'تعداد دریافت',
             'note_count' => 'تعداد یادداشت',
             'imprest_count' => 'تعداد تنخواه',
+            'type' => 'نوع پروژه',
         ];
 
         $sortableTypes = [
@@ -1367,7 +1381,7 @@ class ReportController extends Controller
             $validator->errors()->add('file', 'فایل آماده نشده است.');
             return redirect()->back()->withErrors($validator);
         }
-        return response()->download(storage_path('app/' . $filename), 'users.xlsx')->deleteFileAfterSend(true);
+        return response()->download(storage_path('app/' . $filename), $filename)->deleteFileAfterSend(true);
     }
 
     public function sendSms(Request $request)

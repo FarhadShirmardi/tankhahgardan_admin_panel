@@ -20,6 +20,7 @@ class ProjectReport extends Model
         'note_count',
         'imprest_count',
         'max_time',
+        'type',
         'project_type',
     ];
 }
