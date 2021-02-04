@@ -3,16 +3,25 @@
 @section('title')
     <i class="fa fa-images"></i>
     @if($id)
-        ویرایش بنر
+        ویرایش بنر -
     @else
-        افزودن بنر
+        افزودن بنر -
+    @endif
+    @if($userIds)
+        @if($user)
+            <span class="ltr">{{ $user->fullname }}</span>
+        @else
+            {{ 'جمعی از کابران' }}
+        @endif
+    @else
+        {{ 'عمومی' }}
     @endif
 @endsection
 @section('filter')
 @endsection
 @section('content')
     <form method="post" enctype="multipart/form-data"
-          action="{{ route('dashboard.storeBanner', ['id' => $id]) }}">
+          action="{{ route('dashboard.storeBanner', ['id' => $id, 'userIds' => $userIds]) }}">
         {{ csrf_field() }}
         <input type="hidden" name="id" value="{{ $banner['id'] }}">
         <div class="row">
@@ -37,27 +46,38 @@
                 <label for="image" class="col-md-5 col-form-label text-md-left">
                     عکس
                     <img src="{{
-                            env('MAPSA_URL') . '/storage/' .  $banner['image_path']
-                            ?? asset('img/no-img.png') }}" alt="" class="col-md-5"/>
+                            $banner['image_path'] ?
+                            env('TANKHAH_URL') . '/storage/' .  $banner['image_path'] :
+                            asset('img/no-img.png') }}" alt="" class="col-md-5"/>
                 </label>
                 <input type="file" accept="image/*" name="image" class="form-control col-md-7"
                        @if($id == 0) required @endif>
             </div>
-            <div class="row col-md-4">
-                <label class="col-md-5 form-check-inline text-md-left">
-                    وضعیت
-                    <input name="is_active" type="checkbox" class="form-check-input text-md-right"
-                           @if($banner['is_active']) checked @endif/>
-                </label>
-                <div class="col-md-7">
-
-                </div>
+            <div class="col-md-4 row">
+                <label class="col-md-5 col-form-label text-md-left">تاریخ انقضا</label>
+                <input required style="direction: ltr;" value="{{ $banner['expire_at'] }}" id="date" class="form-control
+                time_picker col-md-7" type="text"
+                       name="expire_at">
+            </div>
+            <div class="col-md-4 row">
+                <label class="col-md-5 col-form-label text-md-left">زمان شروع</label>
+                <input required style="direction: ltr;" value="{{ $banner['start_at'] }}" id="date" class="form-control
+                time_picker col-md-7" type="text"
+                       name="start_at">
             </div>
         </div>
         <div class="row justify-content-center pt-3">
             <div class="col-md-2">
                 <input class="form-control btn btn-success" type="submit" value="ثبت">
             </div>
+            @if($banner['id'] ?? false)
+                <div class="col-md-2">
+                    <button class="form-control btn btn-danger">
+                        <a href="{{ route('dashboard.deleteBanner', ['id' => $banner->id]) }}">حذف</a>
+                    </button>
+                </div>
+            @endif
+
         </div>
     </form>
 

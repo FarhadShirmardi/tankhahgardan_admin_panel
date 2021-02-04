@@ -85,6 +85,10 @@
                 <li class="nav-item nav-dropdown">
                     <a class="nav-link" href="{{ route('dashboard.announcements') }}"><i class="icon-bell"></i>اعلان‌ها</a>
                 </li>
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link" href="{{ route('dashboard.banners') }}"><i
+                            class="icon-picture"></i>بنرها</a>
+                </li>
             @endif
             @if(auth()->user()->hasRole('Admin'))
                 <li class="nav-item nav-dropdown">

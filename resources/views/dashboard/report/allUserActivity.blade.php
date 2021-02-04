@@ -124,6 +124,10 @@
                href="{{ route('dashboard.announcementItem', ['id' => 0, 'userIds' => $userIds]) }}">افزودن
                 اعلان</a>
         </div>
+        <div class="col-md-2">
+            <a class="form-control btn btn-success"
+               href="{{ route('dashboard.bannerItem', ['id' => 0, 'userIds' => $userIds]) }}">افزودن بنر</a>
+        </div>
         <div class="col-md-6">
             <div class="row">
                 <form action="{{ route('dashboard.extractUserIds') }}" enctype="multipart/form-data" method="POST">
