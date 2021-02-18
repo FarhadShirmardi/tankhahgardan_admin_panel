@@ -138,4 +138,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserStatus::class)->orderBy('end_date', 'DESC');
     }
+
+    public function banner()
+    {
+        return $this->hasMany(BannerUser::class, 'user_id', 'id');
+    }
 }
