@@ -14,7 +14,8 @@ class Banner extends Model
         'image_path',
         'expire_at',
         'start_at',
-        'panel_user_id'
+        'panel_user_id',
+        'type'
     ];
 
     public function user()
