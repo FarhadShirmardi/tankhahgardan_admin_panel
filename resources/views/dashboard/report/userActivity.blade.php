@@ -6,7 +6,7 @@
     @include('dashboard.layouts.username')
 @endsection
 @section('filter')
-    <div class="row pb-5">
+    <div class="row pb-3">
         <div class="col-md-2">
             <a class="form-control btn btn-info" href="{{ route('dashboard.promoCodes', ['user_id' => $user->id]) }}">کد تخفیف‌های کاربر</a>
         </div>
@@ -30,6 +30,12 @@
         <div class="col-md-2">
             <a class="form-control btn btn-success"
                href="{{ route('dashboard.announcementItem', ['id' => 0, 'userIds' => $user->id]) }}">افزودن اعلان</a>
+        </div>
+    </div>
+    <div class="row pb-5">
+        <div class="col-md-2">
+            <a class="form-control btn btn-success"
+               href="{{ route('dashboard.bannerItem', ['id' => 0, 'userIds' => $user->id]) }}">افزودن بنر</a>
         </div>
     </div>
 @endsection

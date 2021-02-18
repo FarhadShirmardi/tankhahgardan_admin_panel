@@ -24,6 +24,8 @@ use Exception;
 use Artisan;
 use App\Jobs\SendFirebaseNotificationJob;
 use App\Constants\NotificationType;
+use App\Constants\BannerStatus;
+use App\Constants\BannerType;
 
 class ManagementController extends Controller
 {
@@ -563,12 +565,24 @@ class ManagementController extends Controller
 
     public function banners()
     {
+        $now = "'" . now()->toDateTimeString() . "'";
         $banners = Banner::query()
             ->join('panel_users', 'panel_user_id', '=', 'panel_users.id')
             ->addSelect([
                 'panel_users.name as panel_user_name',
-                'banners.*'
+                'banners.*',
+                \DB::raw("IF(
+                                    banners.expire_at < {$now},
+                                    " . BannerStatus::EXPIRED . ",
+                                    IF(
+                                        banners.start_at > {$now},
+                                        " . BannerStatus::NOT_STARTED . ",
+                                        " . BannerStatus::ACTIVE . "
+                                    )
+                                ) as status"
+                )
             ])
+            ->orderBy('status')
             ->orderByDesc('banners.updated_at')
             ->get();
 
@@ -577,28 +591,73 @@ class ManagementController extends Controller
         ]);
     }
 
-    public function bannerItem($id)
+    public function bannerItem(Request $request, $id)
     {
+        $userIds = $request->userIds;
+        $user = null;
+        if ($userIds) {
+            $userIds = explode(',', $userIds);
+            if (count($userIds) == 1) {
+                $user = User::query()->findOrFail($userIds[0]);
+            } else {
+                foreach ($userIds as $userId) {
+                    User::query()->findOrFail($userId);
+                }
+            }
+            $userIds = implode(',', $userIds);
+        }
         if ($id) {
             /** @var Banner $banner */
             $banner = Banner::query()->findOrFail($id);
+            $userIds = $banner->user()->pluck('user_id')->toArray();
+            if (count($userIds) == 1) {
+                $user = User::query()->findOrFail($userIds[0]);
+            }
+            $userIds = implode(',', $userIds);
         } else {
             $banner = new Banner([
-                'is_active' => true
+                'expire_at' => now()->addWeek()->endOfDay()
             ]);
         }
 
         return view('dashboard.management.bannerItem', [
             'id' => $id,
             'banner' => $banner,
+            'user' => $user,
+            'userIds' => $userIds
         ]);
     }
 
     public function storeBanner(Request $request, $id)
     {
+        $userIds = $request->input('userIds', []);
+        $users = collect();
+        if (!$userIds) {
+            $request->merge([
+                'user_id' => null
+            ]);
+        } else {
+            $userIds = explode(',', $userIds);
+            foreach ($userIds as $userId) {
+                $users->push(User::query()->findOrFail($userId));
+            }
+        }
+        $validator = Validator::make($request->all(), [
+            'image' => 'nullable|dimensions:ratio=1/1'
+        ]);
+        if ($validator->fails()) {
+            return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+        $startAt = Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->start_at));
+        $expireAt = $request->expire_at ? Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->expire_at)) : null;
         $request->merge([
             'panel_user_id' => auth()->id(),
-            'is_active' => isset($request->is_active) && $request->is_active == 'on'
+            'start_at' => $startAt,
+            'expire_at' => $expireAt,
+            'type' => $userIds == [] ? BannerType::PRIVATE : BannerType::PUBLIC
         ]);
 
         try {
@@ -609,6 +668,16 @@ class ManagementController extends Controller
 
             $id = $banner->id;
 
+            if ($userIds) {
+                $banner->user()->delete();
+            }
+            /** @var User $user */
+            foreach ($users as $user) {
+                $user->banner()->create([
+                    'banner_id' => $id
+                ]);
+            }
+
             $image = $request->file('image');
             if ($image) {
                 $banner->update([
@@ -618,7 +687,7 @@ class ManagementController extends Controller
                 $image->storeAs('/', $path = 'Banner_image' . '.' . $image->getClientOriginalExtension());
                 $http = new Client;
                 $response = $http->post(
-                    env('MAPSA_URL') . '/panel/' . env('MAPSA_TOKEN') . '/banner/' . $id . '/image',
+                    env('TANKHAH_URL') . '/panel/' . env('TANKHAH_TOKEN') . '/banner/' . $id . '/image',
                     [
                         'headers' => [
                             'Accept' => 'application/json',
@@ -640,6 +709,16 @@ class ManagementController extends Controller
         } catch (Exception $exception) {
             dd($exception);
         }
+
+        return redirect()->route('dashboard.banners')->with('success', 'با موفقیت انجام شد');
+    }
+
+    public function deleteBanner($id)
+    {
+        $banner = Banner::query()->findOrFail($id);
+        $banner->update([
+            'expire_at' => now()->toDateTimeString()
+        ]);
 
         return redirect()->route('dashboard.banners')->with('success', 'با موفقیت انجام شد');
     }

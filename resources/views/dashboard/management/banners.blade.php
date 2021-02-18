@@ -2,10 +2,20 @@
 
 @section('title')
     <i class="fa fa-ticket"></i>
-    اعلان‌ها
+    بنرها
 @endsection
 @section('filter')
+    <div class="pt-5 pb-3 justify-content-center align-center row">
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-2">
+            <a class="form-control btn btn-outline-success"
+               href="{{ route('dashboard.bannerItem', ['id' => 0]) }}">افزودن بنر</a>
+        </div>
+        <div class="col-md-2">
+        </div>
 
+    </div>
 @endsection
 @section('content')
     <div id="ajax-table" style="overflow-x: auto;">
@@ -14,6 +24,9 @@
             <tr>
                 <th>ردیف</th>
                 <th>عنوان</th>
+                <th>نوع</th>
+                <th>تاریخ انقضا</th>
+                <th>تاریخ شروع</th>
                 <th>وضعیت</th>
                 <th>کاربر</th>
             </tr>
@@ -26,26 +39,14 @@
                 >
                     <td>{{ $loop->iteration }}</td>
                     <td class="ltr text-right">{{ $banner->title }}</td>
-                    <td>
-                        @if($banner->is_active) <img src="{{ asset('dashboard/icons/icon_check.png') }}">
-                        @else <img src="{{ asset('dashboard/icons/icon_uncheck.png') }}">
-                        @endif
-                    </td>
+                    <td>{{ \App\Constants\BannerType::getEnum($banner->type) }}</td>
+                    <td class="ltr text-right">{{ \App\Helpers\Helpers::convertDateTimeToJalali($banner->expire_at) }}</td>
+                    <td class="ltr text-right">{{ \App\Helpers\Helpers::convertDateTimeToJalali($banner->start_at) }}</td>
+                    <td>{{ \App\Constants\BannerStatus::getEnum($banner->status) }}</td>
                     <td>{{ $banner->panel_user_name }}</td>
                 </tr>
             @endforeach
             </tbody>
         </table>
-    </div>
-    <div class="pt-5 pb-3 justify-content-center align-center row">
-        <div class="col-md-2">
-        </div>
-        <div class="col-md-2">
-            <a class="form-control btn btn-outline-success"
-               href="{{ route('dashboard.bannerItem', ['id' => 0]) }}">افزودن اعلان</a>
-        </div>
-        <div class="col-md-2">
-        </div>
-
     </div>
 @endsection

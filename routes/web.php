@@ -121,6 +121,7 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
             Route::get('banners', 'Dashboard\ManagementController@banners')->name('banners');
             Route::get('banners/{id}', 'Dashboard\ManagementController@bannerItem')->name('bannerItem');
             Route::post('banners/{id}', 'Dashboard\ManagementController@storeBanner')->name('storeBanner');
+            Route::get('banners/{id}/delete', 'Dashboard\ManagementController@deleteBanner')->name('deleteBanner');
         });
 
         Route::middleware(['permission:add_notification'])->post('notification/new/{id?}', 'Dashboard\ReportController@addNotification')->name('newNotification');
