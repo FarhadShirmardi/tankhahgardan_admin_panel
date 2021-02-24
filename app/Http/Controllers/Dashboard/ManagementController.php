@@ -657,7 +657,7 @@ class ManagementController extends Controller
             'panel_user_id' => auth()->id(),
             'start_at' => $startAt,
             'expire_at' => $expireAt,
-            'type' => $userIds == [] ? BannerType::PRIVATE : BannerType::PUBLIC
+            'type' => $userIds == [] ? BannerType::PUBLIC : BannerType::PRIVATE
         ]);
 
         try {
