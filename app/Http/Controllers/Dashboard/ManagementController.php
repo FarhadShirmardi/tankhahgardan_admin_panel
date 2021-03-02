@@ -527,7 +527,6 @@ class ManagementController extends Controller
             'user_count' => 'تعداد کاربر',
             'volume_size' => 'مقدار حجم',
             'type' => 'نوع تراکنش',
-            'payable_amount' => 'مبلغ قابل پرداخت',
             'total_amount' => 'مبلغ کل',
             'discount_amount' => 'مقدار تخفیف',
             'added_value_amount' => 'ارزش افزوده',

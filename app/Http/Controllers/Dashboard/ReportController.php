@@ -48,6 +48,8 @@ use App\Constants\UserPremiumState;
 use GuzzleHttp\Client;
 use App\Constants\PremiumConstants;
 use App\Jobs\ProjectReportExportJob;
+use App\Imports\ConvertToUser;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
@@ -1394,5 +1396,28 @@ class ReportController extends Controller
         } catch (Exception $exception) {
             return redirect()->back()->withInput($request->all())->withException($exception);
         }
+    }
+
+    public function extractUserIds(Request $request)
+    {
+        $path1 = $request->file('users')->store('temp');
+        $path = storage_path('app') . '/' . $path1;
+        $userImport = new ConvertToUser();
+        Excel::import($userImport, $path);
+        $userIds = $userImport->data->unique()->toArray();
+
+        $errors = $userImport->errors->toArray();
+
+        if ($errors != []) {
+            $validator = Validator::make([], []);
+            foreach ($errors as $error) {
+                $validator->errors()->add('error', "مشکل در شماره {$error}");
+            }
+            return redirect()->back()->withErrors($validator);
+        }
+
+        return redirect()
+            ->route('dashboard.report.allUsersActivity', ['user_ids' => $userIds])
+            ->with('success', 'با موفقیت انجام شد');
     }
 }

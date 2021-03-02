@@ -130,7 +130,7 @@
         </div>
         <div class="col-md-6">
             <div class="row">
-                <form action="{{ route('dashboard.extractUserIds') }}" enctype="multipart/form-data" method="POST">
+                <form action="{{ route('dashboard.extractUserIds', [], true) }}" enctype="multipart/form-data" method="POST">
                     {{ csrf_field() }}
                     <div class="row">
                         <input class="col-md-8 form-control form-control-file"
