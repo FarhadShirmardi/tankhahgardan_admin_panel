@@ -8,11 +8,21 @@
 
 namespace App\Helpers;
 
+use App\Constants\PremiumConstants;
+use App\Constants\ProjectUserState;
 use App\Constants\UserActivationConstant;
+use App\Constants\UserPremiumState;
+use App\File;
+use App\Image;
 use App\Jobs\UserActivationSmsJob;
 use App\Project;
+use App\ProjectUser;
+use App\PromoCode;
+use App\SentImage;
 use App\User;
 use App\UserActivationState;
+use App\UserStatus;
+use App\UserStatusLog;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -25,22 +35,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Validator;
 use Log;
 use RangeException;
 use Storage;
-use App\Constants\ProjectUserState;
-use App\Constants\PremiumConstants;
-use App\Constants\UserPremiumState;
-use App\UserStatus;
-use Illuminate\Support\Facades\DB;
-use App\UserStatusLog;
-use Illuminate\Support\Str;
-use App\PromoCode;
-use App\Image;
-use App\SentImage;
-use App\ProjectUser;
-use App\File;
 
 class Helpers
 {
@@ -140,8 +140,7 @@ class Helpers
         &$data = null,
         string $jsonResourceClassName = null,
         $metaData = []
-    )
-    {
+    ) {
         $metaData += [
             self::RESPONSE_MESSAGE => $message == null ? [] : [$message],
         ];
@@ -182,8 +181,7 @@ class Helpers
         $fileName = null,
         $path = 'public',
         $fileColumn = 'image'
-    )
-    {
+    ) {
         if ($request->hasFile($fileColumn)) {
             $fileExtension = $request->file($fileColumn)->getClientOriginalExtension();
             if ($fileName == null) {
@@ -466,8 +464,7 @@ class Helpers
     public static function generateRandomToken(
         $length = 10,
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    )
-    {
+    ) {
         $charactersLength = strlen($characters);
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {
@@ -666,7 +663,7 @@ class Helpers
             ->selectSub($userCount, 'user_count')
             ->selectSub($pdfCount, 'pdf_count');
         $results = $query->first();
-        list($results->image_count, $results->volume_size) = explode('-', $results->images);
+        [$results->image_count, $results->volume_size] = explode('-', $results->images);
         unset($results->images);
         $counts = collect();
         $r = new \ReflectionClass(PremiumConstants::class);
@@ -808,5 +805,23 @@ class Helpers
         } while ($promoCode);
 
         return $code;
+    }
+
+    public static function getUserStatus(User &$user)
+    {
+        $userState = $user->userStatuses->first();
+        if (!$userState) {
+            return UserPremiumState::FREE;
+        } else {
+            $carbon = new Carbon();
+            $endDate = $carbon->parse($userState->end_date);
+            if ($endDate->lt(now())) {
+                return UserPremiumState::EXPIRED_PREMIUM;
+            } elseif ($endDate->diffInDays(now()) < PremiumConstants::NEAR_END_THRESHOLD) {
+                return UserPremiumState::NEAR_ENDING_PREMIUM;
+            } else {
+                return UserPremiumState::PREMIUM;
+            }
+        }
     }
 }

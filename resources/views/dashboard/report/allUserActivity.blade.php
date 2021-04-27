@@ -7,7 +7,7 @@
             وضعیت کاربران
         </div>
         <div class="col-md-6 ltr">
-            @if(auth()->user()->hasRole('Admin'))
+            @if(auth()->user()->can('refresh_users_report'))
                 <a href="{{ route('dashboard.generateReport') }}">
                     <i class="fa fa-refresh"></i>
                 </a>
@@ -97,7 +97,7 @@
             <input type="hidden" name="page" value="1"/>
             <div class="row pt-2">
                 <input class="btn btn-info" type="submit" value="اعمال فیلتر">
-                @if(auth()->user()->hasRole('Admin'))
+                @if(auth()->user()->can('export_users_report'))
                     <input class="btn btn-warning mr-2" type="button" value="فایل خروجی" onclick="exportClick()">
                 @endif
             </div>

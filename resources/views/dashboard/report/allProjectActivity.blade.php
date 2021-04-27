@@ -7,7 +7,7 @@
             وضعیت پروژه‌ها
         </div>
         <div class="col-md-6 ltr">
-            @if(auth()->user()->hasRole('Admin'))
+            @if(auth()->user()->can('refresh_projects_report'))
                 <a href="{{ route('dashboard.generateReport') }}">
                     <i class="fa fa-refresh"></i>
                 </a>
@@ -90,7 +90,7 @@
         </div>
         <div class="row pb-5 pt-2 justify-content-center">
             <input class="btn btn-info pt-2" type="submit" value="اعمال فیلتر">
-            @if(auth()->user()->hasRole('Admin'))
+            @if(auth()->user()->can('export_projects_report'))
                 <input class="btn btn-warning mr-2" type="button" value="فایل خروجی" onclick="exportClick()">
             @endif
         </div>

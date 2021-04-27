@@ -2,30 +2,30 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Helpers\Helpers;
-use App\Campaign;
-use Validator;
-use App\PromoCode;
-use App\User;
-use App\UserStatusLog;
-use App\Constants\ProjectStatusType;
-use App\Constants\PremiumBanks;
-use App\Constants\PremiumPrices;
-use App\Transaction;
-use App\Constants\PurchaseType;
-use App\Jobs\PromoCodeSmsJob;
-use App\SmsLog;
 use App\Banner;
-use GuzzleHttp\Client;
-use Storage;
-use Exception;
-use Artisan;
-use App\Jobs\SendFirebaseNotificationJob;
-use App\Constants\NotificationType;
+use App\Campaign;
 use App\Constants\BannerStatus;
 use App\Constants\BannerType;
+use App\Constants\NotificationType;
+use App\Constants\PremiumBanks;
+use App\Constants\PremiumPrices;
+use App\Constants\ProjectStatusType;
+use App\Constants\PurchaseType;
+use App\Helpers\Helpers;
+use App\Http\Controllers\Controller;
+use App\Jobs\PromoCodeSmsJob;
+use App\Jobs\SendFirebaseNotificationJob;
+use App\PromoCode;
+use App\SmsLog;
+use App\Transaction;
+use App\User;
+use App\UserStatusLog;
+use Artisan;
+use Exception;
+use GuzzleHttp\Client;
+use Illuminate\Http\Request;
+use Storage;
+use Validator;
 
 class ManagementController extends Controller
 {
@@ -101,6 +101,7 @@ class ManagementController extends Controller
                 return $item;
             });
         }
+        $promoCodes = Helpers::paginateCollection($promoCodes);
 
         return view('dashboard.management.campaign_item', [
             'campaign' => $campaign,
@@ -445,7 +446,7 @@ class ManagementController extends Controller
 
     public function transactions(Request $request)
     {
-        list($startDate, $endDate) = $this->reportController->normalizeDate($request, true);
+        [$startDate, $endDate] = $this->reportController->normalizeDate($request, true);
         if (!$startDate) {
             $startDate = Transaction::query()->selectRaw('min(Date(created_at)) as date')->first()->date;
         }
@@ -499,7 +500,7 @@ class ManagementController extends Controller
             ]);
         }
 
-        list($sortableFields, $sortableTypes) = $this->getTransactionSortFields();
+        [$sortableFields, $sortableTypes] = $this->getTransactionSortFields();
 
         return view('dashboard.management.transactions', [
             'transactions' => $transactions,

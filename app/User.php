@@ -3,7 +3,7 @@
 namespace App;
 
 use App\Helpers\Helpers;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Helpers\UtilHelpers;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -64,6 +64,14 @@ class User extends Authenticatable
     public function projects()
     {
         return $this->belongsToMany(Project::class)
+            ->withPivot(['id', 'is_owner', 'state', 'expired_date', 'added_date', 'note'])
+            ->withTimestamps();
+    }
+
+    public function ownedProjects()
+    {
+        return $this->belongsToMany(Project::class)
+            ->where('is_owner', true)
             ->withPivot(['id', 'is_owner', 'state', 'expired_date', 'added_date', 'note'])
             ->withTimestamps();
     }
@@ -142,5 +150,10 @@ class User extends Authenticatable
     public function banner()
     {
         return $this->hasMany(BannerUser::class, 'user_id', 'id');
+    }
+
+    public function getPremiumStateAttribute($value)
+    {
+        return Helpers::getUserStatus($this);
     }
 }

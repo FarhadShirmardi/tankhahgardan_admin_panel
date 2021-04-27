@@ -4,58 +4,58 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Advertisement;
 use App\City;
+use App\Comment;
+use App\Constants\FeedbackSource;
+use App\Constants\FeedbackStatus;
+use App\Constants\Platform;
+use App\Constants\PremiumConstants;
+use App\Constants\ProjectUserState;
+use App\Constants\UserPremiumState;
 use App\Device;
 use App\Feedback;
 use App\FeedbackResponse;
+use App\FeedbackTitle;
+use App\File;
 use App\Helpers\Helpers;
+use App\Http\Controllers\Controller;
 use App\Image;
+use App\Imports\ConvertToUser;
 use App\Imprest;
+use App\Jobs\FeedbackResponseSms;
+use App\Jobs\ProjectReportExportJob;
+use App\Jobs\UserReportExportJob;
 use App\Note;
 use App\PanelUser;
 use App\Payment;
 use App\Project;
+use App\ProjectReport;
+use App\ProjectUser;
 use App\Receive;
 use App\State;
+use App\StepByStep;
 use App\User;
+use App\UserReport;
+use App\UserStatus;
 use Carbon\Carbon;
 use DB;
+use Exception;
 use Faker\Provider\Uuid;
+use GuzzleHttp\Client;
 use Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Notification;
-use Validator;
-use App\File;
-use App\ProjectUser;
-use App\StepByStep;
-use App\Constants\ProjectUserState;
-use App\Constants\FeedbackSource;
-use App\Comment;
-use App\Constants\FeedbackStatus;
-use App\FeedbackTitle;
-use App\UserReport;
-use App\ProjectReport;
-use App\Jobs\UserReportExportJob;
 use Kavenegar;
-use App\Jobs\FeedbackResponseSms;
-use App\Constants\Platform;
-use Storage;
-use Exception;
-use URL;
-use App\UserStatus;
-use App\Constants\UserPremiumState;
-use GuzzleHttp\Client;
-use App\Constants\PremiumConstants;
-use App\Jobs\ProjectReportExportJob;
-use App\Imports\ConvertToUser;
 use Maatwebsite\Excel\Facades\Excel;
+use Notification;
+use Storage;
+use URL;
+use Validator;
 
 class ReportController extends Controller
 {
     public function timeSeparation(Request $request)
     {
-        list($startDate, $endDate) = $this->normalizeDate($request);
+        [$startDate, $endDate] = $this->normalizeDate($request);
 
         $usersTime =
             User::query()->whereDate('created_at', '>=', $startDate)
@@ -94,7 +94,7 @@ class ReportController extends Controller
 
     public function daySeparation(Request $request)
     {
-        list($startDate, $endDate) = $this->normalizeDate($request);
+        [$startDate, $endDate] = $this->normalizeDate($request);
 
         $days = [
             'دوشنبه',
@@ -127,7 +127,7 @@ class ReportController extends Controller
 
     public function rangeSeparation(Request $request)
     {
-        list($startDate, $endDate) = $this->normalizeDate($request);
+        [$startDate, $endDate] = $this->normalizeDate($request);
 
         $userDays = User::query()
             ->whereDate('created_at', '>=', $startDate)
@@ -177,7 +177,7 @@ class ReportController extends Controller
             ]);
         }
 
-        list($sortableFields, $sortableTypes) = $this->getUserSortFields();
+        [$sortableFields, $sortableTypes] = $this->getUserSortFields();
 
         return view('dashboard.report.allUserActivity', [
                 'users' => $users,
@@ -195,7 +195,7 @@ class ReportController extends Controller
 
     private function getAllUserActivityFilter(Request $request)
     {
-        list($startDate, $endDate) = $this->normalizeDate($request, true);
+        [$startDate, $endDate] = $this->normalizeDate($request, true);
         if (!$startDate) {
             $startDate = UserReport::query()->selectRaw('min(Date(registered_at)) as date')->first()->date;
         }
@@ -610,9 +610,9 @@ class ReportController extends Controller
 
         $counts = $this->getProjectTypeCounts();
 
-        list($states, $cities) = $this->getLocations();
+        [$states, $cities] = $this->getLocations();
 
-        list($sortableFields, $sortableTypes) = $this->getProjectSortFields();
+        [$sortableFields, $sortableTypes] = $this->getProjectSortFields();
 
         return view('dashboard.report.allProjectActivity', [
             'projects' => $projects,
@@ -764,7 +764,7 @@ class ReportController extends Controller
 
     public function viewFeedback(Request $request)
     {
-        list($startDate, $endDate) = $this->normalizeDate($request, true);
+        [$startDate, $endDate] = $this->normalizeDate($request, true);
         if (!$startDate) {
             $startDate = Feedback::query()->selectRaw('min(Date(created_at)) as date')->first()->date;
         }
@@ -1105,7 +1105,6 @@ class ReportController extends Controller
 
     public function responseFeedbackView($id)
     {
-        /** @var Feedback $feedback */
         $feedback = Feedback::query()->findOrFail($id);
         $images = $feedback->images()->get()->toArray();
         $responseImages = [];
@@ -1388,7 +1387,7 @@ class ReportController extends Controller
 
     public function sendSms(Request $request)
     {
-        $phoneNumber = Helpers::formatPhoneNumber($request->phone_number);
+        $phoneNumber = Helpers::formatPhoneNumber(Helpers::getEnglishString($request->phone_number));
         $text = $request->text;
         try {
             $result = Kavenegar::Send('10005000000550', $phoneNumber, $text);

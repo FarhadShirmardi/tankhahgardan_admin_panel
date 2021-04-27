@@ -5,5 +5,5 @@
 @endsection
 @section('content')
     @include('dashboard.admin.user_table')
-    <a class="btn-info" href="{{ route('dashboard.admin.user_item') }}">ثبت کاربر جدید</a>
+    <a class="btn-info" href="{{ route('dashboard.admin.user_item', ['id' => 0]) }}">ثبت کاربر جدید</a>
 @endsection
