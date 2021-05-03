@@ -59,15 +59,14 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
                 ->match(['get', 'post'], 'projectActivity/{id}', 'Dashboard\ReportController@projectActivity')
                 ->name('projectActivity');
             Route::prefix('export')->name('export.')->group(function () {
-                Route::middleware(['permission:all_user_activity_full'])
+                Route::middleware(['permission:export_users_report'])
                     ->get('userActivity', 'Dashboard\ReportController@exportAllUsersActivity')
                     ->name('allUsersActivity');
 
-                Route::middleware(['permission:all_user_activity_full', 'signed'])
-                    ->get('download/{filename}', 'Dashboard\ReportController@downloadReport')
+                Route::get('download/{filename}', 'Dashboard\ReportController@downloadReport')
                     ->name('download');
 
-                Route::middleware(['permission:all_project_activity_full'])
+                Route::middleware(['permission:export_projects_report'])
                     ->get('projectActivity', 'Dashboard\ReportController@exportAllProjectsActivity')
                     ->name('allProjectsActivity');
             });
@@ -88,6 +87,7 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::group(['middleware' => ['permission:view_feedback']], function () {
             Route::get('feedbacks', 'Dashboard\ReportController@viewFeedback')->name('feedbacks');
             Route::get('comment/new/{id?}', 'Dashboard\ReportController@commentView')->name('commentView');
+            Route::get('feedback/{feedback_id}/response', 'Dashboard\ReportController@responseFeedbackView')->name('viewFeedback');
         });
         Route::middleware(['permission:response_feedback'])->group(function () {
             Route::group(['middleware' => ['permission:response_feedback']], function () {
@@ -97,7 +97,6 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
             Route::group(['middleware' => ['permission:new_feedback']], function () {
                 Route::post('comment/new/{id?}', 'Dashboard\ReportController@addComment')->name('newComment');
             });
-            Route::get('feedback/{feedback_id}/response', 'Dashboard\ReportController@responseFeedbackView')->name('viewFeedback');
         });
 
         Route::group(['middleware' => ['permission:view_feedback']], function () {
@@ -138,6 +137,11 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
                 Route::post('campaigns/{campaignId}/promoCodes/{id}', 'Dashboard\ManagementController@promoCodeStore')->name('promoCodeStore');
                 Route::get('promoCodes/{id}/delete', 'Dashboard\ManagementController@promoCodeDelete')->name('promoCodeDelete');
             });
+        });
+
+        Route::prefix('automation')->name('automation.')->middleware('permission:view_automation')->group(function () {
+            Route::get('metrics', 'Dashboard\AutomationController@metrics')->name('metrics');
+            Route::get('types', 'Dashboard\AutomationController@typeList')->name('types');
         });
 
         Route::group(['middleware' => ['permission:view_transactions']], function () {

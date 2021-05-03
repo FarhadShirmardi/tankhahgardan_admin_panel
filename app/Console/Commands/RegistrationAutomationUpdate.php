@@ -3,10 +3,16 @@
 namespace App\Console\Commands;
 
 use App\AutomationData;
+use App\Constants\PremiumDuration;
+use App\Constants\UserPremiumState;
 use App\Payment;
+use App\ProjectUser;
 use App\Receive;
 use App\User;
+use App\UserStatusLog;
+use DB;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Container\BindingResolutionException;
 
 class RegistrationAutomationUpdate extends Command
 {
@@ -38,6 +44,7 @@ class RegistrationAutomationUpdate extends Command
      * Execute the console command.
      *
      * @return mixed
+     * @throws BindingResolutionException
      */
     public function handle()
     {
@@ -46,8 +53,8 @@ class RegistrationAutomationUpdate extends Command
 
         $maxTimes = AutomationData::query()
             ->first([
-                \DB::raw("max(registered_at) as max_reg_time"),
-                \DB::raw("max(max_time) as max_time"),
+                DB::raw("max(registered_at) as max_reg_time"),
+                DB::raw("max(max_time) as max_time"),
             ])->toArray();
 
         $users = User::query()->where('verification_time', '>=', $maxTimes['max_reg_time'])->get();
@@ -92,21 +99,281 @@ class RegistrationAutomationUpdate extends Command
             AutomationData::query()
                 ->where('id', $item->creator_user_id)
                 ->update([
-                    'transaction_count' => \DB::raw('transaction_count + 1'),
+                    'transaction_count' => DB::raw('transaction_count + 1'),
                     'max_time' => $item->created_at,
                 ]);
+            /** @var ProjectUser $owner */
             $owner = $item->projectOwnerUser()->first();
             if ($owner and $item->creator_user_id != $owner->user_id) {
                 AutomationData::query()
                     ->where('id', $owner->user_id)
                     ->update([
-                        'transaction_count' => \DB::raw('transaction_count + 1'),
+                        'transaction_count' => DB::raw('transaction_count + 1'),
                         'max_time' => $item->created_at,
                     ]);
             }
             $bar->advance();
         }
 
+        $statusLogs = UserStatusLog::query()
+            ->with('user')
+            ->where('status', true)
+            ->where(function ($query) {
+                $query->whereDate('start_date', now()->toDateString())
+                    ->orWhereDate('end_date', now()->toDateString());
+            })
+            ->get();
+
+        $automationRegister = app()->make(RegistrationAutomationCalculate::class);
+
+        foreach ($statusLogs as $statusLog) {
+            $data = $automationRegister->getRegistrationAutomationQuery(
+                $statusLog->user->first()
+            );
+            unset($data['id']);
+            AutomationData::query()
+                ->where('id', $statusLog->user_id)
+                ->update(
+                    $data
+                );
+        }
+
+
+        $premiumStates = [UserPremiumState::PREMIUM, UserPremiumState::NEAR_ENDING_PREMIUM];
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDay()->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(3)->toDateTimeString())
+            ->update([
+                'automation_state' => 2,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(3)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(9)->toDateTimeString())
+            ->where('transaction_count', '>', 0)
+            ->update([
+                'automation_state' => 3,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(3)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(9)->toDateTimeString())
+            ->where('transaction_count', 0)
+            ->update([
+                'automation_state' => 4,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(9)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(18)->toDateTimeString())
+            ->where('transaction_count', '>', 0)
+            ->update([
+                'automation_state' => 5,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(9)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(18)->toDateTimeString())
+            ->where('transaction_count', 0)
+            ->update([
+                'automation_state' => 6,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(18)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(30)->toDateTimeString())
+            ->where('transaction_count', '>=', 10)
+            ->whereNotIn('premium_state', $premiumStates)
+            ->update([
+                'automation_state' => 7,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(18)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(30)->toDateTimeString())
+            ->where('transaction_count', '>=', 10)
+            ->whereIn('premium_state', $premiumStates)
+            ->update([
+                'automation_state' => 8,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(18)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(30)->toDateTimeString())
+            ->where('transaction_count', '<=', 9)
+            ->where('transaction_count', '>=', 5)
+            ->update([
+                'automation_state' => 9,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(18)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(30)->toDateTimeString())
+            ->where('transaction_count', '<=', 4)
+            ->where('transaction_count', '>=', 1)
+            ->update([
+                'automation_state' => 10,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(18)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(30)->toDateTimeString())
+            ->where('transaction_count', 0)
+            ->update([
+                'automation_state' => 11,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(30)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(45)->toDateTimeString())
+            ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
+            ->where('transaction_count', '>=', 25)
+            ->whereNotIn('premium_state', $premiumStates)
+            ->update([
+                'automation_state' => 12,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(30)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(45)->toDateTimeString())
+            ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
+            ->where('transaction_count', '>=', 25)
+            ->whereIn('premium_state', $premiumStates)
+            ->update([
+                'automation_state' => 13,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(30)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(45)->toDateTimeString())
+            ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
+            ->where('transaction_count', '<', 25)
+            ->update([
+                'automation_state' => 14,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(30)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(45)->toDateTimeString())
+            ->where('max_time', '<', now()->subDays(10)->toDateTimeString())
+            ->where('transaction_count', '>=', 10)
+            ->update([
+                'automation_state' => 15,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(30)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(45)->toDateTimeString())
+            ->where('max_time', '<', now()->subDays(10)->toDateTimeString())
+            ->where('transaction_count', '<', 10)
+            ->update([
+                'automation_state' => 16,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(45)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
+            ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
+            ->where('transaction_count', '>=', 35)
+            ->whereNotIn('premium_state', $premiumStates)
+            ->update([
+                'automation_state' => 17,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(45)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
+            ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
+            ->where('transaction_count', '>=', 35)
+            ->whereIn('premium_state', $premiumStates)
+            ->update([
+                'automation_state' => 18,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(45)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
+            ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
+            ->where('transaction_count', '<', 35)
+            ->update([
+                'automation_state' => 19,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(45)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
+            ->where('max_time', '<', now()->subDays(10)->toDateTimeString())
+            ->where('transaction_count', '>=', 20)
+            ->update([
+                'automation_state' => 20,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '<=', now()->subDays(45)->toDateTimeString())
+            ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
+            ->where('max_time', '<', now()->subDays(10)->toDateTimeString())
+            ->where('transaction_count', '<', 20)
+            ->update([
+                'automation_state' => 21,
+            ]);
+
+        $userStatusLog = UserStatusLog::query()
+            ->where('status', true)
+            ->whereNotIn('price_id', [PremiumDuration::ONE_WEEK, PremiumDuration::HALF_MONTH]);
+
+        AutomationData::query()
+            ->joinSub($userStatusLog->getQuery(), 'status_logs', 'status_logs.user_id', 'automation_data.id')
+            ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
+            ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
+            ->where('premium_state', UserPremiumState::EXPIRED_PREMIUM)
+            ->update([
+                'automation_state' => 22,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
+            ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
+            ->where('premium_state', UserPremiumState::FREE)
+            ->where('transaction_count', '>=', 50)
+            ->update([
+                'automation_state' => 23,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
+            ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
+            ->where('premium_state', UserPremiumState::FREE)
+            ->where('transaction_count', '<', 50)
+            ->update([
+                'automation_state' => 24,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
+            ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
+            ->whereIn('premium_state', $premiumStates)
+            ->update([
+                'automation_state' => 25,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
+            ->where('max_time', '<', now()->subDays(10)->toDateTimeString())
+            ->where('transaction_count', '>=', 20)
+            ->update([
+                'automation_state' => 26,
+            ]);
+
+        AutomationData::query()
+            ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
+            ->where('max_time', '<', now()->subDays(10)->toDateTimeString())
+            ->where('transaction_count', '<', 20)
+            ->update([
+                'automation_state' => 27,
+            ]);
+
         $this->info(now()->diff($start)->format('%i:%s.%f'));
+        return null;
     }
 }

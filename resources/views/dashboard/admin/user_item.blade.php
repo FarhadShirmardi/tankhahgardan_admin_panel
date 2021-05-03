@@ -38,6 +38,7 @@
                             @foreach($groupPermission as $permission => $permissionName)
                                 <div class="col-md-3">
                                     <input type="checkbox" name="permission_checkbox[]" value="{{ $permission }}"
+                                           @if(in_array($permission, $user_permissions)) checked @endif
                                            id="{{ $permission }}">
                                     <label for="{{ $permission }}">{{ $permissionName }}</label>
                                 </div>

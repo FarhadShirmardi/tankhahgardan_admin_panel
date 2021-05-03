@@ -2,9 +2,9 @@
 
 namespace App;
 
+use App\Helpers\Helpers;
 use App\Helpers\UtilHelpers;
 use Illuminate\Database\Eloquent\Model;
-use App\Helpers\Helpers;
 
 class UserStatusLog extends Model
 {
@@ -34,6 +34,11 @@ class UserStatusLog extends Model
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function promoCode()

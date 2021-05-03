@@ -253,7 +253,7 @@ class RegistrationAutomationMetric extends Command
             ->updateOrInsert([
                 'date' => now()->toDateString(),
             ], [
-                'metric' => $meta,
+                'metric' => json_encode($meta),
             ]);
 
         $this->info(now()->diff($start)->format('%i:%s.%f'));

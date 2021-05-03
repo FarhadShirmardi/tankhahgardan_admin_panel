@@ -38,6 +38,9 @@ class AdminController extends Controller
             'edit_transactions' => 'ثبت تراکنش جدید',],
 
         ['edit_user_panels' => 'ویرایش کاربران پنل',],
+
+        ['view_automation' => 'نمایش اطلاعات اتوماسیون',
+            'edit_automation' => 'ثبت زنگ و تغییر استیت کاربران'],
     ];
 
     public function userList()
@@ -56,6 +59,7 @@ class AdminController extends Controller
         return view('dashboard.admin.user_item', [
             'user' => $user,
             'permissions' => $this->permissions,
+            'user_permissions' => $user->permissions()->pluck('name')->toArray(),
         ]);
     }
 

@@ -156,4 +156,9 @@ class User extends Authenticatable
     {
         return Helpers::getUserStatus($this);
     }
+
+    public function sentSms()
+    {
+        return $this->hasMany(AutomationSms::class, 'user_id', 'id');
+    }
 }

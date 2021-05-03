@@ -14,6 +14,20 @@
                 }
             }
         });
+        $('.automation_metrics').pDatepicker({
+            format: "YYYY/MM/DD",
+            initialValue: false,
+            initialValueType: 'gregorian',
+            autoClose: true,
+            maxDate: new persianDate(),
+            calendar: {
+                persian: {
+                    locale: 'fa',
+                    showHint: false,
+                    leapYearMode: 'algorithmic'
+                }
+            }
+        });
         $('.time_picker').pDatepicker({
             format: "YYYY/MM/DD H:m",
             altFormat: "YYYY/MM/DD H:m",

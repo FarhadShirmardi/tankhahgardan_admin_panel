@@ -19,10 +19,6 @@ class CreateAutomationSmsTable extends Migration
             $table->integer('type');
             $table->text('sms_text');
             $table->dateTime('sent_time');
-
-            $table->foreign('user_id')
-                ->on('users')
-                ->references('id');
         });
     }
 

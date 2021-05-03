@@ -84,7 +84,27 @@
                         </li>
                     </ul>
                 </li>
-            @endif
+                @endif
+                @if(auth()->user()->can('view_automation'))
+                    <li class="nav-item nav-dropdown">
+                        <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-refresh"></i>اتوماسیون</a>
+                        <ul class="nav-dropdown-items">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('dashboard.automation.metrics') }}">
+                                    <i class="icon-list"></i>
+                                    متریک‌ها
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('dashboard.automation.types') }}">
+                                    <i class="icon-list"></i>
+                                    گزارش وضعیت
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                @endif
+
         </ul>
     </nav>
 </div>
