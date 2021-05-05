@@ -4,13 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class AutomationSms extends Model
+class AutomationCall extends Model
 {
-    protected $connection = 'mysql_panel';
     public $timestamps = false;
+    protected $connection = 'mysql_panel';
     protected $fillable = [
+        'text',
         'type',
-        'sms_text',
-        'sent_time',
+        'call_time',
     ];
 }

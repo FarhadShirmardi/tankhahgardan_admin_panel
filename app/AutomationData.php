@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AutomationData extends Model
 {
+    protected $connection = 'mysql_panel';
     public $timestamps = false;
     protected $fillable = [
         'id',

@@ -46,9 +46,16 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
             Route::middleware(['permission:view_registration'])
                 ->match(['get', 'post'], 'rangeSeparation', 'Dashboard\ReportController@rangeSeparation')
                 ->name('rangeSeparation');
-            Route::middleware(['permission:view_users_report'])
-                ->match(['get', 'post'], 'userActivity', 'Dashboard\ReportController@allUsersActivity')
-                ->name('allUsersActivity');
+            Route::middleware(['permission:view_users_report'])->group(function () {
+                Route::match(['get', 'post'], 'userActivity', 'Dashboard\ReportController@allUsersActivity')
+                    ->name('allUsersActivity');
+                Route::get('extractUserIdsWithFilter', 'Dashboard\ReportController@extractUserIdsWithFilter')
+                    ->name('extractUserIdsWithFilter');
+                Route::get('userActivityCountChart', 'Dashboard\ReportController@allUsersCountChart')
+                    ->name('userActivityCountChart');
+                Route::get('userActivityRangeChart', 'Dashboard\ReportController@allUsersRangeChart')
+                    ->name('userActivityRangeChart');
+            });
             Route::middleware(['permission:view_projects_report'])
                 ->match(['get', 'post'], 'projectActivity', 'Dashboard\ReportController@allProjectsActivity')
                 ->name('allProjectsActivity');
@@ -142,6 +149,11 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::prefix('automation')->name('automation.')->middleware('permission:view_automation')->group(function () {
             Route::get('metrics', 'Dashboard\AutomationController@metrics')->name('metrics');
             Route::get('types', 'Dashboard\AutomationController@typeList')->name('types');
+            Route::get('typeItem/{id}', 'Dashboard\AutomationController@typeItem')->name('typeItem');
+            Route::get('callLogs/{id}', 'Dashboard\AutomationController@callLogs')->name('callLogs');
+            Route::post('burnUser/{id}', 'Dashboard\AutomationController@burnUser')->name('burnUser');
+            Route::get('call/{userId}/{id}', 'Dashboard\AutomationController@newCallView')->name('callView');
+            Route::post('newCall/{userId}/{id}', 'Dashboard\AutomationController@newCall')->name('newCall');
         });
 
         Route::group(['middleware' => ['permission:view_transactions']], function () {

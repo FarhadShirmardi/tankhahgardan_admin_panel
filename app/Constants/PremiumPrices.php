@@ -37,13 +37,13 @@ class PremiumPrices
                 'user_price' => self::filterPrice(PremiumConstants::USER_PRICE, 0.5, $minUserCount, $isUpgrade),
                 'volume_price' => self::filterPrice(PremiumConstants::VOLUME_PRICE, 0.5, $minVolume, $isUpgrade),
                 'constant_price' => PremiumConstants::CONSTANT_PRICE,
-                'title' => trans('names.plan_title', ['plan' => PremiumDuration::getTitle(PremiumDuration::HALF_MONTH)]),
+                'title' => trans('names.gift_title', ['plan' => PremiumDuration::getTitle(PremiumDuration::HALF_MONTH)]),
                 'title2' => PremiumDuration::getSecondTitle(PremiumDuration::HALF_MONTH),
                 'month_count' => 0.5,
                 'day_count' => 15,
                 'discount_percent' => 0,
                 'active' => false,
-                'is_gift' => true
+                'is_gift' => true,
             ],
             [
                 'id' => PremiumDuration::MONTH,
@@ -56,6 +56,7 @@ class PremiumPrices
                 'day_count' => 31,
                 'discount_percent' => 0,
                 'active' => true,
+                'is_gift' => false,
             ],
             [
                 'id' => PremiumDuration::YEAR,
@@ -68,6 +69,7 @@ class PremiumPrices
                 'day_count' => 365,
                 'discount_percent' => 17,
                 'active' => true,
+                'is_gift' => false,
             ]
         ];
     }

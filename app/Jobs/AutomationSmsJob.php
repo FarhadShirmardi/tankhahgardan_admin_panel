@@ -46,6 +46,9 @@ class AutomationSmsJob implements ShouldQueue
         $receptor = $this->user->phone_number;
         [$pattern, $text, $params] = $this->smsText($this->user, $this->type);
 
+        if (is_null($pattern)) {
+            return;
+        }
 
         if (in_array($pattern, ['active-18Day', 'active-first-discount', 'active-discount-yearly'])) {
             /** @var Campaign $campaign */
@@ -72,7 +75,6 @@ class AutomationSmsJob implements ShouldQueue
                 'end_date' => now()->addDays(5)->endOfDay()->toDateTimeString(),
             ]);
         }
-
         foreach ($params as $key => $param) {
             if ($param == '#PROMO_CODE_PERCENT#') {
                 $tokens[$key] = $discount;
@@ -83,7 +85,7 @@ class AutomationSmsJob implements ShouldQueue
             } else {
                 $tokens[$key] = $param;
             }
-            $text = str_replace('%token' . ($key + 1), $tokens[$key], $text);
+            $text = str_replace('%token' . ($key == 1 ? '' : ($key + 1)), $tokens[$key], $text);
         }
 
         $result = Kavenegar::VerifyLookup($receptor, $tokens[0], $tokens[1], $tokens[2], $pattern, 'sms');
@@ -91,7 +93,7 @@ class AutomationSmsJob implements ShouldQueue
             $message = $result[0]->statustext;
             Log::info('Send to kavenegar   ====>   ' . $receptor . '  ' . $message);
 
-            $this->user->sentSms()->create([
+            $this->user->automationSms()->create([
                 'type' => $this->type,
                 'sms_text' => $text,
                 'sent_time' => now()->toDateTimeString(),
@@ -152,7 +154,7 @@ https://www.aparat.com/v/bUA9J', ['تنخواه']];
 کد تخفیف: %token2
 مهلت استفاده: %token3', ['#PROMO_CODE_PERCENT#', '#PROMO_CODE#', '#PROMO_CODE_DATE#']];
             case 20:
-                if ($user->sentSms()->whereIn('type', [15, 20, 26])->exists()) {
+                if ($user->automationSms()->whereIn('type', [15, 20, 26])->exists()) {
                     return ['active-info-support', 'کاربر گرامی %token گردان
 برای آموزش سریع استفاده از تنخواه‌گردان از لینک زیر استفاده کنید و یا با همکاران واحد پشتیبانی تماس بگیرید.
 شماره تماس پشتیبانی:‌ 02162995555
@@ -166,7 +168,7 @@ https://www.aparat.com/v/bUA9J', ['تنخواه']];
 شروع پاسخگویی:‌', ['تنخواه']];
                 }
             case 26:
-                if ($user->sentSms()->whereIn('type', [15, 20, 26])->exists()) {
+                if ($user->automationSms()->whereIn('type', [15, 20, 26])->exists()) {
                     return ['active-60Day', 'کاربر گرامی %token گردان
 جهت مشاوره و ارائه انتقادات و پیشنهادات خود می‌توانید همه روزه با شماره 02162995555 تماس حاصل فرمایید.
 

@@ -2,22 +2,22 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Announcement;
-use App\User;
-use App\Helpers\Helpers;
 use App\AnnouncementUser;
-use GuzzleHttp\Client;
-use Illuminate\Http\UploadedFile;
-use Validator;
-use App\Jobs\AnnouncementJob;
-use Carbon\Carbon;
-use Exception;
-use Storage;
 use App\Constants\AnnouncementStatus;
 use App\Constants\AnnouncementType;
+use App\Helpers\Helpers;
+use App\Http\Controllers\Controller;
+use App\Jobs\AnnouncementJob;
+use App\User;
+use Carbon\Carbon;
 use DB;
+use Exception;
+use GuzzleHttp\Client;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Storage;
+use Validator;
 
 class FirebaseController extends Controller
 {
@@ -114,15 +114,15 @@ class FirebaseController extends Controller
             if (count($userIds) == 1) {
                 $user = User::query()->findOrFail($userIds[0]);
                 $users->push([
-                    'username' => Helpers::getEnglishString($user->username),
-                    'state' => $userStates->count() ? $userStates->where('user_id', $user->id)->first()->read : 0
+                    'username' => Helpers::getEnglishString($user->full_name),
+                    'state' => $userStates->count() ? $userStates->where('user_id', $user->id)->first()->read : 0,
                 ]);
             } else {
                 foreach ($userIds as $userId) {
                     $userTemp = User::query()->findOrFail($userId);
                     $users->push([
-                        'username' => Helpers::getEnglishString($userTemp->username),
-                        'state' => $userStates->count() ? $userStates->where('user_id', $userId)->first()->read : 0
+                        'username' => Helpers::getEnglishString($userTemp->full_name),
+                        'state' => $userStates->count() ? $userStates->where('user_id', $userId)->first()->read : 0,
                     ]);
                 }
             }

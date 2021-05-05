@@ -29,8 +29,21 @@
             @endif
             @if(auth()->user()->can('view_users_report'))
                 <li class="nav-item nav-dropdown">
-                    <a class="nav-link" href="{{ route('dashboard.report.allUsersActivity') }}"><i
-                            class="icon-pie-chart"></i>گزارش وضعیت کاربران</a>
+                    <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-chart"></i>وضعیت کاربران</a>
+                    <ul class="nav-dropdown-items">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard.report.allUsersActivity') }}"><i
+                                    class="icon-list"></i>گزارش وضعیت کاربران</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard.report.userActivityCountChart') }}"><i
+                                    class="icon-chart"></i>نمودار وضعیت کاربران</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard.report.userActivityRangeChart') }}"><i
+                                    class="icon-chart"></i>نمودار وضعیت تراکنش در بازه</a>
+                        </li>
+                    </ul>
                 </li>
             @endif
             @if(auth()->user()->can('view_projects_report'))
@@ -44,15 +57,22 @@
                     <a class="nav-link" href="{{ route('dashboard.feedbacks') }}"><i class="icon-user"></i>بازخوردها</a>
                 </li>
             @endif
-            @if(auth()->user()->can('view_notification'))
+            @if(auth()->user()->can('view_notification') or auth()->user()->can('view_banner'))
                 <li class="nav-item nav-dropdown">
-                    <a class="nav-link" href="{{ route('dashboard.announcements') }}"><i class="icon-bell"></i>اعلان‌ها</a>
-                </li>
-            @endif
-            @if(auth()->user()->can('view_banner'))
-                <li class="nav-item nav-dropdown">
-                    <a class="nav-link" href="{{ route('dashboard.banners') }}"><i
-                            class="icon-picture"></i>بنرها</a>
+                    <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-menu"></i>اعلان و بنر</a>
+                    <ul class="nav-dropdown-items">
+                        @if(auth()->user()->can('view_notification'))
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('dashboard.announcements') }}"><i class="icon-bell"></i>اعلان‌ها</a>
+                            </li>
+                        @endif
+                        @if(auth()->user()->can('view_banner'))
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('dashboard.banners') }}"><i
+                                        class="icon-picture"></i>بنرها</a>
+                            </li>
+                        @endif
+                    </ul>
                 </li>
             @endif
             @if(auth()->user()->can('edit_user_panels'))
@@ -84,26 +104,26 @@
                         </li>
                     </ul>
                 </li>
-                @endif
-                @if(auth()->user()->can('view_automation'))
-                    <li class="nav-item nav-dropdown">
-                        <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-refresh"></i>اتوماسیون</a>
-                        <ul class="nav-dropdown-items">
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('dashboard.automation.metrics') }}">
-                                    <i class="icon-list"></i>
-                                    متریک‌ها
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('dashboard.automation.types') }}">
-                                    <i class="icon-list"></i>
-                                    گزارش وضعیت
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                @endif
+            @endif
+            @if(auth()->user()->can('view_automation'))
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-refresh"></i>اتوماسیون</a>
+                    <ul class="nav-dropdown-items">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard.automation.metrics') }}">
+                                <i class="icon-list"></i>
+                                متریک‌ها
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard.automation.types') }}">
+                                <i class="icon-list"></i>
+                                گزارش وضعیت
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            @endif
 
         </ul>
     </nav>

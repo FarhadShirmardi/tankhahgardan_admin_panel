@@ -111,7 +111,7 @@
 
     <hr>
 
-    @include('dashboard.report.listUser')
+    @include('dashboard.report.listUser', ['clickable' => true])
 
     <hr>
 

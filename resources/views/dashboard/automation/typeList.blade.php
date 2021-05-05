@@ -15,7 +15,8 @@
             </thead>
             <tbody>
             @foreach($mappings as $type => $mapping)
-                <tr>
+                <tr class="clickableRow table-row-clickable"
+                    data-href="{{ route('dashboard.automation.typeItem', ['id' => $type]) }}">
                     <td class="ltr">{{ $type }}</td>
                     <td>{{ $mapping }}</td>
                     <td>{{ $types->where('automation_state', $type)->first()->c ?? 0 }}</td>

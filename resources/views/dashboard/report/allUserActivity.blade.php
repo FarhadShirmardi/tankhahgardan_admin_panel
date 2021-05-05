@@ -19,6 +19,7 @@
     @include('dashboard.layouts.link_message')
     <form id="filter" method="get" action="">
         {{ csrf_field() }}
+        <input type="hidden" id="route" name="route"/>
         <div class="row pb-5 pt-5 justify-content-center">
             <div class="col-md-3 col-sm-10">
                 <table class="table table-bordered table-responsive">
@@ -110,23 +111,21 @@
         <div class="col-md-4">{{ $users->appends(request()->input())->links() }}</div>
         <div class="col-md-8"><p>تعداد {{ $users->total() }} کاربر با شرایط فوق پیدا شد.</p></div>
     </div>
-    @include('dashboard.report.listUser')
+    @include('dashboard.report.listUser', ['clickable' => true])
     {{ $users->appends(request()->input())->links() }}
     <hr>
     <div class="row">
         <div class="col-md-2">
-            <a class="form-control btn btn-success"
-               href="{{ route('dashboard.campaignUser', ['userIds' => $userIds]) }}">افزودن
-                کد تخفیف</a>
+            <input class="form-control btn btn-success" onclick="extractIds('dashboard.campaignUser');" value="افزودن کد تخفیف">
         </div>
         <div class="col-md-2">
-            <a class="form-control btn btn-success"
-               href="{{ route('dashboard.announcementItem', ['id' => 0, 'userIds' => $userIds]) }}">افزودن
-                اعلان</a>
+            <input class="form-control btn btn-success" onclick="extractIds('dashboard.announcementItem');"
+                   value="افزودن اعلان">
         </div>
         <div class="col-md-2">
-            <a class="form-control btn btn-success"
-               href="{{ route('dashboard.bannerItem', ['id' => 0, 'userIds' => $userIds]) }}">افزودن بنر</a>
+            <input class="form-control btn btn-success" onclick="extractIds('dashboard' +
+             '.bannerItem');" value="افزودن بنر">
+
         </div>
         <div class="col-md-6">
             <div class="row">
@@ -144,17 +143,9 @@
             </div>
         </div>
     </div>
-    <hr>
-    <div id="dateChart" style="width:100%;"></div>
-    <div id="rangeCount" class="my-5" style="width:100%;"></div>
-@endsection
-@section('chart')
-    @include('dashboard.report.charts.allUserActivity')
-    @include('dashboard.report.charts.rangeCount')
 @endsection
 @section('scripts')
     <script>
-
         function changeUserType(userType) {
             var input = document.getElementById('userType');
             input.value = userType;
@@ -168,6 +159,15 @@
 
             document.getElementById('filter').submit();
             form.action = '';
+        }
+
+        function extractIds(route) {
+            var routeEl = document.getElementById('route');
+            routeEl.value = route;
+
+            var form = document.getElementById('filter');
+            form.action = '{{ route('dashboard.report.extractUserIdsWithFilter') }}';
+            document.getElementById('filter').submit();
         }
 
         $('#user_states').select2({width: 'element'});

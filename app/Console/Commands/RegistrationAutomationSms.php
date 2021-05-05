@@ -51,7 +51,7 @@ class RegistrationAutomationSms extends Command
                         $user,
                         $type
                     )
-                )->onConnection('activationSms');
+                )->onQueue('activationSms');
             }
         }
 

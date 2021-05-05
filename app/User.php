@@ -28,7 +28,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'verification_code', 'vcode_genration_time', 'state'
+        'password', 'remember_token', 'verification_code', 'vcode_genration_time', 'state',
     ];
 
     protected $dates = [
@@ -47,7 +47,8 @@ class User extends Authenticatable
 
     public function getFullNameAttribute()
     {
-        return ($this->name or $this->family) ? "{$this->name} {$this->family}" : Helpers::getPersianString($this->phone_number);
+        return ($this->name or $this->family) ? "{$this->name} {$this->family}" :
+            Helpers::getPersianString($this->phone_number);
     }
 
     public function getCreatedAtDateAttribute()
@@ -157,8 +158,23 @@ class User extends Authenticatable
         return Helpers::getUserStatus($this);
     }
 
-    public function sentSms()
+    public function automationSms()
     {
         return $this->hasMany(AutomationSms::class, 'user_id', 'id');
+    }
+
+    public function automationCall()
+    {
+        return $this->hasMany(AutomationCall::class, 'user_id', 'id');
+    }
+
+    public function automationData()
+    {
+        return $this->hasOne(AutomationData::class, 'id', 'id');
+    }
+
+    public function automationBurn()
+    {
+        return $this->hasMany(AutomationBurntUser::class, 'user_id', 'id');
     }
 }

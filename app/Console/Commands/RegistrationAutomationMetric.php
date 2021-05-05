@@ -74,11 +74,10 @@ class RegistrationAutomationMetric extends Command
             ]);
 
 //        dd($automationMetrics->toArray());
-
         $meta = [
             'total_count' => $userCounts->sum('count'),
-            'active_user_count' => $userCounts->where('user_state', 1)->first()->count,
-            'inactive_user_count' => $userCounts->where('user_state', 0)->first()->count,
+            'active_user_count' => $userCounts->where('user_state', 1)->first()->count ?? 0,
+            'inactive_user_count' => $userCounts->where('user_state', 0)->first()->count ?? 0,
 
             'D10+_T50+_R15+_P+_A+' => $automationMetrics
                 ->where('D', 'D10+')

@@ -183,6 +183,7 @@ class ManagementController extends Controller
                     $query->where('user_id', $userId)->orWhereNull('user_id');
                 }
             })
+            ->orderBy('created_at', 'desc')
             ->addSelect([
                 'promo_codes.*',
                 'panel_users.name as panel_user_name',
@@ -282,10 +283,10 @@ class ManagementController extends Controller
             })
             ->where(function ($query) use ($filter) {
                 if (isset($filter['start_date'])) {
-                    $query->whereDate('transactions.created_at', '>=', $filter['start_date']);
+                    $query->whereDate('user_status_logs.created_at', '>=', $filter['start_date']);
                 }
                 if (isset($filter['end_date'])) {
-                    $query->whereDate('transactions.created_at', '<=', $filter['end_date']);
+                    $query->whereDate('user_status_logs.created_at', '<=', $filter['end_date']);
                 }
             })
             ->where(function ($query) use ($filter) {
@@ -295,6 +296,7 @@ class ManagementController extends Controller
             })
             ->orderBy($filter['sort_field'], $filter['sort_type'])
             ->selectRaw("IFNULL(transactions.created_at, user_status_logs.created_at) as date")
+            ->selectRaw("IF(users.name is null and users.family is null, users.phone_number, CONCAT_WS(' ', IFNULL(users.name, ''), IFNULL(users.family, ''))) as full_name")
             ->addSelect([
                 'user_status_logs.user_id',
                 'users.name as user_name',
@@ -317,8 +319,8 @@ class ManagementController extends Controller
             ])->get();
 
         $transactions = $transactions->map(function ($item) {
-            $item->full_name = ($item->user_name or $item->user_family) ?
-                $item->user_name . ' ' . $item->user_family : ' - ';
+//            $item->full_name = ($item->user_name or $item->user_family) ?
+//                $item->user_name . ' ' . $item->user_family : ' - ';
             $item->date = $item->date ? Helpers::convertDateTimeToJalali($item->date) : '-';
             $item->start_date = Helpers::convertDateTimeToJalali($item->start_date);
             $item->end_date = Helpers::convertDateTimeToJalali($item->end_date);

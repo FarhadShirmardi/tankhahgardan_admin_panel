@@ -6,6 +6,7 @@ use App\AutomationData;
 use App\AutomationMetric;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
+use App\User;
 use Illuminate\Http\Request;
 
 class AutomationController extends Controller
@@ -39,6 +40,7 @@ class AutomationController extends Controller
         25 => 'بیش از ۶۰ روز از تاریخ ثبت‌نام گذشته و کاربر در ۱۰ روز اخیر تراکنش ثبت کرده و پولی است.',
         26 => 'بیش از ۶۰ روز از تاریخ ثبت‌نام گذشته و کاربر در ۱۰ روز اخیر تراکنش ثبت نکرده و بیشتر مساوی ۲۰ تراکنش ثبت کرده است.',
         27 => 'بیش از ۶۰ روز از تاریخ ثبت‌نام گذشته و کاربر در ۱۰ روز اخیر تراکنش ثبت نکرده و کمتر از ۲۰ تراکنش ثبت کرده است.',
+        28 => 'کاربر سوخته!',
     ];
 
 
@@ -120,5 +122,82 @@ class AutomationController extends Controller
             'types' => $types,
             'mappings' => $this->typeMapping,
         ]);
+    }
+
+    public function typeItem(Request $request, $type)
+    {
+        $automationData = AutomationData::query()
+            ->where('automation_state', $type)
+            ->orderBy('transaction_count', 'desc')
+            ->paginate();
+
+        return view('dashboard.automation.typeItem', [
+            'type' => $type,
+            'mappings' => $this->typeMapping,
+            'items' => $automationData,
+        ]);
+    }
+
+    public function callLogs($id)
+    {
+        $user = User::query()->findOrFail($id);
+        $userState = $user->automationData()->first();
+        $messages = $user->automationSms()->orderBy('sent_time', 'desc')->get();
+        $calls = $user->automationCall()->orderBy('call_time', 'desc')->get();
+        $burn = $user->automationBurn()->first();
+        return view('dashboard.automation.callLogs', [
+            'user' => $user,
+            'burn' => $burn,
+            'userState' => $userState,
+            'typeMappings' => $this->typeMapping,
+            'userMessages' => $messages,
+            'calls' => $calls,
+        ]);
+    }
+
+    public function newCallView($userId, $id)
+    {
+        $user = User::query()->findOrFail($userId);
+        $call = $user->automationCall()->find($id);
+
+        return view('dashboard.automation.newCallLogs', [
+            'user' => $user,
+            'id' => $id,
+            'call' => $call,
+        ]);
+    }
+
+    public function newCall(Request $request, $userId, $id)
+    {
+        $user = User::query()->findOrFail($userId);
+        $data = [
+            'text' => $request->text,
+            'type' => $user->automationData()->first()->automation_state,
+        ];
+        if (!$id) {
+            $data['call_time'] = now()->toDateTimeString();
+        }
+        $user->automationCall()->updateOrCreate([
+            'id' => $id,
+        ], $data);
+        return redirect()->route('dashboard.automation.callLogs', ['id' => $userId]);
+    }
+
+    public function burnUser(Request $request, $id)
+    {
+        $user = User::query()->findOrFail($id);
+        $burn = $user->automationBurn()->first();
+        $user->automationBurn()->updateOrCreate([
+            'id' => $burn ? $burn->id : 0,
+        ], [
+            'text' => $request->text,
+            'date' => $burn ? $burn->date : now()->toDateTimeString(),
+        ]);
+        if ($user->automationData()->first()->automation_state == 26) {
+            $user->automationData()->update([
+                'automation_state' => 28,
+            ]);
+        }
+        return redirect()->back()->with('success', 'با موفقیت انجام شد.');
     }
 }

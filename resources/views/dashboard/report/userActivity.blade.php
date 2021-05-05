@@ -11,17 +11,25 @@
             <a class="form-control btn btn-info" href="{{ route('dashboard.promoCodes', ['user_id' => $user->id]) }}">کد تخفیف‌های کاربر</a>
         </div>
         <div class="col-md-2">
-            <a class="form-control btn btn-success" href="{{ route('dashboard.campaignUser', ['userIds' => $user->id]) }}">افزودن
-                کد تخفیف</a>
-        </div>
-        <div class="col-md-2">
             <a class="form-control btn btn-info" href="{{ route('dashboard.transactions', ['user_id' => $user->id]) }}">تراکنش‌های
                 کاربر</a>
         </div>
         <div class="col-md-2">
-            <a class="form-control btn btn-light" href="{{ route('dashboard.feedbacks', ['user_id' => $user->id]) }}">بازخوردهای
+            <a class="form-control btn btn-info" href="{{ route('dashboard.feedbacks', ['user_id' => $user->id])
+            }}">بازخوردهای
                 کاربر</a>
         </div>
+        <div class="col-md-2">
+            <a class="form-control btn btn-info" href="{{ route('dashboard.automation.callLogs', ['id' => $user->id])
+            }}">تماس‌های کاربر</a>
+        </div>
+    </div>
+    <div class="row pb-5">
+        <div class="col-md-2">
+            <a class="form-control btn btn-success" href="{{ route('dashboard.campaignUser', ['userIds' => $user->id]) }}">افزودن
+                کد تخفیف</a>
+        </div>
+        <div class="col-md-2"></div>
         <div class="col-md-2">
             <a class="form-control btn btn-success"
                href="{{ route('dashboard.newComment', ['phone_number' => $user->phone_number, 'user_id' => $user->id]) }}">افزودن
@@ -29,17 +37,25 @@
         </div>
         <div class="col-md-2">
             <a class="form-control btn btn-success"
-               href="{{ route('dashboard.announcementItem', ['id' => 0, 'userIds' => $user->id]) }}">افزودن اعلان</a>
+               href="{{ route('dashboard.bannerItem', ['id' => 0, 'userIds' => $user->id]) }}">افزودن بنر</a>
         </div>
-    </div>
-    <div class="row pb-5">
         <div class="col-md-2">
             <a class="form-control btn btn-success"
-               href="{{ route('dashboard.bannerItem', ['id' => 0, 'userIds' => $user->id]) }}">افزودن بنر</a>
+               href="{{ route('dashboard.announcementItem', ['id' => 0, 'userIds' => $user->id]) }}">افزودن اعلان</a>
         </div>
     </div>
 @endsection
 @section('content')
+    <div class="row">
+        @include('dashboard.report.listUser', [
+                'users' => $userItem,
+                'clickable' => false,
+                'extraData' => [
+                    'کیف پول' => $user->wallet,
+                    'کیف پول رزرو شده' => $user->reserve_wallet
+                ]
+        ])
+    </div>
     <div id="ajax-table">
         <table class="table table-striped table-responsive">
             <thead>
@@ -102,7 +118,21 @@
         </table>
     </div>
     <hr class="pt-4 pb-2">
-    <h5 class="text-center">دستگاه‌های کاربر</h5>
+    <h5 class="text-center pb-3">وضعیت اتوماسیون</h5>
+    @if($automationState)
+        <a target="_blank" href="{{ route('dashboard.automation.typeItem', ['id' => $automationState['automation_state']]) }}">{{
+    $type_mappings[$automationState['automation_state']]
+    }} (وضعیت {{
+    $automationState['automation_state'] }})
+        </a>
+    @else
+        تشخیص داده نشده!
+    @endif
+    <hr class="pt-4 pb-2">
+    <h5 class="text-center pb-3">طرح‌های کاربر</h5>
+    @include('dashboard.management.listUserStatus')
+    <hr class="pt-4 pb-2">
+    <h5 class="text-center pb-3">دستگاه‌های کاربر</h5>
     @include('dashboard.report.listDevices')
     <hr>
     <div id="rangeCount" class="my-5" style="width:100%;"></div>
