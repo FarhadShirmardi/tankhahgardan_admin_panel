@@ -53,13 +53,13 @@
             <div class="col-md-3 col-sm-12 pr-2">
                 <div class="row">
                     <label class="col-md-5 col-form-label text-md-left">مرتب‌سازی</label>
-                    <select id="sort_field" name="sort_field">
+                    <select id="sort_field" class="form-control col-md-4" name="sort_field">
                         @foreach($sortable_fields as $key => $sortable_field)
                             <option @if ($key == $filter['sort_field']) selected
                                     @endif value="{{ $key }}">{{ $sortable_field }}</option>
                         @endforeach
                     </select>
-                    <select id="sort_type" name="sort_type">
+                    <select id="sort_type" class="form-control col-md-3" name="sort_type">
                         @foreach($sortable_types as $key => $sortable_type)
                             <option @if ($key == $filter['sort_type']) selected
                                     @endif value="{{ $key }}">{{ $sortable_type }}</option>

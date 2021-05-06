@@ -120,8 +120,17 @@
     <hr class="pt-4 pb-2">
     <h5 class="text-center pb-3">وضعیت اتوماسیون</h5>
     @if($automationState)
-        <a target="_blank" href="{{ route('dashboard.automation.typeItem', ['id' => $automationState['automation_state']]) }}">{{
-    $type_mappings[$automationState['automation_state']]
+        <a target="_blank" href="{{ route('dashboard.automation.typeItem', ['id' => $automationState['automation_state']]) }}">
+            @if($type_mappings[$automationState['automation_state']]['type'] == 'call')
+                <i class="fa fa-phone">
+                </i>
+            @endif
+            @if($type_mappings[$automationState['automation_state']]['type'] != 'none')
+                <i class="fa fa-commenting">
+                </i>
+            @endif
+            {{
+    $type_mappings[$automationState['automation_state']]['title']
     }} (وضعیت {{
     $automationState['automation_state'] }})
         </a>

@@ -13,7 +13,7 @@ use Illuminate\Console\Command;
 
 class RegistrationAutomationCalculate extends Command
 {
-    public $automationStartDate = '2021-03-21 00:00:00';
+    public $automationStartDate = '2021-01-21 00:00:00';
 
     /**
      * The name and signature of the console command.
@@ -48,7 +48,7 @@ class RegistrationAutomationCalculate extends Command
     {
         $start = now();
         $this->info('start');
-        $users = User::query()->with('ownedProjects')->get();
+        $users = User::query()->whereNotNull('verification_time')->with('ownedProjects')->get();
         $finalResults = collect();
         $bar = $this->output->createProgressBar($users->count());
         foreach ($users as $user) {
@@ -72,14 +72,20 @@ class RegistrationAutomationCalculate extends Command
         $projectIds = $user->ownedProjects->pluck('id')->toArray();
 
         $payments = Payment::query()
-            ->where('creator_user_id', $userId)
-            ->orWhereIn('project_id', $projectIds)
+            ->withoutTrashed()
+            ->where(function ($query) use ($userId, $projectIds) {
+                $query->where('creator_user_id', $userId)
+                    ->orWhereIn('project_id', $projectIds);
+            })
             ->select(['created_at'])
             ->getQuery();
 
         $receives = Receive::query()
-            ->where('creator_user_id', $userId)
-            ->orWhereIn('project_id', $projectIds)
+            ->withoutTrashed()
+            ->where(function ($query) use ($userId, $projectIds) {
+                $query->where('creator_user_id', $userId)
+                    ->orWhereIn('project_id', $projectIds);
+            })
             ->select(['created_at'])
             ->getQuery();
 

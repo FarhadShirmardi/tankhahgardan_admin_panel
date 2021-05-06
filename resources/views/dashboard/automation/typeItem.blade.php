@@ -1,7 +1,15 @@
 @extends('dashboard.layouts.master')
 @section('title')
     <i class="fa fa-bar-chart"></i>
-    گزارش وضعیت - {{ $mappings[$type] }}
+    گزارش وضعیت - {{ $mappings[$type]['title'] }}
+    @if($mappings[$type]['type'] == 'call')
+        <i class="fa fa-phone">
+        </i>
+    @endif
+    @if($mappings[$type]['type'] != 'none')
+        <i class="fa fa-commenting">
+        </i>
+    @endif
 @endsection
 @section('content')
     {{ $items->appends(request()->input())->links() }}

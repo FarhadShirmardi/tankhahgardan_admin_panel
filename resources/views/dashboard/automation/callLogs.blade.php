@@ -19,7 +19,7 @@
             @foreach($userMessages as $userMessage)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $typeMappings[$userMessage->type] }} (وضعیت {{ $userMessage->type }})</td>
+                    <td>{{ $typeMappings[$userMessage->type]['title'] }} (وضعیت {{ $userMessage->type }})</td>
                     <td>{{ $userMessage->sms_text }}</td>
                     <td class="ltr text-right">{{ \App\Helpers\Helpers::convertDateTimeToJalali($userMessage->sent_time)
                     }}</td>
@@ -57,7 +57,7 @@
                     data-href="{{ route('dashboard.automation.callView', ['userId' => $user->id, 'id' => $call->id])
                     }}" data-target="_self">
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $typeMappings[$call->type] }} (وضعیت {{ $call->type }})</td>
+                    <td>{{ $typeMappings[$call->type]['title'] }} (وضعیت {{ $call->type }})</td>
                     <td>{{ $call->text }}</td>
                     <td class=" ltr text-right">{{ \App\Helpers\Helpers::convertDateTimeToJalali($call->call_time) }}</td>
                 </tr>
