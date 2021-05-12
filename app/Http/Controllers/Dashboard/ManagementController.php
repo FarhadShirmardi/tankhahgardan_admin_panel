@@ -8,6 +8,7 @@ use App\Constants\BannerStatus;
 use App\Constants\BannerType;
 use App\Constants\NotificationType;
 use App\Constants\PremiumBanks;
+use App\Constants\PremiumDuration;
 use App\Constants\PremiumPrices;
 use App\Constants\ProjectStatusType;
 use App\Constants\PurchaseType;
@@ -42,7 +43,7 @@ class ManagementController extends Controller
             ->leftJoin('panel_users', 'panel_users.id', 'panel_user_id')
             ->get([
                 'campaigns.*',
-                'panel_users.name as panel_user_name'
+                'panel_users.name as panel_user_name',
             ]);
         $campaigns = $campaigns->map(function ($item) {
             $item['start_date'] = $item['start_date'] ? Helpers::convertDateTimeToJalali($item['start_date']) : ' - ';
@@ -64,7 +65,7 @@ class ManagementController extends Controller
             ->leftJoin('panel_users', 'panel_users.id', 'panel_user_id')
             ->get([
                 'campaigns.*',
-                'panel_users.name as panel_user_name'
+                'panel_users.name as panel_user_name',
             ]);
         $campaigns = $campaigns->map(function ($item) {
             $item['start_date'] = $item['start_date'] ? Helpers::convertDateTimeToJalali($item['start_date']) : ' - ';
@@ -73,7 +74,7 @@ class ManagementController extends Controller
         });
         return view('dashboard.management.campaigns', [
             'campaigns' => $campaigns,
-            'userIds' => implode(',', $userIds)
+            'userIds' => implode(',', $userIds),
         ]);
     }
 
@@ -92,7 +93,7 @@ class ManagementController extends Controller
                 ->addSelect([
                     'promo_codes.*',
                     'panel_users.name as panel_user_name',
-                    'users.phone_number'
+                    'users.phone_number',
                 ])
                 ->get();
             $promoCodes = $promoCodes->map(function ($item) {
@@ -106,7 +107,8 @@ class ManagementController extends Controller
         return view('dashboard.management.campaign_item', [
             'campaign' => $campaign,
             'promoCodes' => $promoCodes,
-            'id' => $id
+            'prices' => $this->getPrices(),
+            'id' => $id,
         ]);
     }
 
@@ -144,11 +146,11 @@ class ManagementController extends Controller
         $request->merge([
             'start_date' => Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->start_date)),
             'end_date' => Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->end_date)),
-            'panel_user_id' => auth()->id()
+            'panel_user_id' => auth()->id(),
         ]);
 
         Campaign::query()->updateOrCreate([
-            'id' => $id
+            'id' => $id,
         ], $request->all());
 
         return redirect()->route('dashboard.campaigns')->with('success', 'با موفقیت انجام شد');
@@ -159,7 +161,7 @@ class ManagementController extends Controller
         $campaign = Campaign::query()->findOrFail($id);
         PromoCode::query()->where('campaign_id', $id)
             ->update([
-                'expire_at' => now()->toDateTimeString()
+                'expire_at' => now()->toDateTimeString(),
             ]);
 
         return redirect()->route('dashboard.campaigns')->with('success', 'با موفقیت انجام شد');
@@ -187,7 +189,7 @@ class ManagementController extends Controller
             ->addSelect([
                 'promo_codes.*',
                 'panel_users.name as panel_user_name',
-                'users.phone_number'
+                'users.phone_number',
             ])
             ->get();
 
@@ -201,8 +203,18 @@ class ManagementController extends Controller
 
         return view('dashboard.management.promoCodes', [
             'promoCodes' => $promoCodes,
-            'user' => $user
+            'user' => $user,
+            'prices' => $this->getPrices(),
         ]);
+    }
+
+    private function getPrices()
+    {
+        return [
+            null => 'بدون طرح',
+            PremiumDuration::MONTH => PremiumDuration::getTitle(PremiumDuration::MONTH),
+            PremiumDuration::YEAR => PremiumDuration::getTitle(PremiumDuration::YEAR),
+        ];
     }
 
     public function promoCodeItem(Request $request, $campaignId, $id)
@@ -242,7 +254,8 @@ class ManagementController extends Controller
             'campaignId' => $campaignId,
             'id' => $id,
             'userIds' => $userIds,
-            'transactions' => $transactions
+            'transactions' => $transactions,
+            'prices' => $this->getPrices(),
         ]);
     }
 
@@ -345,7 +358,7 @@ class ManagementController extends Controller
         $users = collect();
         if (!$userIds) {
             $request->merge([
-                'user_id' => null
+                'user_id' => null,
             ]);
         } else {
             $userIds = explode(',', $userIds);
@@ -360,16 +373,16 @@ class ManagementController extends Controller
                 return redirect()->back()->withErrors($validator);
             }
             $request->merge([
-                'discount_percent' => 100
+                'discount_percent' => 100,
             ]);
         }
         if (!$request->max_discount) {
             $request->merge([
-                'max_discount' => null
+                'max_discount' => null,
             ]);
         } else {
             $request->merge([
-                'max_discount' => (int)($request->max_discount)
+                'max_discount' => (int)($request->max_discount),
             ]);
         }
 
@@ -377,18 +390,27 @@ class ManagementController extends Controller
         $campaign = Campaign::query()->findOrFail($campaignId);
 
         $startAt = Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->start_at));
-        $expireAt = $request->expire_at ? Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->expire_at)) : null;
+        $expireAt =
+            $request->expire_at ? Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->expire_at)) :
+                null;
+
+        $isHidden = isset($request->is_hidden) and $request->is_hidden == 'on';
+        $isUnlimited = isset($request->is_unlimited) and ($request->is_unlimited == 'on');
+        $priceId = $request->price_id == 0 ? null : $request->price_id;
 
         $request->merge([
             'start_at' => str_replace('/', '-', $startAt),
             'expire_at' => str_replace('/', '-', $expireAt),
-            'panel_user_id' => auth()->id()
+            'panel_user_id' => auth()->id(),
+            'is_hidden' => $isHidden,
+            'is_unlimited' => $isUnlimited and $isHidden,
+            'price_id' => $priceId,
         ]);
 
         if (!$userIds) {
             if (!isset($request->code)) {
                 $request->merge([
-                    'code' => Helpers::generatePromoCode()
+                    'code' => Helpers::generatePromoCode(),
                 ]);
             } else {
                 $promoCode = PromoCode::query()->where('id', '<>', $id)->where('code', $request->code)->first();
@@ -399,15 +421,15 @@ class ManagementController extends Controller
                 }
             }
             $promoCode = $campaign->promoCodes()->updateOrCreate([
-                'id' => $id
+                'id' => $id,
             ], $request->all());
 
             if ($id == 0) {
                 dispatch(
                     (new SendFirebaseNotificationJob([
                         'type' => NotificationType::PROMO_CODE,
-                        'promo_code_id' => $promoCode->id
-                ]))->onQueue('activationSms')
+                        'promo_code_id' => $promoCode->id,
+                    ]))->onQueue('activationSms')
                 );
             }
         } else {
@@ -416,7 +438,7 @@ class ManagementController extends Controller
                 $request->merge([
                     'code' => $code,
                     'user_id' => $user->id,
-                    'max_count' => 1
+                    'max_count' => 1,
                 ]);
                 $promoCode = $campaign->promoCodes()->firstOrCreate(['id' => $id], $request->all());
 
@@ -426,14 +448,14 @@ class ManagementController extends Controller
                         'user_id' => $user->id,
                         'phone_number' => $user->full_phone_number,
                         'type' => PromoCode::class,
-                        'text' => $request->template . ' - ' . $code
+                        'text' => $request->template . ' - ' . $code,
                     ]);
                 }
                 if ($id == 0) {
                     dispatch(
                         (new SendFirebaseNotificationJob([
                             'type' => NotificationType::PROMO_CODE,
-                            'promo_code_id' => $promoCode->id
+                            'promo_code_id' => $promoCode->id,
                         ]))->onQueue('activationSms')
                     );
                 }
@@ -480,7 +502,7 @@ class ManagementController extends Controller
             $plans->push([
                 'id' => $price['id'],
                 'title' => $price['title2'],
-                'is_selected' => in_array($price['id'], $filter['plan_ids'])
+                'is_selected' => in_array($price['id'], $filter['plan_ids']),
             ]);
         }
 
@@ -489,7 +511,7 @@ class ManagementController extends Controller
             $states->push([
                 'id' => $item,
                 'title' => ProjectStatusType::getEnum($item),
-                'is_selected' => in_array($item, $filter['states'])
+                'is_selected' => in_array($item, $filter['states']),
             ]);
         }
 
@@ -498,7 +520,7 @@ class ManagementController extends Controller
             $types->push([
                 'id' => $item,
                 'name' => PurchaseType::getEnum($item),
-                'is_selected' => in_array($item, $filter['types'])
+                'is_selected' => in_array($item, $filter['types']),
             ]);
         }
 
@@ -512,7 +534,7 @@ class ManagementController extends Controller
             'states' => $states,
             'types' => $types,
             'sortable_fields' => $sortableFields,
-            'sortable_types' => $sortableTypes
+            'sortable_types' => $sortableTypes,
         ]);
     }
 
@@ -582,14 +604,14 @@ class ManagementController extends Controller
                                         " . BannerStatus::ACTIVE . "
                                     )
                                 ) as status"
-                )
+                ),
             ])
             ->orderBy('status')
             ->orderByDesc('banners.updated_at')
             ->get();
 
         return view('dashboard.management.banners', [
-            'banners' => $banners
+            'banners' => $banners,
         ]);
     }
 
@@ -618,7 +640,7 @@ class ManagementController extends Controller
             $userIds = implode(',', $userIds);
         } else {
             $banner = new Banner([
-                'expire_at' => now()->addWeek()->endOfDay()
+                'expire_at' => now()->addWeek()->endOfDay(),
             ]);
         }
 
@@ -626,7 +648,7 @@ class ManagementController extends Controller
             'id' => $id,
             'banner' => $banner,
             'user' => $user,
-            'userIds' => $userIds
+            'userIds' => $userIds,
         ]);
     }
 
@@ -636,7 +658,7 @@ class ManagementController extends Controller
         $users = collect();
         if (!$userIds) {
             $request->merge([
-                'user_id' => null
+                'user_id' => null,
             ]);
         } else {
             $userIds = explode(',', $userIds);
@@ -645,7 +667,7 @@ class ManagementController extends Controller
             }
         }
         $validator = Validator::make($request->all(), [
-            'image' => 'nullable|dimensions:ratio=1/1'
+            'image' => 'nullable|dimensions:ratio=1/1',
         ]);
         if ($validator->fails()) {
             return redirect()
@@ -654,18 +676,20 @@ class ManagementController extends Controller
                 ->withInput();
         }
         $startAt = Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->start_at));
-        $expireAt = $request->expire_at ? Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->expire_at)) : null;
+        $expireAt =
+            $request->expire_at ? Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->expire_at)) :
+                null;
         $request->merge([
             'panel_user_id' => auth()->id(),
             'start_at' => $startAt,
             'expire_at' => $expireAt,
-            'type' => $userIds == [] ? BannerType::PUBLIC : BannerType::PRIVATE
+            'type' => $userIds == [] ? BannerType::PUBLIC : BannerType::PRIVATE,
         ]);
 
         try {
             /** @var Banner $banner */
             $banner = Banner::query()->updateOrCreate([
-                'id' => $id
+                'id' => $id,
             ], $request->all());
 
             $id = $banner->id;
@@ -676,7 +700,7 @@ class ManagementController extends Controller
             /** @var User $user */
             foreach ($users as $user) {
                 $user->banner()->create([
-                    'banner_id' => $id
+                    'banner_id' => $id,
                 ]);
             }
 
@@ -698,9 +722,9 @@ class ManagementController extends Controller
                             [
                                 'name' => 'image',
                                 'filename' => $image->getClientOriginalName(),
-                                'contents' => file_get_contents(storage_path() . '/app/' . $path)
-                            ]
-                        ]
+                                'contents' => file_get_contents(storage_path() . '/app/' . $path),
+                            ],
+                        ],
                     ]
                 );
                 $response = json_decode($response->getBody());
@@ -719,7 +743,7 @@ class ManagementController extends Controller
     {
         $banner = Banner::query()->findOrFail($id);
         $banner->update([
-            'expire_at' => now()->toDateTimeString()
+            'expire_at' => now()->toDateTimeString(),
         ]);
 
         return redirect()->route('dashboard.banners')->with('success', 'با موفقیت انجام شد');

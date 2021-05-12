@@ -16,6 +16,9 @@
             <th>تعداد استفاده شده</th>
             <th>تاریخ شروع</th>
             <th>تاریخ پایان</th>
+            <th>حالت پنهان</th>
+            <th>حالت نامحدود</th>
+            <th>طرح</th>
             <th>کارشناس</th>
         </tr>
         </thead>
@@ -40,6 +43,15 @@
                 <td>{{ $promoCode->used_promo_code_count }}</td>
                 <td class="ltr text-right">{{ $promoCode->start_at }}</td>
                 <td class="ltr text-right">{{ $promoCode->expire_at }}</td>
+                <td>
+                    @if($promoCode->is_hidden) <img src="{{ asset('dashboard/icons/icon_check.png') }}">
+                    @endif
+                </td>
+                <td>
+                    @if($promoCode->is_unlimited) <img src="{{ asset('dashboard/icons/icon_check.png') }}">
+                    @endif
+                </td>
+                <td>{{ $prices[$promoCode->price_id] }}</td>
                 <td>{{ $promoCode->panel_user_name ?? 'سیستم' }}</td>
             </tr>
         @endforeach

@@ -36,6 +36,7 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
     })->name('logout');
 
     Route::middleware('auth')->group(function () {
+        Route::get('files', 'Dashboard\FileController@files');
         Route::prefix('report')->name('report.')->group(function () {
             Route::middleware(['permission:view_registration'])
                 ->match(['get', 'post'], 'timeSeparation', 'Dashboard\ReportController@timeSeparation')

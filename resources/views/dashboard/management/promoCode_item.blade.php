@@ -83,9 +83,30 @@
                 </div>
                 <div class="col-md-4 row">
                     <label class="col-md-5 col-form-label text-md-left">تمپلیت sms</label>
-                    <input style="direction: ltr;" value="" id="template"
+                    <input style="width: 100%;" value="" id="template"
                            class="form-control col-md-7" type="text"
                            name="template">
+                </div>
+            </div>
+            <div class="row pt-2">
+                <div class="col-md-4 row">
+                    <label class="col-md-5 col-form-label text-md-left">طرح استفاده</label>
+                    <select id="price_id" name="price_id">
+                        @foreach($prices as $key => $price)
+                            <option @if ($key == ($promoCode['price_id'] ?? null)) selected
+                                    @endif value="{{ $key }}">{{ $price }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="row col-md-4">
+                    <label class="col-md-5 col-form-label text-md-left">حالت پنهان؟</label>
+                    <input name="is_hidden" type="checkbox" class="form-group pull-right"
+                           @if($promoCode['is_hidden'] ?? false) checked @endif/>
+                </div>
+                <div class="row col-md-4">
+                    <label class="col-md-5 col-form-label text-md-left">حالت نامحدود؟</label>
+                    <input name="is_unlimited" type="checkbox" class="form-group pull-right"
+                           @if($promoCode['is_unlimited'] ?? false) checked @endif/>
                 </div>
             </div>
             @if(auth()->user()->can('edit_promo_code'))
@@ -108,5 +129,12 @@
 
     @include('dashboard.management.listTransactions')
     <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#price_id').select2({
+                width: 'element',
+            });
+        });
+
     </script>
 @endsection

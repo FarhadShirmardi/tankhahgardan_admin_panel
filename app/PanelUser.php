@@ -17,6 +17,11 @@ class PanelUser extends Authenticatable
         'name',
         'phone_number',
         'password',
-        'type'
+        'type',
     ];
+
+    public function files()
+    {
+        return $this->hasMany(PanelFile::class);
+    }
 }

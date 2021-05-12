@@ -16,7 +16,10 @@ class PromoCode extends Model
         'max_count',
         'user_id',
         'start_at',
-        'expire_at'
+        'expire_at',
+        'is_hidden',
+        'is_unlimited',
+        'price_id',
     ];
 
     public function campaign()

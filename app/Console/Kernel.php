@@ -41,6 +41,15 @@ class Kernel extends ConsoleKernel
             ->then(function () {
                 $this->call('generate:report --project');
             });
+
+        $schedule->command('automation:update')
+            ->everyFifteenMinutes()
+            ->then(function () {
+                $this->call('automation:update');
+            });
+
+        $schedule->command('automation:sms')
+            ->dailyAt('15:00');
     }
 
     /**
