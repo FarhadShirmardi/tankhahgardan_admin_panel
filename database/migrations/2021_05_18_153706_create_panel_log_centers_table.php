@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePanelFilesTable extends Migration
+class CreatePanelLogCentersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,15 @@ class CreatePanelFilesTable extends Migration
      */
     public function up()
     {
-        Schema::create('files', function (Blueprint $table) {
+        Schema::create('log_centers', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedInteger('user_id');
-            $table->string('path');
-            $table->string('description');
+            $table->unsignedInteger('panel_user_id');
+            $table->unsignedInteger('user_id')->nullable();
+            $table->integer('type');
             $table->dateTime('date_time');
+            $table->text('description');
+            $table->json('old_json')->nullable();
+            $table->json('new_json');
         });
     }
 
@@ -29,6 +32,6 @@ class CreatePanelFilesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('files');
+        Schema::dropIfExists('log_centers');
     }
 }

@@ -7,6 +7,7 @@ use App\City;
 use App\Comment;
 use App\Constants\FeedbackSource;
 use App\Constants\FeedbackStatus;
+use App\Constants\LogType;
 use App\Constants\Platform;
 use App\Constants\PremiumConstants;
 use App\Constants\ProjectUserState;
@@ -48,7 +49,6 @@ use Kavenegar;
 use Maatwebsite\Excel\Facades\Excel;
 use Notification;
 use Storage;
-use URL;
 use Validator;
 
 class ReportController extends Controller
@@ -354,23 +354,18 @@ class ReportController extends Controller
         $filter = $this->getAllUserActivityFilter($request);
 
 //        $users = $usersQuery->get();
-        $link =
-            URL::temporarySignedRoute('dashboard.report.export.download', now()->addHour(), ['filename' => 'users.xlsx']);
-        $this->dispatch((new UserReportExportJob($filter, $link))->onQueue('activationSms'));
+        $this->dispatch((new UserReportExportJob($filter))->onQueue('activationSms'));
 
-        return redirect()->back()->with('success', 'فایل در حال ساخته شدن میباشد.')->with('link', $link);
+        return redirect()->route('dashboard.downloadCenter');
     }
 
     public function exportAllProjectsActivity(Request $request)
     {
         $filter = $this->getAllProjectActivityFilter($request);
 
-//        $users = $usersQuery->get();
-        $link =
-            URL::temporarySignedRoute('dashboard.report.export.download', now()->addHour(), ['filename' => 'projects.xlsx']);
-        $this->dispatch((new ProjectReportExportJob($filter, $link))->onQueue('activationSms'));
+        $this->dispatch((new ProjectReportExportJob($filter))->onQueue('activationSms'));
 
-        return redirect()->back()->with('success', 'فایل در حال ساخته شدن میباشد.')->with('link', $link);
+        return redirect()->route('dashboard.downloadCenter');
     }
 
     public function getProjectQuery()
@@ -1179,6 +1174,18 @@ class ReportController extends Controller
             $comment->update($request->all());
         }
 
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $type = $id ? LogType::EDIT_COMMENT : LogType::NEW_COMMENT;
+        $panelUser->logs()->create([
+            'user_id' => null,
+            'type' => $type,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription($type, $panelUser),
+            'old_json' => $comment,
+            'new_json' => Comment::findOrFail($id),
+        ]);
+
         return redirect()->route('dashboard.commentView')->with('success', 'با موفقیت انجام شد.');
     }
 
@@ -1222,6 +1229,7 @@ class ReportController extends Controller
     {
         $feedback = Feedback::query()->findOrFail($id);
         $responseText = $request->input('response', '');
+        $oldResponse = $feedback->feedbackResponse()->first();
         $isSpam = $request->state == FeedbackStatus::SPAM;
         if (trim($responseText) == '' and !$isSpam) {
             return redirect()->back()->withErrors('پاسخ بازخورد نباید خالی باشد.');
@@ -1276,6 +1284,17 @@ class ReportController extends Controller
             $user = $feedback->user()->first();
             $this->dispatch((new FeedbackResponseSms($user))->onQueue('activationSms'));
         }
+
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $panelUser->logs()->create([
+            'user_id' => $user->id,
+            'type' => LogType::RESPONSE_FEEDBACK,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription(LogType::BURN_USER, $panelUser),
+            'old_json' => $oldResponse,
+            'new_json' => $feedback->feedbackResponse()->first(),
+        ]);
 
         return redirect()->route('dashboard.viewFeedback', ['feedback_id' => $id])->with('success', 'با موفقیت انجام شد');
     }
@@ -1452,16 +1471,6 @@ class ReportController extends Controller
             $collection = $collection->sortBy($sort[0], SORT_REGULAR, $sort[1] == 'DESC');
         }
         $sort[1] = $sort[1] == 'DESC' ? 'ASC' : 'DESC';
-    }
-
-    public function downloadReport($filename)
-    {
-        if (!file_exists(storage_path('app/' . $filename))) {
-            $validator = Validator::make([], []);
-            $validator->errors()->add('file', 'فایل آماده نشده است.');
-            return redirect()->back()->withErrors($validator);
-        }
-        return response()->download(storage_path('app/' . $filename), $filename)->deleteFileAfterSend(true);
     }
 
     public function sendSms(Request $request)

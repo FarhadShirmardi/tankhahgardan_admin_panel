@@ -22,6 +22,11 @@ class PanelUser extends Authenticatable
 
     public function files()
     {
-        return $this->hasMany(PanelFile::class);
+        return $this->hasMany(PanelFile::class, 'user_id', 'id');
+    }
+
+    public function logs()
+    {
+        return $this->hasMany(PanelLogCenter::class, 'panel_user_id', 'id');
     }
 }

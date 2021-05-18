@@ -36,8 +36,11 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
     })->name('logout');
 
     Route::middleware('auth')->group(function () {
-        Route::get('files', 'Dashboard\FileController@files');
+        Route::get('files', 'Dashboard\FileController@files')->name('downloadCenter');
+        Route::get('download/{id}', 'Dashboard\FileController@downloadFile')
+            ->name('downloadFile');
         Route::prefix('report')->name('report.')->group(function () {
+            Route::get('premiumReport', 'Dashboard\ManagementController@premiumReport')->name('premiumReport');
             Route::middleware(['permission:view_registration'])
                 ->match(['get', 'post'], 'timeSeparation', 'Dashboard\ReportController@timeSeparation')
                 ->name('timeSeparation');
@@ -70,9 +73,6 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
                 Route::middleware(['permission:export_users_report'])
                     ->get('userActivity', 'Dashboard\ReportController@exportAllUsersActivity')
                     ->name('allUsersActivity');
-
-                Route::get('download/{filename}', 'Dashboard\ReportController@downloadReport')
-                    ->name('download');
 
                 Route::middleware(['permission:export_projects_report'])
                     ->get('projectActivity', 'Dashboard\ReportController@exportAllProjectsActivity')

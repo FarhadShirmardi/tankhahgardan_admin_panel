@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\AutomationData;
 use App\AutomationMetric;
+use App\Constants\LogType;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
+use App\PanelUser;
 use App\User;
 use Illuminate\Http\Request;
 
@@ -287,6 +289,15 @@ class AutomationController extends Controller
                 'automation_state' => 28,
             ]);
         }
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $panelUser->logs()->create([
+            'user_id' => $user->id,
+            'type' => LogType::BURN_USER,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription(LogType::BURN_USER, $panelUser),
+            'new_json' => $user->automationBurn()->first(),
+        ]);
         return redirect()->back()->with('success', 'با موفقیت انجام شد.');
     }
 }

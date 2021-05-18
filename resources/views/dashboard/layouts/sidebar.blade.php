@@ -123,8 +123,15 @@
                         </li>
                     </ul>
                 </li>
-            @endif
-
+                @endif
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link" href="{{ route('dashboard.report.premiumReport') }}"><i
+                            class="icon-wallet"></i> گزارش معیارهای سنجش پولی</a>
+                </li>
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link" href="{{ route('dashboard.downloadCenter') }}"><i
+                            class="icon-cloud-download"></i>مرکز دانلود</a>
+                </li>
         </ul>
     </nav>
 </div>

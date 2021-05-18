@@ -10,6 +10,7 @@ use App\Constants\NotificationType;
 use App\Constants\PremiumBanks;
 use App\Constants\PremiumDuration;
 use App\Constants\PremiumPrices;
+use App\Constants\PremiumReportType;
 use App\Constants\ProjectStatusType;
 use App\Constants\PurchaseType;
 use App\Helpers\Helpers;
@@ -747,5 +748,76 @@ class ManagementController extends Controller
         ]);
 
         return redirect()->route('dashboard.banners')->with('success', 'با موفقیت انجام شد');
+    }
+
+    public function premiumReport(Request $request)
+    {
+        $type = $request->input('type', PremiumReportType::DAILY);
+
+        $items = UserStatusLog::query()
+            ->without('transaction')
+            ->orderBy('date', 'desc')
+            ->groupBy('date')
+            ->select([
+                \DB::raw('date(updated_at) as date'),
+                \DB::raw('sum(IF(status = 1, 1, 0)) as successful_count'),
+                \DB::raw('sum(IF(status = 0, 1, 0)) as unsuccessful_count'),
+                \DB::raw('sum(IF(status = 1, 1, 0) * (total_amount + added_value_amount)) as successful_amount'),
+                \DB::raw('sum(IF(status = 0, 1, 0) * (total_amount + added_value_amount)) as unsuccessful_amount'),
+                \DB::raw('sum(IF(status = 1, 1, 0) * (total_amount + added_value_amount - wallet_amount - discount_amount)) as successful_amount_pure'),
+                \DB::raw('sum(IF(status = 1, 1, 0) * IF(price_id = ' . PremiumDuration::YEAR . ', 1, 0)) as successful_year_count'),
+                \DB::raw('sum(IF(status = 1, 1, 0) * IF(price_id = ' . PremiumDuration::MONTH . ', 1, 0)) as successful_month_count'),
+                \DB::raw('sum(IF(status = 1, 1, 0) * IF(price_id = ' . PremiumDuration::HALF_MONTH . ', 1, 0)) as successful_half_month_count'),
+                \DB::raw('sum(IF(status = 0, 1, 0) * IF(price_id = ' . PremiumDuration::YEAR . ', 1, 0)) as unsuccessful_year_count'),
+                \DB::raw('sum(IF(status = 0, 1, 0) * IF(price_id = ' . PremiumDuration::MONTH . ', 1, 0)) as unsuccessful_month_count'),
+                \DB::raw('sum(IF(status = 0, 1, 0) * IF(price_id = ' . PremiumDuration::HALF_MONTH . ', 1, 0)) as unsuccessful_half_month_count'),
+                \DB::raw('sum(IF(status = 1, 1, 0) * IF(type = ' . PurchaseType::NEW . ', 1, 0)) as successful_new_count'),
+                \DB::raw('sum(IF(status = 1, 1, 0) * IF(type = ' . PurchaseType::UPGRADE . ', 1, 0)) as successful_upgrade_count'),
+                \DB::raw('sum(IF(status = 1, 1, 0) * IF(type = ' . PurchaseType::EXTEND . ', 1, 0)) as successful_extend_count'),
+                \DB::raw('sum(IF(status = 0, 1, 0) * IF(type = ' . PurchaseType::NEW . ', 1, 0)) as unsuccessful_new_count'),
+                \DB::raw('sum(IF(status = 0, 1, 0) * IF(type = ' . PurchaseType::UPGRADE . ', 1, 0)) as unsuccessful_upgrade_count'),
+                \DB::raw('sum(IF(status = 0, 1, 0) * IF(type = ' . PurchaseType::EXTEND . ', 1, 0)) as unsuccessful_extend_count'),
+            ]);
+
+        $items = $items->get();
+
+        if ($type == PremiumReportType::FULL) {
+            $item = [];
+            foreach ($items->toArray()[0] as $key => $value) {
+                if (is_numeric($value)) {
+                    $item[$key] = $items->sum($key);
+                }
+            }
+            $items = [$item];
+        } elseif ($type == PremiumReportType::MONTHLY) {
+            $gItems = $items->groupBy(function ($item) {
+                [$year, $month, $day] = explode('/', Helpers::gregorianDateStringToJalali($item['date']));
+                return $year . '-' . $month;
+            });
+            $oldItem = $items->toArray()[0];
+            $items = [];
+            foreach ($gItems as $date => $gItem) {
+                [$year, $month] = explode('-', $date);
+                $item = [
+                    'date' => Helpers::getMonthName($month) . ' ' . $year,
+                ];
+                foreach ($oldItem as $key => $value) {
+                    if (is_numeric($value)) {
+                        $item[$key] = $gItem->sum($key);
+                    }
+                }
+                $items[] = $item;
+            }
+        } elseif ($type == PremiumReportType::DAILY) {
+            $items = $items->map(function ($item) {
+                $item['date'] = Helpers::gregorianDateStringToJalali($item['date']);
+                return $item;
+            });
+        }
+
+        return view('dashboard.management.premiumReport', [
+            'type' => $type,
+            'items' => $items,
+        ]);
     }
 }
