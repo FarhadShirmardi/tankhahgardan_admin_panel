@@ -21,9 +21,14 @@
                     <td>{{ $file->description }}</td>
                     <td>{{ \App\Helpers\Helpers::convertDateTimeToJalali($file->date_time) }}</td>
                     <td>
-                        <a target="_blank" href="{{ route('dashboard.downloadFile', ['id' => $file->id]) }}">
-                            <i class="fa fa-download"></i>
-                        </a>
+                        @if($file['state'])
+                            <a target="_blank" href="{{ route('dashboard.downloadFile', ['id' => $file->id]) }}">
+                                <i class="fa fa-download"></i>
+                            </a>
+                        @else
+                            <i class="fa fa-refresh" data-toggle="tooltip" title="فایل در حال ساخت می‌باشد."
+                               data-placement="top"></i>
+                        @endif
                     </td>
                 </tr>
             @endforeach

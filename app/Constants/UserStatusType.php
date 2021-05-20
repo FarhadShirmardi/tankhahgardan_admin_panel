@@ -11,7 +11,7 @@ namespace App\Constants;
 use ReflectionClass;
 use ReflectionException;
 
-class ProjectStatusType
+class UserStatusType
 {
     const FAILED = 0;
     const SUCCEED = 1;

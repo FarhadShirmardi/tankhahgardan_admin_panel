@@ -268,9 +268,23 @@ class AutomationController extends Controller
         if (!$id) {
             $data['call_time'] = now()->toDateTimeString();
         }
-        $user->automationCall()->updateOrCreate([
+        $oldCall = $user->automationCall()->find($id);
+        $call = $user->automationCall()->updateOrCreate([
             'id' => $id,
         ], $data);
+
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $type = $id ? LogType::EDIT_AUTOMATION_CALL : LogType::NEW_AUTOMATION_CALL;
+        $panelUser->logs()->create([
+            'user_id' => $userId,
+            'type' => $type,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription($type, $panelUser),
+            'old_json' => $oldCall,
+            'new_json' => $call,
+        ]);
+
         return redirect()->route('dashboard.automation.callLogs', ['id' => $userId]);
     }
 

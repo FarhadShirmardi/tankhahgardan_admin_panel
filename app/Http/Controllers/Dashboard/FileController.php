@@ -16,6 +16,11 @@ class FileController extends Controller
             ->orderBy('date_time', 'desc')
             ->paginate();
 
+        $files->transform(function ($item) {
+            $item['state'] = Storage::disk('local')->exists($item->path);
+            return $item;
+        });
+
         return view('dashboard.file.files', [
             'files' => $files,
         ]);

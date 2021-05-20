@@ -558,7 +558,7 @@ class ReportController extends Controller
             ->selectRaw($userTypeQuery);
     }
 
-    public function userActivity($id)
+    public function userActivity($id, PremiumController $premiumController)
     {
         /** @var User $user */
         $user = User::with('projects')->findOrFail($id);
@@ -649,11 +649,7 @@ class ReportController extends Controller
         $userItem = $this->getUserQuery($id)->get();
         $userItem = Helpers::paginateCollection($userItem);
 
-        $userStates = $user->userStatus()->get()->map(function ($item) {
-            $item['start_date'] = Helpers::convertDateTimeToJalali($item['start_date']);
-            $item['end_date'] = Helpers::convertDateTimeToJalali($item['end_date']);
-            return $item;
-        });
+        $userStates = $premiumController->getUserStates($user);
 
         $automationState = $user->automationData()->first();
         $automationController = app()->make(AutomationController::class);
@@ -1169,6 +1165,7 @@ class ReportController extends Controller
             Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->response_date)) : null;
         if (!$id) {
             Comment::create($request->all());
+            $comment = null;
         } else {
             $comment = Comment::findOrFail($id);
             $comment->update($request->all());

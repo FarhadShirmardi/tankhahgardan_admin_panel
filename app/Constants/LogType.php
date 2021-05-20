@@ -14,6 +14,22 @@ class LogType
     const NEW_COMMENT = 3;
     const EDIT_COMMENT = 4;
 
+    const NEW_ANNOUNCEMENT = 5;
+    const EDIT_ANNOUNCEMENT = 6;
+    const DELETE_ANNOUNCEMENT = 7;
+
+    const NEW_BANNER = 8;
+    const EDIT_BANNER = 9;
+    const DELETE_BANNER = 10;
+
+    const NEW_PROMO_CODE = 11;
+    const EDIT_PROMO_CODE = 12;
+
+    const NEW_AUTOMATION_CALL = 13;
+    const EDIT_AUTOMATION_CALL = 14;
+
+    const EDIT_WALLET = 15;
+
     /**
      * @return array
      * @throws ReflectionException
@@ -35,6 +51,24 @@ class LogType
                 return $user->name . ' بازخورد جدیدی را ثبت کرد.';
             case self::EDIT_COMMENT:
                 return $user->name . ' بازخوردی را ویرایش کرد.';
+            case self::NEW_ANNOUNCEMENT:
+                return $user->name . ' اعلان جدیدی را ثبت کرد.';
+            case self::EDIT_ANNOUNCEMENT:
+                return $user->name . ' اعلانی را ویرایش کرد.';
+            case self::DELETE_ANNOUNCEMENT:
+                return $user->name . ' اعلانی را حذف کرد.';
+            case self::NEW_BANNER:
+                return $user->name . ' بنر جدیدی را ثبت کرد.';
+            case self::EDIT_BANNER:
+                return $user->name . ' بنری را ویرایش کرد.';
+            case self::DELETE_BANNER:
+                return $user->name . ' بنری را حذف کرد.';
+            case self::NEW_PROMO_CODE:
+                return $user->name . ' کد تخفیف جدیدی را ایجاد کرد.';
+            case self::EDIT_PROMO_CODE:
+                return $user->name . ' کد تخفیفی را ویرایش کرد.';
+            case self::EDIT_WALLET:
+                return $user->name . ' کیف پولی را تغییر داد.';
         }
     }
 
@@ -49,6 +83,24 @@ class LogType
                 return 'ثبت بازخورد';
             case self::EDIT_COMMENT:
                 return 'ویرایش بازخورد';
+            case self::NEW_ANNOUNCEMENT:
+                return 'ثبت اعلان';
+            case self::EDIT_ANNOUNCEMENT:
+                return 'ویرایش اعلان';
+            case self::DELETE_ANNOUNCEMENT:
+                return 'حذف اعلان';
+            case self::NEW_BANNER:
+                return 'ثبت بنر';
+            case self::EDIT_BANNER:
+                return 'ویرایش بنر';
+            case self::DELETE_BANNER:
+                return 'حذف بنر';
+            case self::NEW_PROMO_CODE:
+                return 'ایجاد کد تخفیف';
+            case self::EDIT_PROMO_CODE:
+                return 'ویرایش کد تخفیف';
+            case self::EDIT_WALLET:
+                return 'ویرایش کیف پول';
             default:
                 return '';
         }

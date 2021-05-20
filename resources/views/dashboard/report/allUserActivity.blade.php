@@ -21,7 +21,7 @@
         {{ csrf_field() }}
         <input type="hidden" id="route" name="route"/>
         <div class="row pb-5 pt-5 justify-content-center">
-            <div class="col-md-3 col-sm-10">
+            <div class="col-md-3 col-sm-12">
                 <table class="table table-bordered table-responsive">
                     <tr class="text-center">
                         <input id="userType" type="hidden" value="{{ $filter['user_type'] }}" name="user_type">
@@ -36,30 +36,30 @@
                     </tr>
                 </table>
             </div>
-            <div class="col-md-3 col-sm-10 pr-2">
+            <div class="col-md-3 col-sm-12">
                 <div class="row">
                     <label class="col-md-5 col-form-label text-md-left">جستجوی شماره</label>
                     <input type="text" id="phone_number" name="phone_number" value="{{$filter['phone_number']}}"
                            placeholder="جستجوی شماره" class="form-control col-md-7">
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12 pr-2">
+            <div class="col-md-3 col-sm-12">
                 <div class="row">
                     <label class="col-md-5 col-form-label text-md-left">جستجوی نام</label>
                     <input type="text" id="name" name="name" value="{{$filter['name']}}"
                            placeholder="جستجوی نام" class="form-control col-md-7">
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12 pr-2">
+            <div class="col-md-3 col-sm-12">
                 <div class="row">
-                    <label class="col-md-5 col-form-label text-md-left">مرتب‌سازی</label>
-                    <select id="sort_field" class="form-control col-md-4" name="sort_field">
+                    <label class="col-md-5 col-lg-5 col-form-label text-md-left">مرتب‌سازی</label>
+                    <select id="sort_field" class="form-control col-md-4 col-lg-4" name="sort_field">
                         @foreach($sortable_fields as $key => $sortable_field)
                             <option @if ($key == $filter['sort_field']) selected
                                     @endif value="{{ $key }}">{{ $sortable_field }}</option>
                         @endforeach
                     </select>
-                    <select id="sort_type" class="form-control col-md-3" name="sort_type">
+                    <select id="sort_type" class="form-control col-md-3 col-lg-3" name="sort_type">
                         @foreach($sortable_types as $key => $sortable_type)
                             <option @if ($key == $filter['sort_type']) selected
                                     @endif value="{{ $key }}">{{ $sortable_type }}</option>
@@ -67,22 +67,22 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12 pr-2"></div>
-            <div class="col-md-3 col-sm-12 pr-2">
+            <div class="col-md-3 col-sm-12"></div>
+            <div class="col-md-3 col-sm-12">
                 <div class="row">
                     <label class="col-md-5 col-form-label text-md-left">تاریخ شروع</label>
                     <input id="start_date" class="form-control range_date col-md-7" type="text" name="start_date"
                            value="{{$filter['start_date']}}">
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12 pr-2">
+            <div class="col-md-3 col-sm-12">
                 <div class="row">
                     <label class="col-md-5 col-form-label text-md-left">تاریخ پایان</label>
                     <input id="end_date" class="form-control range_date col-md-7" type="text" name="end_date"
                            value="{{$filter['end_date']}}">
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12 pr-2">
+            <div class="col-md-3 col-sm-12">
                 <div class="row">
                     <label class="col-md-5 col-form-label text-md-left">وضعیت کاربر</label>
                     <div class="ms-list col-md-7">

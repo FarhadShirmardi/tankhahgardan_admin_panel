@@ -13,7 +13,7 @@ use Illuminate\Console\Command;
 
 class RegistrationAutomationCalculate extends Command
 {
-    public $automationStartDate = '2021-01-21 00:00:00';
+    public $automationStartDate = '2021-05-19 00:00:00';
 
     /**
      * The name and signature of the console command.

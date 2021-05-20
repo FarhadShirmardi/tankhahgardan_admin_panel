@@ -51,7 +51,7 @@
                 'users' => $userItem,
                 'clickable' => false,
                 'extraData' => [
-                    'کیف پول' => $user->wallet,
+                    'کیف پول' => $user->wallet_amount,
                     'کیف پول رزرو شده' => $user->reserve_wallet
                 ]
         ])
@@ -138,7 +138,21 @@
         تشخیص داده نشده!
     @endif
     <hr class="pt-4 pb-2">
-    <h5 class="text-center pb-3">طرح‌های کاربر</h5>
+    <div class="row">
+        <div class="col-md-2">
+            <a class="form-control btn btn-info"
+               href="{{ route('dashboard.premium.wallet', ['user_id' => $user->id]) }}">کیف پول</a>
+        </div>
+        @if($user_statuses->where('is_active', true)->count() == 0)
+            <div class="col-md-2">
+                <a class="form-control btn btn-success"
+                   href="{{ route('dashboard.premium.purchase', ['user_id' => $user->id, 'type' =>
+                                \App\Constants\PurchaseType::NEW, 'id' => 0]) }}">ایجاد طرح</a>
+            </div>
+        @endif
+        <div class="col-md-4"><h5 class="text-center pb-3">طرح‌های کاربر</h5></div>
+        <div class="col-md-2"></div>
+    </div>
     @include('dashboard.management.listUserStatus')
     <hr class="pt-4 pb-2">
     <h5 class="text-center pb-3">دستگاه‌های کاربر</h5>

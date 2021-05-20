@@ -6,17 +6,18 @@ use App\Banner;
 use App\Campaign;
 use App\Constants\BannerStatus;
 use App\Constants\BannerType;
+use App\Constants\LogType;
 use App\Constants\NotificationType;
 use App\Constants\PremiumBanks;
 use App\Constants\PremiumDuration;
 use App\Constants\PremiumPrices;
 use App\Constants\PremiumReportType;
-use App\Constants\ProjectStatusType;
 use App\Constants\PurchaseType;
+use App\Constants\UserStatusType;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
-use App\Jobs\PromoCodeSmsJob;
 use App\Jobs\SendFirebaseNotificationJob;
+use App\PanelUser;
 use App\PromoCode;
 use App\SmsLog;
 use App\Transaction;
@@ -116,7 +117,7 @@ class ManagementController extends Controller
     private function usedPromoCodeQuery()
     {
         return UserStatusLog::query()
-            ->where('status', ProjectStatusType::SUCCEED)
+            ->where('status', UserStatusType::SUCCEED)
             ->whereColumn('promo_code_id', 'promo_codes.id')
             ->selectRaw('count(*)')
             ->getQuery();
@@ -338,7 +339,7 @@ class ManagementController extends Controller
             $item->date = $item->date ? Helpers::convertDateTimeToJalali($item->date) : '-';
             $item->start_date = Helpers::convertDateTimeToJalali($item->start_date);
             $item->end_date = Helpers::convertDateTimeToJalali($item->end_date);
-            $item->state = ProjectStatusType::getEnum($item->state);
+            $item->state = UserStatusType::getEnum($item->state);
             $item->bank = PremiumBanks::getBank($item->bank)['name'];
             $item->type = PurchaseType::getEnum($item->type);
 
@@ -355,6 +356,7 @@ class ManagementController extends Controller
             $validator->errors()->add('error', 'تاریخ پایان نمی‌تواند خالی باشد.');
             return redirect()->back()->withErrors($validator);
         }
+        $oldPromoCode = PromoCode::find($id);
         $userIds = $request->userIds;
         $users = collect();
         if (!$userIds) {
@@ -466,6 +468,18 @@ class ManagementController extends Controller
         $campaign->count = $campaign->promoCodes()->count();
         $campaign->save();
 
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $type = $id ? LogType::EDIT_PROMO_CODE : LogType::NEW_PROMO_CODE;
+        $panelUser->logs()->create([
+            'user_id' => ($userIds and sizeof($userIds) == 1) ? $userIds[0] : null,
+            'type' => $type,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription($type, $panelUser),
+            'old_json' => $oldPromoCode,
+            'new_json' => ($userIds and sizeof($userIds) > 1) ? [] : $promoCode,
+        ]);
+
         return redirect()->route('dashboard.campaignItem', ['id' => $campaignId])->with('success', 'با موفقیت انجام شد');
     }
 
@@ -508,10 +522,10 @@ class ManagementController extends Controller
         }
 
         $states = collect();
-        foreach (ProjectStatusType::toArray() as $item) {
+        foreach (UserStatusType::toArray() as $item) {
             $states->push([
                 'id' => $item,
-                'title' => ProjectStatusType::getEnum($item),
+                'title' => UserStatusType::getEnum($item),
                 'is_selected' => in_array($item, $filter['states']),
             ]);
         }
@@ -687,6 +701,8 @@ class ManagementController extends Controller
             'type' => $userIds == [] ? BannerType::PUBLIC : BannerType::PRIVATE,
         ]);
 
+        $oldBanner = Banner::find($id);
+
         try {
             /** @var Banner $banner */
             $banner = Banner::query()->updateOrCreate([
@@ -737,6 +753,18 @@ class ManagementController extends Controller
             dd($exception);
         }
 
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $type = $id ? LogType::EDIT_BANNER : LogType::NEW_BANNER;
+        $panelUser->logs()->create([
+            'user_id' => ($userIds and sizeof($userIds) == 1) ? $userIds[0] : null,
+            'type' => $type,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription($type, $panelUser),
+            'old_json' => $oldBanner,
+            'new_json' => $banner,
+        ]);
+
         return redirect()->route('dashboard.banners')->with('success', 'با موفقیت انجام شد');
     }
 
@@ -762,9 +790,9 @@ class ManagementController extends Controller
                 \DB::raw('date(updated_at) as date'),
                 \DB::raw('sum(IF(status = 1, 1, 0)) as successful_count'),
                 \DB::raw('sum(IF(status = 0, 1, 0)) as unsuccessful_count'),
-                \DB::raw('sum(IF(status = 1, 1, 0) * (total_amount + added_value_amount)) as successful_amount'),
+                \DB::raw('sum(IF(status = 1, 1, 0) * (total_amount + added_value_amount)) as successful_amount_pure'),
                 \DB::raw('sum(IF(status = 0, 1, 0) * (total_amount + added_value_amount)) as unsuccessful_amount'),
-                \DB::raw('sum(IF(status = 1, 1, 0) * (total_amount + added_value_amount - wallet_amount - discount_amount)) as successful_amount_pure'),
+                \DB::raw('sum(IF(status = 1, 1, 0) * (total_amount + added_value_amount - wallet_amount - discount_amount)) as successful_amount'),
                 \DB::raw('sum(IF(status = 1, 1, 0) * IF(price_id = ' . PremiumDuration::YEAR . ', 1, 0)) as successful_year_count'),
                 \DB::raw('sum(IF(status = 1, 1, 0) * IF(price_id = ' . PremiumDuration::MONTH . ', 1, 0)) as successful_month_count'),
                 \DB::raw('sum(IF(status = 1, 1, 0) * IF(price_id = ' . PremiumDuration::HALF_MONTH . ', 1, 0)) as successful_half_month_count'),
@@ -813,6 +841,7 @@ class ManagementController extends Controller
                 $item['date'] = Helpers::gregorianDateStringToJalali($item['date']);
                 return $item;
             });
+            $items = Helpers::paginateCollection($items, 100);
         }
 
         return view('dashboard.management.premiumReport', [

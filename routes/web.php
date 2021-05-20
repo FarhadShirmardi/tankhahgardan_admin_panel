@@ -36,6 +36,16 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
     })->name('logout');
 
     Route::middleware('auth')->group(function () {
+        Route::prefix('premium')->name('premium.')->middleware(['permission:edit_premium'])->group(function () {
+            Route::prefix('{user_id}')->group(function () {
+                Route::get('wallet', 'Dashboard\PremiumController@walletView')->name('wallet');
+                Route::post('wallet', 'Dashboard\PremiumController@walletStore');
+
+                Route::get('purchase/{type}/{id}', 'Dashboard\PremiumController@purchase')->name('purchase');
+                Route::post('purchase/{type}/{id}', 'Dashboard\PremiumController@previewPurchase')->name('previewPurchase');
+            });
+
+        });
         Route::get('files', 'Dashboard\FileController@files')->name('downloadCenter');
         Route::get('download/{id}', 'Dashboard\FileController@downloadFile')
             ->name('downloadFile');

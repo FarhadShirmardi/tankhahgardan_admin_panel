@@ -28,6 +28,9 @@
     </div>
 @endsection
 @section('content')
+    @if($items instanceof \Illuminate\Pagination\LengthAwarePaginator)
+        <div class="col-md-4">{{ $items->appends(request()->input())->links() }}</div>
+    @endif
     <div id="ajax-table" style="overflow-x: auto;">
         <table class="table table-striped">
             <thead>
@@ -40,18 +43,18 @@
                 <th>مبلغ پرداخت شده ناموفق</th>
                 <th>مبلغ پرداخت شده موفق بدون کیف پول و تخفیف</th>
                 <th>تعداد موفق</th>
-                <th>تعداد ناموفق</th>
                 <th>تعداد سالانه موفق</th>
-                <th>تعداد سالانه ناموفق</th>
                 <th>تعداد ماهانه موفق</th>
-                <th>تعداد ماهانه ناموفق</th>
                 <th>تعداد ۱۵ روزه موفق</th>
-                <th>تعداد ۱۵ روزه ناموفق</th>
                 <th>تعداد خرید موفق</th>
-                <th>تعداد خرید ناموفق</th>
                 <th>تعداد تمدید موفق</th>
-                <th>تعداد تمدید ناموفق</th>
                 <th>تعداد ارتقا امکانات موفق</th>
+                <th>تعداد ناموفق</th>
+                <th>تعداد سالانه ناموفق</th>
+                <th>تعداد ماهانه ناموفق</th>
+                <th>تعداد ۱۵ روزه ناموفق</th>
+                <th>تعداد خرید ناموفق</th>
+                <th>تعداد تمدید ناموفق</th>
                 <th>تعداد ارتقا امکانات ناموفق</th>
             </tr>
             </thead>
@@ -59,7 +62,11 @@
             @foreach($items as $item)
                 <tr>
                     @if($type != \App\Constants\PremiumReportType::FULL)
-                        <td>{{ $loop->iteration }}</td>
+                        @if(!$items instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                            <td>{{ $loop->iteration }}</td>
+                        @else
+                            <td>{{ ($items->currentPage() - 1) * $items->perPage() + $loop->iteration }}</td>
+                        @endif
                         <th>{{ $item['date'] }}</th>
                     @endif
                     <td class="ltr text-right">{{ \App\Helpers\Helpers::formatNumber($item['successful_amount']) }}</td>
@@ -68,18 +75,18 @@
                     <td class="ltr text-right">{{ \App\Helpers\Helpers::formatNumber($item['successful_amount_pure'])
                      }}</td>
                     <td class="ltr text-right">{{ $item['successful_count'] }}</td>
-                    <td class="ltr text-right">{{ $item['unsuccessful_count'] }}</td>
                     <td class="ltr text-right">{{ $item['successful_year_count'] }}</td>
-                    <td class="ltr text-right">{{ $item['unsuccessful_year_count'] }}</td>
                     <td class="ltr text-right">{{ $item['successful_month_count'] }}</td>
-                    <td class="ltr text-right">{{ $item['unsuccessful_month_count'] }}</td>
                     <td class="ltr text-right">{{ $item['successful_half_month_count'] }}</td>
-                    <td class="ltr text-right">{{ $item['unsuccessful_half_month_count'] }}</td>
                     <td class="ltr text-right">{{ $item['successful_new_count'] }}</td>
-                    <td class="ltr text-right">{{ $item['unsuccessful_new_count'] }}</td>
                     <td class="ltr text-right">{{ $item['successful_upgrade_count'] }}</td>
-                    <td class="ltr text-right">{{ $item['unsuccessful_upgrade_count'] }}</td>
                     <td class="ltr text-right">{{ $item['successful_extend_count'] }}</td>
+                    <td class="ltr text-right">{{ $item['unsuccessful_count'] }}</td>
+                    <td class="ltr text-right">{{ $item['unsuccessful_year_count'] }}</td>
+                    <td class="ltr text-right">{{ $item['unsuccessful_month_count'] }}</td>
+                    <td class="ltr text-right">{{ $item['unsuccessful_half_month_count'] }}</td>
+                    <td class="ltr text-right">{{ $item['unsuccessful_new_count'] }}</td>
+                    <td class="ltr text-right">{{ $item['unsuccessful_upgrade_count'] }}</td>
                     <td class="ltr text-right">{{ $item['unsuccessful_extend_count'] }}</td>
                 </tr>
             @endforeach

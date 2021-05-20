@@ -81,8 +81,9 @@
     <script>
         function toggle() {
             checkboxes = document.getElementsByName('permission_checkbox[]');
+            let value = !checkboxes[0].checked;
             for (var i = 0, n = checkboxes.length; i < n; i++) {
-                checkboxes[i].checked = !checkboxes[i].checked;
+                checkboxes[i].checked = value;
             }
         }
     </script>

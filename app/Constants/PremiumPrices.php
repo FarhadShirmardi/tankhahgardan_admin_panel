@@ -70,11 +70,24 @@ class PremiumPrices
                 'discount_percent' => 17,
                 'active' => true,
                 'is_gift' => false,
-            ]
+            ],
+            [
+                'id' => PremiumDuration::SPECIAL,
+                'user_price' => self::filterPrice(PremiumConstants::USER_PRICE, 1, $minUserCount, $isUpgrade),
+                'volume_price' => self::filterPrice(PremiumConstants::VOLUME_PRICE, 1, $minVolume, $isUpgrade),
+                'constant_price' => PremiumConstants::CONSTANT_PRICE,
+                'title' => trans('names.plan_title', ['plan' => PremiumDuration::getTitle(PremiumDuration::SPECIAL)]),
+                'title2' => PremiumDuration::getSecondTitle(PremiumDuration::SPECIAL),
+                'month_count' => 1,
+                'day_count' => 31,
+                'discount_percent' => 0,
+                'active' => true,
+                'is_gift' => true,
+            ],
         ];
     }
 
-    private static function filterPrice(array $prices, $coef, $minValue, $isUpgrade)
+    public static function filterPrice(array $prices, $coef, $minValue, $isUpgrade)
     {
         $prices = collect($prices);
         if ($isUpgrade and $minValue) {

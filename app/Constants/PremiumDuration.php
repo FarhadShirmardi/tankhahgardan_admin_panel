@@ -14,6 +14,7 @@ class PremiumDuration
     const HALF_MONTH = 2;
     const ONE_WEEK = 3;
     const YEAR = 4;
+    const SPECIAL = 5;
 
     public static function getTitle($enum)
     {
@@ -26,6 +27,8 @@ class PremiumDuration
                 return trans('names.one_year');
             case self::HALF_MONTH:
                 return trans('names.half_month');
+            case self::SPECIAL:
+                return 'ویژه';
             default:
                 return ' - ';
         }

@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Constants\UserStatusType;
 use App\Helpers\Helpers;
 use App\Helpers\UtilHelpers;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -176,5 +177,21 @@ class User extends Authenticatable
     public function automationBurn()
     {
         return $this->hasMany(AutomationBurntUser::class, 'user_id', 'id');
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(PanelInvoice::class, 'user_id', 'id');
+    }
+
+    public function getWalletAmountAttribute()
+    {
+        $usedWalletQuery = (int)(UserStatusLog::query()
+            ->where('status', UserStatusType::SUCCEED)
+            ->where('user_id', $this->id)
+            ->selectRaw('sum(wallet_amount) as wallet')
+            ->first()->wallet);
+
+        return $this->wallet - $this->reserve_wallet - $usedWalletQuery;
     }
 }

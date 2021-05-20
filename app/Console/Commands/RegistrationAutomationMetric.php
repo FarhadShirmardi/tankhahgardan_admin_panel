@@ -45,6 +45,7 @@ class RegistrationAutomationMetric extends Command
         $this->info('start');
 
         $days10 = now()->subDays(10)->toDateTimeString();
+        dd($days10);
         $days15 = now()->subDays(15)->toDateTimeString();
         $days60 = now()->subDays(60)->toDateTimeString();
 

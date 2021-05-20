@@ -41,6 +41,8 @@ class AdminController extends Controller
 
         ['view_automation' => 'نمایش اطلاعات اتوماسیون',
             'edit_automation' => 'ثبت زنگ و تغییر استیت کاربران'],
+
+        ['edit_premium' => 'افزایش کیف پول و ایجاد طرح'],
     ];
 
     public function userList()

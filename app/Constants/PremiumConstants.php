@@ -33,94 +33,94 @@ class PremiumConstants
     public const USER_PRICE = [
         [
             'value' => 1,
-            'price' => 50000,
-            'active' => true
+            'price' => 100000,
+            'active' => true,
         ],
         [
             'value' => 2,
-            'price' => 100000,
-            'active' => true
+            'price' => 200000,
+            'active' => true,
         ],
         [
             'value' => 3,
-            'price' => 150000,
-            'active' => true
+            'price' => 300000,
+            'active' => true,
         ],
         [
             'value' => 4,
-            'price' => 200000,
-            'active' => true
+            'price' => 400000,
+            'active' => true,
         ],
         [
             'value' => 5,
-            'price' => 250000,
-            'active' => true
+            'price' => 500000,
+            'active' => true,
         ],
         [
             'value' => 6,
-            'price' => 300000,
-            'active' => true
+            'price' => 600000,
+            'active' => true,
         ],
         [
             'value' => 7,
-            'price' => 350000,
-            'active' => true
+            'price' => 700000,
+            'active' => true,
         ],
         [
             'value' => 8,
-            'price' => 400000,
-            'active' => true
+            'price' => 800000,
+            'active' => true,
         ],
         [
             'value' => 9,
-            'price' => 450000,
-            'active' => true
+            'price' => 900000,
+            'active' => true,
         ],
         [
             'value' => 10,
-            'price' => 500000,
-            'active' => true
+            'price' => 1000000,
+            'active' => true,
         ],
         [
             'value' => 12,
-            'price' => 600000,
-            'active' => true
+            'price' => 1200000,
+            'active' => true,
         ],
         [
             'value' => 15,
-            'price' => 750000,
-            'active' => true
+            'price' => 1500000,
+            'active' => true,
         ],
         [
             'value' => 20,
-            'price' => 1000000,
-            'active' => true
+            'price' => 2000000,
+            'active' => true,
         ],
         [
             'value' => 30,
-            'price' => 1500000,
-            'active' => true
+            'price' => 3000000,
+            'active' => true,
         ],
         [
             'value' => 40,
-            'price' => 2000000,
-            'active' => true
+            'price' => 4000000,
+            'active' => true,
         ],
         [
             'value' => 50,
-            'price' => 2500000,
-            'active' => true
+            'price' => 5000000,
+            'active' => true,
         ],
         [
             'value' => 75,
-            'price' => 3750000,
-            'active' => true
+            'price' => 7500000,
+            'active' => true,
         ],
         [
             'value' => 100,
-            'price' => 5000000,
-            'active' => true
-        ]
+            'price' => 10000000,
+            'active' => true,
+        ],
     ];
     public const VOLUME_PRICE = [
         [
@@ -161,18 +161,18 @@ class PremiumConstants
         [
             'value' => 8000,
             'price' => 160000,
-            'active' => true
+            'active' => true,
         ],
         [
             'value' => 9000,
             'price' => 180000,
-            'active' => true
+            'active' => true,
         ],
         [
             'value' => 10000,
             'price' => 200000,
-            'active' => true
-        ]
+            'active' => true,
+        ],
     ];
-    public const CONSTANT_PRICE = 50000;
+    public const CONSTANT_PRICE = 0;
 }
