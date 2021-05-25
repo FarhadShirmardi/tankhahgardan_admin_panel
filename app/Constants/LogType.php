@@ -29,6 +29,7 @@ class LogType
     const EDIT_AUTOMATION_CALL = 14;
 
     const EDIT_WALLET = 15;
+    const NEW_INVOICE = 16;
 
     /**
      * @return array
@@ -69,6 +70,8 @@ class LogType
                 return $user->name . ' کد تخفیفی را ویرایش کرد.';
             case self::EDIT_WALLET:
                 return $user->name . ' کیف پولی را تغییر داد.';
+            case self::NEW_INVOICE:
+                return $user->name . ' یک پیش‌فاکتور جدید ساخته است.';
         }
     }
 
@@ -101,6 +104,8 @@ class LogType
                 return 'ویرایش کد تخفیف';
             case self::EDIT_WALLET:
                 return 'ویرایش کیف پول';
+            case self::NEW_INVOICE:
+                return 'ساخت پیش‌فاکتور';
             default:
                 return '';
         }

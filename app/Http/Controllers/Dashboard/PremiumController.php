@@ -10,6 +10,7 @@ use App\Constants\PurchaseType;
 use App\Constants\UserStatusType;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
+use App\PanelInvoice;
 use App\PanelUser;
 use App\User;
 use Carbon\Carbon;
@@ -73,15 +74,15 @@ class PremiumController extends Controller
 
         try {
             if ($openInvoices) {
-                throw new \Exception('برای ایجاد پیش فاکتور جدید ابتدا تمام پیش فاکتورهای قبل را ببندید.');
+                throw new \UnexpectedValueException('برای ایجاد پیش فاکتور جدید ابتدا تمام پیش فاکتورهای قبل را ببندید.');
             }
             $this->validateType($type, $userStates, $selectedPlan);
-        } catch (\Exception $exception) {
+        } catch (\UnexpectedValueException $exception) {
             $validator = Validator::make([], []);
             $validator->errors()->add('error', $exception->getMessage());
-            $validator->errors()->add('error', $exception->getFile());
-            $validator->errors()->add('error', $exception->getLine());
             return redirect()->back()->withErrors($validator);
+        } catch (\Exception $exception) {
+            dd($exception);
         }
 
         $prices = [
@@ -119,32 +120,34 @@ class PremiumController extends Controller
     {
         if ($type == PurchaseType::UPGRADE) {
             if (!$selectedPlan->is_active) {
-                throw new \Exception('برای ارتقا طرح باید فعال باشد.');
+                throw new \UnexpectedValueException('برای ارتقا طرح باید فعال باشد.');
             }
         } elseif ($type == PurchaseType::EXTEND) {
             if (!$selectedPlan->is_last_item or !$selectedPlan->is_active) {
-                throw new \Exception('تنها آخرین طرح را می‌توانید تمدید کنید');
+                throw new \UnexpectedValueException('تنها آخرین طرح را می‌توانید تمدید کنید');
             }
         } elseif ($type == PurchaseType::NEW) {
             $activePlan = $userStates->where('is_active', true)->first();
             if ($activePlan) {
-                throw new \Exception('برای خرید نباید طرح فعالی داشته باشید.');
+                throw new \UnexpectedValueException('برای خرید نباید طرح فعالی داشته باشید.');
             }
         } else {
-            throw new \Exception('نوع طرح صحیح نیست.');
+            throw new \UnexpectedValueException('نوع طرح صحیح نیست.');
         }
     }
 
     public function previewPurchase(Request $request, $userId, $type, $id)
     {
         try {
-            $this->validatePurchase($request, $type, $userId, $id);
-        } catch (\Exception $exception) {
+            return $this->validatePurchase($request, $type, $userId, $id);
+        } catch (\UnexpectedValueException $exception) {
             $validator = Validator::make([], []);
             $validator->errors()->add('error', $exception->getMessage());
             $validator->errors()->add('error', $exception->getFile());
             $validator->errors()->add('error', $exception->getLine());
             return redirect()->back()->withErrors($validator);
+        } catch (\Exception $exception) {
+            dd($exception);
         }
     }
 
@@ -164,7 +167,7 @@ class PremiumController extends Controller
             $price = PremiumPrices::getPrice($priceId);
         }
         $data = [];
-
+        $activePlan = $user->userStatus()->orderBy('end_date', 'desc')->first();
         if ($type == PurchaseType::NEW) {
             $startDate = now()->toDateTimeString();
             if ($priceId == PremiumDuration::SPECIAL) {
@@ -172,7 +175,7 @@ class PremiumController extends Controller
                 $startDate = $carbon->parse($request->start_date);
                 $endDate = $carbon->parse($request->end_date);
                 if ($endDate->lt($startDate)) {
-                    throw new \Exception('تاریخ شروع نمیتواند بزرگتر از تاریخ پایان باشد.');
+                    throw new \UnexpectedValueException('تاریخ شروع نمیتواند بزرگتر از تاریخ پایان باشد.');
                 }
             } elseif ($priceId == PremiumDuration::MONTH) {
                 $endDate = now()->addDays(31)->endOfDay()->toDateTimeString();
@@ -180,25 +183,56 @@ class PremiumController extends Controller
                 $endDate = now()->addDays(365)->endOfDay()->toDateTimeString();
             }
         } elseif ($type == PurchaseType::UPGRADE) {
-
+            $startDate = now()->toDateTimeString();
+            $endDate = $activePlan->end_date;
         } elseif ($type == PurchaseType::EXTEND) {
-
+            $startDate = new Carbon($activePlan->end_date);
+            $startDate = $startDate->addDay()->startOfDay();
+            if ($priceId == PremiumDuration::SPECIAL) {
+                $carbon = new Carbon();
+                $endDate = $carbon->parse($request->end_date);
+                if ($endDate->lt($startDate)) {
+                    throw new \UnexpectedValueException('تاریخ شروع نمیتواند بزرگتر از تاریخ پایان باشد.');
+                }
+            } elseif ($priceId == PremiumDuration::MONTH) {
+                $endDate = $startDate->addDays(31)->endOfDay()->toDateTimeString();
+            } elseif ($priceId == PremiumDuration::YEAR) {
+                $endDate = $startDate->addDays(365)->endOfDay()->toDateTimeString();
+            }
         }
 
         $percent = $this->calculatePercent($selectedPlan, $type);
         $userPrice = collect($price['user_price'])->where('value', $request->user_count)->first()['price'];
         $volumePrice = collect($price['volume_price'])->where('value', $request->volume_size)->first()['price'];
         $constantPrice = $type == PurchaseType::UPGRADE ? 0 : $price['constant_price'];
-        $totalAmount = max(1000, ceil(($userPrice + $volumePrice + $constantPrice) * $percent));
-        $discountAmount = $request->discount_amount;
+        $totalAmount =
+            $priceId == PremiumDuration::SPECIAL ? $request->total_price :
+                max(1000, ceil(($userPrice + $volumePrice + $constantPrice) * $percent));
+        $discountAmount = (int)$request->discount_amount;
         $payableAmount = Helpers::getPayableAmount($totalAmount, 0, $discountAmount, 0);
         $useWallet = $request->use_wallet == 'on';
         $walletAmount = $useWallet ? min($user->wallet_amount, $payableAmount) : 0;
         $addedValueAmount =
             round(($totalAmount - $discountAmount - $walletAmount) * PremiumConstants::ADDED_VALUE_PERCENT);
-        $payableAmount = Helpers::getPayableAmount($totalAmount, $addedValueAmount, $discountAmount, 0);
 
-        dd($payableAmount);
+        /** @var PanelInvoice $invoice */
+        $invoice = $user->invoices()->firstOrNew([
+            'status' => UserStatusType::PENDING,
+        ]);
+
+        $invoice->start_date = $startDate;
+        $invoice->type = $type;
+        $invoice->end_date = $endDate;
+        $invoice->volume_size = $request->volume_size;
+        $invoice->user_count = $request->user_count;
+        $invoice->wallet_amount = $walletAmount;
+        $invoice->total_amount = $totalAmount;
+        $invoice->discount_amount = $discountAmount;
+        $invoice->added_value_amount = $addedValueAmount;
+        $invoice->price_id = $priceId;
+        $invoice->save();
+
+        return redirect(route('dashboard.report.userActivity', ['id' => $user->id]))->with('success', 'پیش فاکتور با موفقیت ایجاد شد');
     }
 
     private function convertDate($request)
@@ -227,5 +261,32 @@ class PremiumController extends Controller
             $percent = $remain / $total;
         }
         return $percent;
+    }
+
+    public function deleteInvoice($userId, $id)
+    {
+        $invoice = PanelInvoice::query()->findOrFail($id);
+
+        if ($invoice->status != UserStatusType::PENDING) {
+            $validator = Validator::make([], []);
+            $validator->errors()->add('error', 'وضعیت پیش‌فاکتور باید «در انتظار» باشد.');
+            return redirect()->back()->withErrors($validator);
+        }
+        \DB::transaction(function () use ($invoice) {
+            /** @var PanelUser $panelUser */
+            $panelUser = auth()->user();
+            $panelUser->logs()->create([
+                'user_id' => $invoice->user_id,
+                'type' => LogType::NEW_INVOICE,
+                'date_time' => now()->toDateTimeString(),
+                'description' => LogType::getDescription(LogType::NEW_INVOICE, $panelUser),
+                'old_json' => $invoice->toJson(),
+                'new_json' => json_encode([]),
+            ]);
+
+            $invoice->delete();
+        });
+
+        return redirect()->back()->with('success', 'با موفقیت انجام شد.');
     }
 }

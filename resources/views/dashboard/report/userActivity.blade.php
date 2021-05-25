@@ -138,6 +138,9 @@
         تشخیص داده نشده!
     @endif
     <hr class="pt-4 pb-2">
+    <h5 class="text-center pb-3">پیش فاکتورهای کاربر</h5>
+    @include('dashboard.management.listInvoices')
+    <hr class="pt-4 pb-2">
     <div class="row">
         <div class="col-md-2">
             <a class="form-control btn btn-info"
@@ -164,4 +167,22 @@
 @section('chart')
     @include('dashboard.report.charts.rangeCount')
     @include('dashboard.report.charts.dateCount')
+@endsection
+
+@section('scripts')
+    <script>
+        $(document).ready(function () {
+            document.getElementById("paymentLink").addEventListener("click", function (event) {
+                event.preventDefault()
+            });
+        });
+
+        function copyClipboard(value) {
+            let $temp = $("<input>");
+            $("body").append($temp);
+            $temp.val(value).select();
+            document.execCommand("copy");
+            $temp.remove();
+        }
+    </script>
 @endsection

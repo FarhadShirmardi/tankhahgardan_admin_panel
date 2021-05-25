@@ -650,6 +650,7 @@ class ReportController extends Controller
         $userItem = Helpers::paginateCollection($userItem);
 
         $userStates = $premiumController->getUserStates($user);
+        $invoices = $user->invoices()->get();
 
         $automationState = $user->automationData()->first();
         $automationController = app()->make(AutomationController::class);
@@ -663,6 +664,7 @@ class ReportController extends Controller
             'dates' => $dates,
             'devices' => $devices,
             'user_statuses' => $userStates,
+            'invoices' => $invoices,
             'automationState' => $automationState,
             'type_mappings' => $automationController->typeMapping,
             'colors' => $this->colors(),

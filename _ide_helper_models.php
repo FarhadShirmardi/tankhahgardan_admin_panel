@@ -1,7 +1,6 @@
 <?php
 
 // @formatter:off
-
 /**
  * A helper file for your Eloquent Models
  * Copy the phpDocs from this file to the correct Model,
@@ -56,18 +55,18 @@ namespace App {
      * @property string $code
      * @property int $level
      * @property int $accounting_code_id
- * @property string $accounting_code_type
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property string|null $deleted_at
- * @property-read Model|Eloquent $hasAccountingCode
- * @method static bool|null forceDelete()
- * @method static \Illuminate\Database\Query\Builder|AccountingCodes onlyTrashed()
- * @method static bool|null restore()
- * @method static Builder|AccountingCodes whereAccountingCodeId($value)
- * @method static Builder|AccountingCodes whereAccountingCodeType($value)
- * @method static Builder|AccountingCodes whereCode($value)
- * @method static Builder|AccountingCodes whereCreatedAt($value)
+     * @property string $accounting_code_type
+     * @property Carbon|null $created_at
+     * @property Carbon|null $updated_at
+     * @property string|null $deleted_at
+     * @property-read Model|Eloquent $hasAccountingCode
+     * @method static bool|null forceDelete()
+     * @method static \Illuminate\Database\Query\Builder|AccountingCodes onlyTrashed()
+     * @method static bool|null restore()
+     * @method static Builder|AccountingCodes whereAccountingCodeId($value)
+     * @method static Builder|AccountingCodes whereAccountingCodeType($value)
+     * @method static Builder|AccountingCodes whereCode($value)
+     * @method static Builder|AccountingCodes whereCreatedAt($value)
      * @method static Builder|AccountingCodes whereDeletedAt($value)
      * @method static Builder|AccountingCodes whereId($value)
      * @method static Builder|AccountingCodes whereLevel($value)
@@ -169,7 +168,7 @@ namespace App {
     }
 }
 
-namespace App{
+namespace App {
     /**
      * App\AnnouncementUser
      *
@@ -194,7 +193,7 @@ namespace App{
     }
 }
 
-namespace App{
+namespace App {
     /**
      * App\ApplicationVersion
      *
@@ -204,6 +203,50 @@ namespace App{
      * @method static \Illuminate\Database\Eloquent\Builder|ApplicationVersion query()
      */
     class ApplicationVersion extends \Eloquent
+    {
+    }
+}
+
+namespace App {
+    /**
+     * App\AutomationBurntUser
+     *
+     * @property int $id
+     * @property int $user_id
+     * @property string $date
+     * @property string|null $text
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationBurntUser newModelQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationBurntUser newQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationBurntUser query()
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationBurntUser whereDate($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationBurntUser whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationBurntUser whereText($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationBurntUser whereUserId($value)
+     */
+    class AutomationBurntUser extends \Eloquent
+    {
+    }
+}
+
+namespace App {
+    /**
+     * App\AutomationCall
+     *
+     * @property int $id
+     * @property int $type
+     * @property int $user_id
+     * @property string $text
+     * @property string $call_time
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationCall newModelQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationCall newQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationCall query()
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationCall whereCallTime($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationCall whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationCall whereText($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationCall whereType($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationCall whereUserId($value)
+     */
+    class AutomationCall extends \Eloquent
     {
     }
 }
@@ -241,9 +284,15 @@ namespace App {
     /**
      * App\AutomationMetric
      *
+     * @property int $id
+     * @property string $date
+     * @property array $metric
      * @method static \Illuminate\Database\Eloquent\Builder|AutomationMetric newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|AutomationMetric newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|AutomationMetric query()
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationMetric whereDate($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationMetric whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationMetric whereMetric($value)
      */
     class AutomationMetric extends \Eloquent
     {
@@ -254,9 +303,19 @@ namespace App {
     /**
      * App\AutomationSms
      *
+     * @property int $id
+     * @property int $user_id
+     * @property int $type
+     * @property string $sms_text
+     * @property string $sent_time
      * @method static \Illuminate\Database\Eloquent\Builder|AutomationSms newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|AutomationSms newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|AutomationSms query()
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationSms whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationSms whereSentTime($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationSms whereSmsText($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationSms whereType($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AutomationSms whereUserId($value)
      */
     class AutomationSms extends \Eloquent
     {
@@ -274,10 +333,12 @@ namespace App {
      * @method static \Illuminate\Database\Query\Builder|Bank withTrashed()
      * @method static \Illuminate\Database\Query\Builder|Bank withoutTrashed()
      */
-	class Bank extends \Eloquent {}
+    class Bank extends \Eloquent
+    {
+    }
 }
 
-namespace App{
+namespace App {
     /**
      * App\BankPattern
      *
@@ -379,7 +440,9 @@ namespace App {
      * @method static \Illuminate\Database\Eloquent\Builder|Campaign whereSymbol($value)
      * @method static \Illuminate\Database\Eloquent\Builder|Campaign whereUpdatedAt($value)
      */
-	class Campaign extends \Eloquent {}
+    class Campaign extends \Eloquent
+    {
+    }
 }
 
 namespace App{
@@ -747,31 +810,134 @@ namespace App{
  * @method static \Illuminate\Database\Query\Builder|Note withTrashed()
  * @method static \Illuminate\Database\Query\Builder|Note withoutTrashed()
  */
-	class Note extends \Eloquent {}
+    class Note extends \Eloquent
+    {
+    }
 }
 
-namespace App{
-/**
- * App\PanelUser
- *
- * @property int $id
- * @property string $name
- * @property string $phone_number
- * @property string $password
- * @property string|null $remember_token
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property int $type
- * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
- * @property-read int|null $notifications_count
- * @property-read \Illuminate\Database\Eloquent\Collection|\Spatie\Permission\Models\Permission[] $permissions
- * @property-read int|null $permissions_count
- * @property-read \Illuminate\Database\Eloquent\Collection|\Spatie\Permission\Models\Role[] $roles
- * @property-read int|null $roles_count
- * @method static \Illuminate\Database\Eloquent\Builder|PanelUser newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|PanelUser newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|PanelUser permission($permissions)
- * @method static \Illuminate\Database\Eloquent\Builder|PanelUser query()
+namespace App {
+    /**
+     * App\PanelFile
+     *
+     * @property int $id
+     * @property int $user_id
+     * @property string $path
+     * @property string $description
+     * @property string $date_time
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelFile newModelQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelFile newQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelFile query()
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelFile whereDateTime($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelFile whereDescription($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelFile whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelFile wherePath($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelFile whereUserId($value)
+     */
+    class PanelFile extends \Eloquent
+    {
+    }
+}
+
+namespace App {
+    /**
+     * App\PanelInvoice
+     *
+     * @property int $id
+     * @property int $user_id
+     * @property string $start_date
+     * @property string $end_date
+     * @property int $volume_size
+     * @property int $user_count
+     * @property int $wallet_amount
+     * @property int $total_amount
+     * @property int $type
+     * @property int $price_id
+     * @property int $status
+     * @property int $discount_amount
+     * @property int $added_value_amount
+     * @property int|null $user_status_log_id
+     * @property \Illuminate\Support\Carbon|null $created_at
+     * @property \Illuminate\Support\Carbon|null $updated_at
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice newModelQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice newQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice query()
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice whereAddedValueAmount($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice whereCreatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice whereDiscountAmount($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice whereEndDate($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice wherePriceId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice whereStartDate($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice whereStatus($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice whereTotalAmount($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice whereType($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice whereUpdatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice whereUserCount($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice whereUserId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice whereUserStatusLogId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice whereVolumeSize($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelInvoice whereWalletAmount($value)
+     */
+    class PanelInvoice extends \Eloquent
+    {
+    }
+}
+
+namespace App {
+    /**
+     * App\PanelLogCenter
+     *
+     * @property int $id
+     * @property int $panel_user_id
+     * @property int|null $user_id
+     * @property int $type
+     * @property string $date_time
+     * @property string $description
+     * @property mixed|null $old_json
+     * @property mixed $new_json
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelLogCenter newModelQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelLogCenter newQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelLogCenter query()
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelLogCenter whereDateTime($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelLogCenter whereDescription($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelLogCenter whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelLogCenter whereNewJson($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelLogCenter whereOldJson($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelLogCenter wherePanelUserId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelLogCenter whereType($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelLogCenter whereUserId($value)
+     */
+    class PanelLogCenter extends \Eloquent
+    {
+    }
+}
+
+namespace App {
+    /**
+     * App\PanelUser
+     *
+     * @property int $id
+     * @property string $name
+     * @property string $phone_number
+     * @property string $password
+     * @property string|null $remember_token
+     * @property \Illuminate\Support\Carbon|null $created_at
+     * @property \Illuminate\Support\Carbon|null $updated_at
+     * @property int $type
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\PanelFile[] $files
+     * @property-read int|null $files_count
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\PanelLogCenter[] $logs
+     * @property-read int|null $logs_count
+     * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
+     * @property-read int|null $notifications_count
+     * @property-read \Illuminate\Database\Eloquent\Collection|\Spatie\Permission\Models\Permission[] $permissions
+     * @property-read int|null $permissions_count
+     * @property-read \Illuminate\Database\Eloquent\Collection|\Spatie\Permission\Models\Role[] $roles
+     * @property-read int|null $roles_count
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelUser newModelQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelUser newQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelUser permission($permissions)
+     * @method static \Illuminate\Database\Eloquent\Builder|PanelUser query()
  * @method static \Illuminate\Database\Eloquent\Builder|PanelUser role($roles, $guard = null)
  * @method static \Illuminate\Database\Eloquent\Builder|PanelUser whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|PanelUser whereId($value)
@@ -825,6 +991,7 @@ namespace App{
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Image[] $images
  * @property-read int|null $images_count
  * @property-read \App\Imprest|null $imprest
+ * @property-read \App\ProjectUser $projectOwnerUser
  * @property-read \App\SentPayment|null $sentPayment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\TurnoverDetail[] $turnoverDetails
  * @property-read int|null $turnover_details_count
@@ -967,7 +1134,7 @@ namespace App{
 	class ProjectInviteNotification extends \Eloquent {}
 }
 
-namespace App{
+namespace App {
     /**
      * App\ProjectReport
      *
@@ -1068,6 +1235,9 @@ namespace App{
  * @property string $start_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property bool $is_hidden
+ * @property bool $is_unlimited
+ * @property int|null $price_id
  * @property-read \App\Campaign $campaign
  * @method static \Illuminate\Database\Eloquent\Builder|PromoCode newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|PromoCode newQuery()
@@ -1078,9 +1248,12 @@ namespace App{
  * @method static \Illuminate\Database\Eloquent\Builder|PromoCode whereDiscountPercent($value)
  * @method static \Illuminate\Database\Eloquent\Builder|PromoCode whereExpireAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|PromoCode whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PromoCode whereIsHidden($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PromoCode whereIsUnlimited($value)
  * @method static \Illuminate\Database\Eloquent\Builder|PromoCode whereMaxCount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|PromoCode whereMaxDiscount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|PromoCode wherePanelUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PromoCode wherePriceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|PromoCode whereReserveCount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|PromoCode whereStartAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|PromoCode whereText($value)
@@ -1462,6 +1635,13 @@ namespace App{
  * @property int $wallet
  * @property int $reserve_wallet
  * @property string|null $verification_time
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\AutomationBurntUser[] $automationBurn
+ * @property-read int|null $automation_burn_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\AutomationCall[] $automationCall
+ * @property-read int|null $automation_call_count
+ * @property-read \App\AutomationData|null $automationData
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\AutomationSms[] $automationSms
+ * @property-read int|null $automation_sms_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\BannerUser[] $banner
  * @property-read int|null $banner_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Device[] $devices
@@ -1471,8 +1651,11 @@ namespace App{
  * @property-read mixed $created_at_date
  * @property-read mixed $full_name
  * @property-read mixed $premium_state
+ * @property-read mixed $wallet_amount
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Image[] $images
  * @property-read int|null $images_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\PanelInvoice[] $invoices
+ * @property-read int|null $invoices_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
  * @property-read int|null $notifications_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Project[] $ownedProjects
@@ -1568,7 +1751,7 @@ namespace App{
 	class UserActivationState extends \Eloquent {}
 }
 
-namespace App{
+namespace App {
     /**
      * App\UserReport
      *
@@ -1635,6 +1818,7 @@ namespace App {
      * @property \Illuminate\Support\Carbon|null $created_at
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $deleted_at
+     * @property-read \App\User $user
      * @method static \Illuminate\Database\Eloquent\Builder|UserStatus newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|UserStatus newQuery()
      * @method static \Illuminate\Database\Query\Builder|UserStatus onlyTrashed()
@@ -1684,6 +1868,7 @@ namespace App {
      * @property-read \App\Project $project
      * @property-read \App\PromoCode|null $promoCode
      * @property-read \App\Transaction|null $transaction
+     * @property-read \App\User $user
      * @method static \Illuminate\Database\Eloquent\Builder|UserStatusLog newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|UserStatusLog newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|UserStatusLog query()

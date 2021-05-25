@@ -27,6 +27,7 @@ class CreatePanelInvoicesTable extends Migration
             $table->integer('status')->default(2);
             $table->integer('discount_amount')->default(0);
             $table->integer('added_value_amount');
+            $table->unsignedInteger('user_status_log_id')->nullable();
             $table->timestamps();
         });
     }
