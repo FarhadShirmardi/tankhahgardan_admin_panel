@@ -44,7 +44,9 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
                 Route::get('purchase/{type}/{id}', 'Dashboard\PremiumController@purchase')->name('purchase');
                 Route::post('purchase/{type}/{id}', 'Dashboard\PremiumController@previewPurchase')->name('previewPurchase');
                 Route::get('invoices/{id}/delete', 'Dashboard\PremiumController@deleteInvoice')->name('deleteInvoice');
-                Route::get('invoices/{id}/pay', 'Dashboard\PremiumController@payInvoice')->name('payInvoice');
+                Route::post('invoices/{id}/pay', 'Dashboard\PremiumController@payInvoice')->name('payInvoice');
+
+                Route::post('plan/{id}/close', 'Dashboard\PremiumController@closePlan')->name('closePlan');
             });
 
         });

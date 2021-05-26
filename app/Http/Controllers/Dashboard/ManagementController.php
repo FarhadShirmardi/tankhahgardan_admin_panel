@@ -340,7 +340,7 @@ class ManagementController extends Controller
             $item->start_date = Helpers::convertDateTimeToJalali($item->start_date);
             $item->end_date = Helpers::convertDateTimeToJalali($item->end_date);
             $item->state = UserStatusType::getEnum($item->state);
-            $item->bank = PremiumBanks::getBank($item->bank)['name'];
+            $item->bank = $item->bank ? PremiumBanks::getBank($item->bank)['name'] : '';
             $item->type = PurchaseType::getEnum($item->type);
 
             return $item;

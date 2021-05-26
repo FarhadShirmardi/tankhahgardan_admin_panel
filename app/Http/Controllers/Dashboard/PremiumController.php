@@ -13,7 +13,9 @@ use App\Http\Controllers\Controller;
 use App\PanelInvoice;
 use App\PanelUser;
 use App\User;
+use App\UserStatusLog;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -103,10 +105,26 @@ class PremiumController extends Controller
     public function getUserStates(User $user)
     {
         $userStates = $user->userStatus()->orderBy('end_date', 'desc')->get();
-        $userStates->transform(function ($item) {
+        $userStates->transform(function ($item) use ($user) {
             $item['is_active'] =
                 (now()->toDateTimeString() > $item['start_date'] and now()->toDateTimeString() < $item['end_date']);
             $item['is_last_item'] = false;
+
+            $userStatusLogs = $user->userStatusLogNull()->where('status', true)
+                ->where('start_date', '>=', $item['start_date'])
+                ->where('end_date', '<=', $item['end_date'])
+                ->get();
+
+            $amount = 0;
+            if ($item['is_active']) {
+                /** @var UserStatusLog $userStatusLog */
+                foreach ($userStatusLogs as $userStatusLog) {
+                    $percent = Helpers::calculatePercent($userStatusLog, PurchaseType::UPGRADE);
+                    $amount += $percent * Helpers::getPayableAmount($userStatusLog->total_amount, $userStatusLog->added_value_amount, 0, 0);
+                }
+            }
+
+            $item['payable_amount'] = 10 * (int)(round($amount) / 10);
             $item['start_date'] = Helpers::convertDateTimeToJalali($item['start_date']);
             $item['end_date'] = Helpers::convertDateTimeToJalali($item['end_date']);
             return $item;
@@ -201,7 +219,7 @@ class PremiumController extends Controller
             }
         }
 
-        $percent = $this->calculatePercent($selectedPlan, $type);
+        $percent = Helpers::calculatePercent($selectedPlan, $type);
         $userPrice = collect($price['user_price'])->where('value', $request->user_count)->first()['price'];
         $volumePrice = collect($price['volume_price'])->where('value', $request->volume_size)->first()['price'];
         $constantPrice = $type == PurchaseType::UPGRADE ? 0 : $price['constant_price'];
@@ -248,24 +266,11 @@ class PremiumController extends Controller
         return $request;
     }
 
-    private function calculatePercent(&$userStatus, $type)
-    {
-        $percent = 1;
-        /** UserStatus $userStatus */
-        if ($userStatus and $type == PurchaseType::UPGRADE) {
-            $carbon = new Carbon();
-            $startDate = $carbon->parse($userStatus->start_date);
-            $endDate = $carbon->parse($userStatus->end_date);
-            $total = $startDate->diffInDays($endDate);
-            $remain = $endDate->diffInDays(now());
-            $percent = $remain / $total;
-        }
-        return $percent;
-    }
-
     public function deleteInvoice($userId, $id)
     {
-        $invoice = PanelInvoice::query()->findOrFail($id);
+        $user = User::query()->findOrFail($userId);
+        /** @var PanelInvoice $invoice */
+        $invoice = $user->invoices()->findOrFail($id);
 
         if ($invoice->status != UserStatusType::PENDING) {
             $validator = Validator::make([], []);
@@ -286,6 +291,70 @@ class PremiumController extends Controller
 
             $invoice->delete();
         });
+
+        return redirect()->back()->with('success', 'با موفقیت انجام شد.');
+    }
+
+    public function payInvoice(Request $request, $userId, $id)
+    {
+        $user = User::query()->findOrFail($userId);
+        /** @var PanelInvoice $invoice */
+        $invoice = $user->invoices()->findOrFail($id);
+        $invoice['text'] = $request->text;
+
+        \DB::transaction(function () use ($invoice) {
+            $http = new Client;
+            $response = $http->get(
+                env('TANKHAH_URL') . '/panel/' .
+                env('TANKHAH_TOKEN') . '/invoice/' . $invoice['id'] . '/pay',
+                [
+                    'headers' => [
+                        'Accept' => 'application/json',
+                    ],
+                ]
+            );
+            if ($response->getStatusCode() != 200) {
+                throw new \Exception($response->getBody());
+            }
+            /** @var PanelUser $panelUser */
+            $panelUser = auth()->user();
+            $panelUser->logs()->create([
+                'user_id' => $invoice->user_id,
+                'type' => LogType::PAY_INVOICE,
+                'date_time' => now()->toDateTimeString(),
+                'description' => LogType::getDescription(LogType::PAY_INVOICE, $panelUser),
+                'old_json' => $invoice->toJson(),
+                'new_json' => json_encode([]),
+            ]);
+        });
+        return redirect()->back()->with('success', 'با موفقیت انجام شد.');
+    }
+
+    public function closePlan(Request $request, $userId, $id)
+    {
+        $type = $request->type;
+        $user = User::findOrFail($userId);
+        $userStatus = $this->getUserStates($user)->where('id', $id)->first();
+        $userStatus['close_type'] = $type;
+        if ($type == 'wallet') {
+            $user->wallet += $userStatus->payable_amount;
+            $user->save();
+        } elseif ($type == 'card') {
+
+        }
+        $user->userStatus()->where('id', $id)->update([
+            'end_date' => now(),
+        ]);
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $panelUser->logs()->create([
+            'user_id' => $userId,
+            'type' => LogType::CLOSE_PLAN,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription(LogType::CLOSE_PLAN, $panelUser),
+            'old_json' => $userStatus->toJson(),
+            'new_json' => json_encode([]),
+        ]);
 
         return redirect()->back()->with('success', 'با موفقیت انجام شد.');
     }

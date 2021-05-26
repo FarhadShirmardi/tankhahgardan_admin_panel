@@ -58,11 +58,12 @@ class NearExpireUser extends Command
             $this->info("send sms to {$user->phone_number}");
             if (!$this->option('silent')) {
                 $receptor = $user->phone_number;
-                $token1 = str_replace('‌', '_', str_replace(' ', '_', $project->name));
-                $token2 = 'https://web.tankhahgardan.com/user-account-setting';
+                $token1 = 'https://web.tankhahgardan.com/';
+                $token2 = '';
                 $token3 = '';
                 $type = "sms";//sms | call
-                $result = Kavenegar::VerifyLookup($receptor, $token1, $token2, $token3, 'Mapsa-ChargNotif3', $type);
+                $result =
+                    Kavenegar::VerifyLookup($receptor, $token1, $token2, $token3, 'recharge-near-ending-premium', $type);
                 if ($result) {
                     $message = $result[0]->statustext;
                     Log::info('Send to kavenegar   ====>   ' . $receptor . '  ' . $message);

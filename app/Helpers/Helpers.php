@@ -10,6 +10,7 @@ namespace App\Helpers;
 
 use App\Constants\PremiumConstants;
 use App\Constants\ProjectUserState;
+use App\Constants\PurchaseType;
 use App\Constants\UserActivationConstant;
 use App\Constants\UserPremiumState;
 use App\File;
@@ -854,5 +855,20 @@ class Helpers
                 return 'اسفند';
         }
         return '';
+    }
+
+    public static function calculatePercent(&$userStatus, $type)
+    {
+        $percent = 1;
+        /** UserStatus $userStatus */
+        if ($userStatus and $type == PurchaseType::UPGRADE) {
+            $carbon = new Carbon();
+            $startDate = $carbon->parse($userStatus->start_date);
+            $endDate = $carbon->parse($userStatus->end_date);
+            $total = $startDate->diffInDays($endDate);
+            $remain = $endDate->diffInDays(now());
+            $percent = $remain / $total;
+        }
+        return $percent;
     }
 }

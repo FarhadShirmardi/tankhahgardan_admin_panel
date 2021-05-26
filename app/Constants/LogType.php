@@ -30,6 +30,8 @@ class LogType
 
     const EDIT_WALLET = 15;
     const NEW_INVOICE = 16;
+    const PAY_INVOICE = 17;
+    const CLOSE_PLAN = 18;
 
     /**
      * @return array
@@ -72,6 +74,10 @@ class LogType
                 return $user->name . ' کیف پولی را تغییر داد.';
             case self::NEW_INVOICE:
                 return $user->name . ' یک پیش‌فاکتور جدید ساخته است.';
+            case self::PAY_INVOICE:
+                return $user->name . ' یک پیش‌فاکتور را پرداخت کرد.';
+            case self::CLOSE_PLAN:
+                return $user->name . ' یک طرح را اتمام کرد.';
         }
     }
 
@@ -106,6 +112,10 @@ class LogType
                 return 'ویرایش کیف پول';
             case self::NEW_INVOICE:
                 return 'ساخت پیش‌فاکتور';
+            case self::PAY_INVOICE:
+                return 'پرداخت پیش‌فاکتور';
+            case self::CLOSE_PLAN:
+                return 'اتمام طرح';
             default:
                 return '';
         }
