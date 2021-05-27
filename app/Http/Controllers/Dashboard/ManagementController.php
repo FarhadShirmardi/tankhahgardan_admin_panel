@@ -17,6 +17,7 @@ use App\Constants\UserStatusType;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendFirebaseNotificationJob;
+use App\PanelLogCenter;
 use App\PanelUser;
 use App\PromoCode;
 use App\SmsLog;
@@ -847,6 +848,88 @@ class ManagementController extends Controller
         return view('dashboard.management.premiumReport', [
             'type' => $type,
             'items' => $items,
+        ]);
+    }
+
+    public function logCenters(Request $request)
+    {
+        $filter = [
+            'user_id' => $request->input('user_id', null),
+            'panel_user_ids' => $request->input('panel_user_ids', []),
+            'types' => $request->input('types', []),
+        ];
+
+        $logs = PanelLogCenter::query()
+            ->leftJoin('user_reports', 'user_reports.id', 'log_centers.user_id')
+            ->leftJoin('users', 'users.id', 'log_centers.panel_user_id')
+            ->where(function ($query) use ($filter) {
+                if (!empty($filter['panel_user_ids'])) {
+                    $query->whereIn('user_id', $filter['panel_user_ids']);
+                }
+            })->where(function ($query) use ($filter) {
+                if (!empty($filter['types'])) {
+                    $query->whereIn('type', $filter['types']);
+                }
+            })
+            ->where(function ($query) use ($filter) {
+                if ($filter['user_id']) {
+                    $query->where('user_id', $filter['user_id'])
+                        ->orWhereNull('user_id');
+                }
+            })
+            ->get([
+                'user_reports.phone_number',
+                'user_reports.name',
+                'users.name as panel_username',
+                'log_centers.*',
+            ]);
+
+        $logs->transform(function ($log) {
+            $log['username'] = $log['user_id'] ?
+                ($log['name'] ? $log['name'] : $log['phone_number']) :
+                'عمومی';
+            return $log;
+        });
+
+        $users = PanelUser::query()->get()->map(function ($user) use ($filter) {
+            $user['is_selected'] = in_array($user->id, $filter['panel_user_ids']);
+            return $user;
+        });
+
+        $types = Collect(LogType::toArray())->map(function ($item) use ($filter) {
+            $type = [
+                'id' => $item,
+                'title' => LogType::getTitle($item),
+                'is_selected' => in_array($item, $filter['types']),
+            ];
+            return $type;
+        });
+
+        return view('dashboard.management.logCenters', [
+            'logs' => $logs,
+            'users' => $users,
+            'types' => $types,
+        ]);
+    }
+
+    public function logCenterItem($id)
+    {
+        $log = PanelLogCenter::query()
+            ->leftJoin('user_reports', 'user_reports.id', 'log_centers.user_id')
+            ->leftJoin('users', 'users.id', 'log_centers.panel_user_id')
+            ->select([
+                'user_reports.phone_number',
+                'user_reports.name',
+                'users.name as panel_username',
+                'log_centers.*',
+            ])->findOrFail($id);
+
+        $log['username'] = $log['user_id'] ?
+            ($log['name'] ? $log['name'] : $log['phone_number']) :
+            'عمومی';
+
+        return view('dashboard.management.logCenterItem', [
+            'log' => $log,
         ]);
     }
 }

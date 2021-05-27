@@ -50,6 +50,12 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
             });
 
         });
+
+        Route::prefix('logCenters')->name('log_centers.')->middleware(['permission:view_log_center'])->group(function () {
+            Route::get('/', 'Dashboard\ManagementController@logCenters')->name('index');
+            Route::get('/{id}', 'Dashboard\ManagementController@logCenterItem')->name('show');
+        });
+
         Route::get('files', 'Dashboard\FileController@files')->name('downloadCenter');
         Route::get('download/{id}', 'Dashboard\FileController@downloadFile')
             ->name('downloadFile');

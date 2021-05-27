@@ -196,8 +196,6 @@ class FirebaseController extends Controller
                     ->insert($announcementUser->toArray());
             }
 
-            $id = $announcement->id;
-
             $announcement->update([
                 'icon_path' => null,
                 'image_path' => null,
@@ -228,12 +226,12 @@ class FirebaseController extends Controller
             if (!$isNull) {
                 $http = new Client;
                 $response = $http->post(
-                    env('TANKHAH_URL') . '/panel/' . env('TANKHAH_TOKEN') . '/announcement/' . $id . '/image',
+                    env('TANKHAH_URL') . '/panel/' . env('TANKHAH_TOKEN') . '/announcement/' . $announcement->id . '/image',
                     [
                         'headers' => [
                             'Accept' => 'application/json',
                         ],
-                        'multipart' => $imageRequest
+                        'multipart' => $imageRequest,
                     ]
                 );
                 $response = json_decode($response->getBody());

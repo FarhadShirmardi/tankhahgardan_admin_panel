@@ -124,14 +124,22 @@
                     </ul>
                 </li>
                 @endif
-                <li class="nav-item nav-dropdown">
-                    <a class="nav-link" href="{{ route('dashboard.report.premiumReport') }}"><i
-                            class="icon-wallet"></i> گزارش معیارهای سنجش پولی</a>
-                </li>
+                @if(auth()->user()->can('view_premium_report'))
+                    <li class="nav-item nav-dropdown">
+                        <a class="nav-link" href="{{ route('dashboard.report.premiumReport') }}"><i
+                                class="icon-wallet"></i> گزارش معیارهای سنجش پولی</a>
+                    </li>
+                @endif
                 <li class="nav-item nav-dropdown">
                     <a class="nav-link" href="{{ route('dashboard.downloadCenter') }}"><i
                             class="icon-cloud-download"></i>مرکز دانلود</a>
                 </li>
+                @if(auth()->user()->can('view_log_center'))
+                    <li class="nav-item nav-dropdown">
+                        <a class="nav-link" href="{{ route('dashboard.log_centers.index') }}"><i
+                                class="icon-notebook"></i>مرکز لاگ</a>
+                    </li>
+                @endif
         </ul>
     </nav>
 </div>

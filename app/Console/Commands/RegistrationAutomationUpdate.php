@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\AutomationData;
+use App\AutomationDate;
 use App\Constants\PremiumDuration;
 use App\Constants\UserPremiumState;
 use App\Payment;
@@ -10,6 +11,7 @@ use App\ProjectUser;
 use App\Receive;
 use App\User;
 use App\UserStatusLog;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -50,6 +52,8 @@ class RegistrationAutomationUpdate extends Command
     {
         $start = now();
         $this->info('start');
+
+        $premiumStates = [UserPremiumState::PREMIUM, UserPremiumState::NEAR_ENDING_PREMIUM];
 
         $maxTimes = AutomationData::query()
             ->first([
@@ -138,19 +142,94 @@ class RegistrationAutomationUpdate extends Command
                 );
         }
 
+        $lastAutomationDate = AutomationDate::query()->max('date_time');
+        $updateFlag = false;
+        if ($lastAutomationDate) {
+            if (now()->diffInDays($lastAutomationDate = Carbon::parse($lastAutomationDate), true) >= 20) {
+                $updateFlag = true;
+                $lastAutomationDate = $lastAutomationDate->subDays(10)->toDateTimeString();
+            }
+        } else {
+            $updateFlag = true;
+            $lastAutomationDate = Carbon::parse('2021-04-10 00:00:00');
+        }
 
-        $premiumStates = [UserPremiumState::PREMIUM, UserPremiumState::NEAR_ENDING_PREMIUM];
+        if ($updateFlag) {
+            AutomationData::query()
+                ->where('automation_state', '<', 0)
+                ->update([
+                    'automation_state' => -1,
+                ]);
+
+            AutomationData::query()
+                ->where('automation_state', '<', 0)
+                ->where('max_time', '>=', $lastAutomationDate)
+                ->where('max_time', '<', now()->subDays(10)->toDateTimeString())
+                ->where('transaction_count', '>=', 20)
+                ->update([
+                    'automation_state' => -2,
+                ]);
+
+            AutomationData::query()
+                ->where('automation_state', '<', 0)
+                ->where('max_time', '>=', $lastAutomationDate)
+                ->where('max_time', '<', now()->subDays(10)->toDateTimeString())
+                ->where('transaction_count', '<', 20)
+                ->where('transaction_count', '>=', 5)
+                ->update([
+                    'automation_state' => -3,
+                ]);
+
+            AutomationData::query()
+                ->where('automation_state', '<', 0)
+                ->where('max_time', '>=', $lastAutomationDate)
+                ->where('max_time', '<', now()->subDays(10)->toDateTimeString())
+                ->where('transaction_count', '<', 5)
+                ->update([
+                    'automation_state' => -4,
+                ]);
+
+            AutomationData::query()
+                ->where('automation_state', '<', 0)
+                ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
+                ->whereIn('premium_state', $premiumStates)
+                ->update([
+                    'automation_state' => -5,
+                ]);
+
+            AutomationData::query()
+                ->where('automation_state', '<', 0)
+                ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
+                ->where('transaction_count', '<', 20)
+                ->whereNotIn('premium_state', $premiumStates)
+                ->update([
+                    'automation_state' => -6,
+                ]);
+
+            AutomationData::query()
+                ->where('automation_state', '<', 0)
+                ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
+                ->where('transaction_count', '>=', 20)
+                ->whereNotIn('premium_state', $premiumStates)
+                ->update([
+                    'automation_state' => -7,
+                ]);
+
+            AutomationDate::query()->create([
+                'date_time' => now()->toDateTimeString(),
+            ]);
+        }
 
         AutomationData::query()
             ->where('registered_at', '<=', now()->subDay()->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(3)->toDateTimeString())
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->update([
                 'automation_state' => 2,
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(3)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(9)->toDateTimeString())
             ->where('transaction_count', '>', 0)
@@ -159,7 +238,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(3)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(9)->toDateTimeString())
             ->where('transaction_count', 0)
@@ -168,7 +247,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(9)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(18)->toDateTimeString())
             ->where('transaction_count', '>=', 5)
@@ -177,7 +256,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(9)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(18)->toDateTimeString())
             ->where('transaction_count', '<', 5)
@@ -186,7 +265,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(18)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(30)->toDateTimeString())
             ->where('transaction_count', '>=', 10)
@@ -196,7 +275,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(18)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(30)->toDateTimeString())
             ->where('transaction_count', '>=', 10)
@@ -206,7 +285,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(18)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(30)->toDateTimeString())
             ->where('transaction_count', '<=', 9)
@@ -216,7 +295,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(18)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(30)->toDateTimeString())
             ->where('transaction_count', '<=', 4)
@@ -226,7 +305,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(18)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(30)->toDateTimeString())
             ->where('transaction_count', 0)
@@ -235,7 +314,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(30)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(45)->toDateTimeString())
             ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
@@ -246,7 +325,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(30)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(45)->toDateTimeString())
             ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
@@ -257,7 +336,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(30)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(45)->toDateTimeString())
             ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
@@ -267,7 +346,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(30)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(45)->toDateTimeString())
             ->where(function ($query) {
@@ -280,7 +359,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(30)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(45)->toDateTimeString())
             ->where(function ($query) {
@@ -293,7 +372,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(45)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
             ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
@@ -304,7 +383,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(45)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
             ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
@@ -315,7 +394,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(45)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
             ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
@@ -325,7 +404,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(45)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
             ->where(function ($query) {
@@ -338,7 +417,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<=', now()->subDays(45)->toDateTimeString())
             ->where('registered_at', '>', now()->subDays(60)->toDateTimeString())
             ->where(function ($query) {
@@ -355,7 +434,7 @@ class RegistrationAutomationUpdate extends Command
             ->whereNotIn('price_id', [PremiumDuration::ONE_WEEK, PremiumDuration::HALF_MONTH]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->joinSub($userStatusLog->getQuery(), 'status_logs', 'status_logs.user_id', 'automation_data.id')
             ->where('registered_at', '<', now()->subDays(60)->toDateTimeString())
             ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
@@ -365,7 +444,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<', now()->subDays(60)->toDateTimeString())
             ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
             ->where('premium_state', UserPremiumState::FREE)
@@ -375,7 +454,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<', now()->subDays(60)->toDateTimeString())
             ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
             ->where('premium_state', UserPremiumState::FREE)
@@ -385,7 +464,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<', now()->subDays(60)->toDateTimeString())
             ->where('max_time', '>=', now()->subDays(10)->toDateTimeString())
             ->whereIn('premium_state', $premiumStates)
@@ -394,7 +473,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->leftJoin('automation_burnt_users', 'automation_burnt_users.user_id', 'automation_data.id')
             ->where('registered_at', '<', now()->subDays(60)->toDateTimeString())
             ->where(function ($query) {
@@ -408,7 +487,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->leftJoin('automation_burnt_users', 'automation_burnt_users.user_id', 'automation_data.id')
             ->where('registered_at', '<', now()->subDays(60)->toDateTimeString())
             ->where(function ($query) {
@@ -422,7 +501,7 @@ class RegistrationAutomationUpdate extends Command
             ]);
 
         AutomationData::query()
-            ->where('automation_state', '<>', '-1')
+            ->where('automation_state', '<', 0)
             ->where('registered_at', '<', now()->subDays(60)->toDateTimeString())
             ->where(function ($query) {
                 $query->where('max_time', '<', now()->subDays(10)->toDateTimeString())

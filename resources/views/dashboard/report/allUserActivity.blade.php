@@ -109,7 +109,8 @@
     <div></div>
     <div class="row">
         <div class="col-md-4">{{ $users->appends(request()->input())->links() }}</div>
-        <div class="col-md-8"><p>تعداد {{ $users->total() }} کاربر با شرایط فوق پیدا شد.</p></div>
+        <div class="col-md-8 text-center">
+            <p>تعداد {{ $users->total() }} کاربر با شرایط فوق پیدا شد.</p></div>
     </div>
     @include('dashboard.report.listUser', ['clickable' => true])
     {{ $users->appends(request()->input())->links() }}
