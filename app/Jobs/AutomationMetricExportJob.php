@@ -2,11 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Exports\AllUserExport;
+use App\Exports\MetricsExport;
 use App\Helpers\Helpers;
-use App\Http\Controllers\Dashboard\ReportController;
+use App\Http\Controllers\Dashboard\AutomationController;
 use App\PanelFile;
-use App\UserReport;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -41,19 +40,17 @@ class AutomationMetricExportJob implements ShouldQueue
         $filename = "export/automationMetric - {$today}" . '.xlsx';
         try {
             \DB::beginTransaction();
-            $usersQuery = UserReport::query();
-            $reportController = app()->make(ReportController::class);
-            $usersQuery = $reportController->applyFilterUserQuery($usersQuery, $this->filter);
-            $users = $usersQuery->get();
+            $automationController = app()->make(AutomationController::class);
+            $metrics = $automationController->getMetricsItems($this->filter);
             if (!\Storage::disk('local')->exists('export')) {
                 \Storage::disk('local')->makeDirectory('export');
             }
-            Excel::store((new AllUserExport($users)), $filename, 'local');
+            Excel::store((new MetricsExport($metrics)), $filename, 'local');
             PanelFile::query()
                 ->create([
                     'user_id' => auth()->id(),
                     'path' => $filename,
-                    'description' => 'گزارش وضعیت کاربران - ' . str_replace('_', '/', $today),
+                    'description' => 'گزارش وضعیت اتوماسیون - ' . str_replace('_', '/', $today),
                     'date_time' => now()->toDateTimeString(),
                 ]);
             \DB::commit();

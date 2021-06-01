@@ -169,6 +169,8 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
 
         Route::prefix('automation')->name('automation.')->middleware('permission:view_automation')->group(function () {
             Route::get('metrics', 'Dashboard\AutomationController@metrics')->name('metrics');
+            Route::get('exportMetrics', 'Dashboard\AutomationController@exportMetrics')
+                ->name('export_metrics')->middleware(['permission:export_automation_metrics']);
             Route::get('types', 'Dashboard\AutomationController@typeList')->name('types');
             Route::get('typeItem/{id}', 'Dashboard\AutomationController@typeItem')->name('typeItem');
             Route::get('callLogs/{id}', 'Dashboard\AutomationController@callLogs')->name('callLogs');

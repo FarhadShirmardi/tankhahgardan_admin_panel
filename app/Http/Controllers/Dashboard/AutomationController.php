@@ -7,6 +7,7 @@ use App\AutomationMetric;
 use App\Constants\LogType;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
+use App\Jobs\AutomationMetricExportJob;
 use App\PanelUser;
 use App\User;
 use Illuminate\Http\Request;
@@ -176,29 +177,33 @@ class AutomationController extends Controller
         return $result;
     }
 
-    public function metrics(Request $request)
+    private function getMetricsFilter($request)
     {
         $reportController = app()->make(ReportController::class);
         [$startDate, $endDate] = $reportController->normalizeDate($request, true);
         if (!$startDate) {
             $startDate = AutomationMetric::query()->min('date');
         }
-//        dd($request->input('selected_dates', []));
         $filter = [
             'start_date' => $startDate,
             'end_date' => $endDate,
             'selected_dates' => $this->convertSelectedDates($request->input('selected_dates', [])),
         ];
+        return $filter;
+    }
+
+    public function getMetricsItems($filter)
+    {
         $selectedDates = $filter['selected_dates'];
         $metrics = AutomationMetric::query()
-            ->where(function ($query) use ($startDate) {
-                if ($startDate) {
-                    $query->where('date', '>=', $startDate);
+            ->where(function ($query) use ($filter) {
+                if ($filter['start_date']) {
+                    $query->where('date', '>=', $filter['start_date']);
                 }
             })
-            ->where(function ($query) use ($endDate) {
-                if ($endDate) {
-                    $query->where('date', '<=', $endDate);
+            ->where(function ($query) use ($filter) {
+                if ($filter['end_date']) {
+                    $query->where('date', '<=', $filter['end_date']);
                 }
             })
             ->where(function ($query) use ($selectedDates) {
@@ -213,6 +218,23 @@ class AutomationController extends Controller
             $item['date'] = Helpers::gregorianDateStringToJalali($item['date']);
             return $item;
         });
+        return $metrics;
+    }
+
+    public function exportMetrics(Request $request)
+    {
+        $filter = $this->getMetricsFilter($request);
+
+        $this->dispatch((new AutomationMetricExportJob($filter))->onQueue('activationSms'));
+
+        return redirect()->route('dashboard.downloadCenter');
+    }
+
+    public function metrics(Request $request)
+    {
+        $filter = $this->getMetricsFilter($request);
+
+        $metrics = $this->getMetricsItems($filter);
         $metrics = Helpers::paginateCollection($metrics, 100);
 
         $metricKeys = [];
