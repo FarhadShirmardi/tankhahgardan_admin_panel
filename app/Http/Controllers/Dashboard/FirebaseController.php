@@ -2,22 +2,24 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Announcement;
-use App\User;
-use App\Helpers\Helpers;
 use App\AnnouncementUser;
-use GuzzleHttp\Client;
-use Illuminate\Http\UploadedFile;
-use Validator;
-use App\Jobs\AnnouncementJob;
-use Carbon\Carbon;
-use Exception;
-use Storage;
 use App\Constants\AnnouncementStatus;
 use App\Constants\AnnouncementType;
+use App\Constants\LogType;
+use App\Helpers\Helpers;
+use App\Http\Controllers\Controller;
+use App\Jobs\AnnouncementJob;
+use App\PanelUser;
+use App\User;
+use Carbon\Carbon;
 use DB;
+use Exception;
+use GuzzleHttp\Client;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Storage;
+use Validator;
 
 class FirebaseController extends Controller
 {
@@ -114,15 +116,15 @@ class FirebaseController extends Controller
             if (count($userIds) == 1) {
                 $user = User::query()->findOrFail($userIds[0]);
                 $users->push([
-                    'username' => Helpers::getEnglishString($user->username),
-                    'state' => $userStates->count() ? $userStates->where('user_id', $user->id)->first()->read : 0
+                    'username' => Helpers::getEnglishString($user->full_name),
+                    'state' => $userStates->count() ? $userStates->where('user_id', $user->id)->first()->read : 0,
                 ]);
             } else {
                 foreach ($userIds as $userId) {
                     $userTemp = User::query()->findOrFail($userId);
                     $users->push([
-                        'username' => Helpers::getEnglishString($userTemp->username),
-                        'state' => $userStates->count() ? $userStates->where('user_id', $userId)->first()->read : 0
+                        'username' => Helpers::getEnglishString($userTemp->full_name),
+                        'state' => $userStates->count() ? $userStates->where('user_id', $userId)->first()->read : 0,
                     ]);
                 }
             }
@@ -162,19 +164,23 @@ class FirebaseController extends Controller
             }
         }
         $sendAt = Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->send_at));
-        $expireAt = $request->expire_at ? Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->expire_at)) : null;
+        $expireAt =
+            $request->expire_at ? Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->expire_at)) :
+                null;
         $request->merge([
             'send_at' => $sendAt,
             'expire_at' => $expireAt,
             'panel_user_id' => auth()->id(),
             'user_type' => $userIds ? 2 : 1,
-            'external_link' => $request->link_type == 1 ? null : $request->external_link
+            'external_link' => $request->link_type == 1 ? null : $request->external_link,
         ]);
+
+        $oldAnnouncement = Announcement::find($id);
 
         try {
             /** @var Announcement $announcement */
             $announcement = Announcement::query()->updateOrCreate([
-                'id' => $id
+                'id' => $id,
             ], $request->all());
 
             if ($userIds and !$id) {
@@ -189,8 +195,6 @@ class FirebaseController extends Controller
                 AnnouncementUser::query()
                     ->insert($announcementUser->toArray());
             }
-
-            $id = $announcement->id;
 
             $announcement->update([
                 'icon_path' => null,
@@ -222,12 +226,12 @@ class FirebaseController extends Controller
             if (!$isNull) {
                 $http = new Client;
                 $response = $http->post(
-                    env('TANKHAH_URL') . '/panel/' . env('TANKHAH_TOKEN') . '/announcement/' . $id . '/image',
+                    env('TANKHAH_URL') . '/panel/' . env('TANKHAH_TOKEN') . '/announcement/' . $announcement->id . '/image',
                     [
                         'headers' => [
                             'Accept' => 'application/json',
                         ],
-                        'multipart' => $imageRequest
+                        'multipart' => $imageRequest,
                     ]
                 );
                 $response = json_decode($response->getBody());
@@ -255,14 +259,38 @@ class FirebaseController extends Controller
             dd($exception);
         }
 
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $type = $id ? LogType::EDIT_ANNOUNCEMENT : LogType::NEW_ANNOUNCEMENT;
+        $panelUser->logs()->create([
+            'user_id' => ($userIds and sizeof($userIds) == 1) ? $userIds[0] : null,
+            'type' => $type,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription($type, $panelUser),
+            'old_json' => $oldAnnouncement,
+            'new_json' => $announcement,
+        ]);
+
         return redirect()->route('dashboard.announcements')->with('success', 'با موفقیت انجام شد');
     }
 
     public function deleteAnnouncement($id)
     {
+        $oldAnnouncement = Announcement::query()->findOrFail($id);
         $announcement = Announcement::query()->findOrFail($id);
         $announcement->update([
-            'expire_at' => now()->toDateTimeString()
+            'expire_at' => now()->toDateTimeString(),
+        ]);
+
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $panelUser->logs()->create([
+            'user_id' => null,
+            'type' => LogType::DELETE_ANNOUNCEMENT,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription(LogType::DELETE_ANNOUNCEMENT, $panelUser),
+            'old_json' => $oldAnnouncement,
+            'new_json' => $announcement,
         ]);
 
         return redirect()->route('dashboard.announcements')->with('success', 'با موفقیت انجام شد');

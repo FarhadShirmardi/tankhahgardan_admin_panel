@@ -20,4 +20,6 @@
     <link href="{{ asset('/dashboard/css/style.css') }}" rel="stylesheet">
     <script src="{{ asset("js/jquery.min.js") }}"></script>
     <script src="{{ asset('js/dropzone.min.js') }}"></script>
+
+    @yield('extra_css')
 </head>

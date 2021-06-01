@@ -1,73 +1,52 @@
 <div class="sidebar">
     <nav class="sidebar-nav">
         <ul class="nav">
-            @if(auth()->user()->hasRole('Admin'))
-                <li class="nav-item nav-dropdown">
-                    <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-basket"></i>فعال سازی کاربران</a>
-                    <ul class="nav-dropdown-items">
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               href="{{ route('dashboard.users.activation', ['step' => \App\Constants\UserActivationConstant::STATE_FIRST_STEP_INACTIVE]) }}">
-                                <i class="icon-pie-chart"></i>
-                                غیر فعال 24 ساعت گذشته
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               href="{{ route('dashboard.users.activation', ['step' => \App\Constants\UserActivationConstant::STATE_SECOND_STEP_INACTIVE]) }}">
-                                <i class="icon-pie-chart"></i>
-                                غیر فعال یک هفته گذشته
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               href="{{ route('dashboard.users.activation', ['step' => \App\Constants\UserActivationConstant::STATE_THIRD_STEP_INACTIVE]) }}">
-                                <i class="icon-pie-chart"></i>
-                                غیر فعال یک ماه گذشته
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            @endif
-            @if(auth()->user()->can('time_separation') or auth()->user()->can('day_separation') or auth()->user()->can('range_separation'))
+            @if(auth()->user()->can('view_registration'))
                 <li class="nav-item nav-dropdown">
                     <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-pie-chart"></i>گزارش ثبت نام</a>
                     <ul class="nav-dropdown-items">
-                        @can('time_separation')
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('dashboard.report.timeSeparation') }}">
-                                    <i class="icon-chart"></i>
-                                    تفکیک ساعت
-                                </a>
-                            </li>
-                        @endcan
-                        @can('day_separation')
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('dashboard.report.daySeparation') }}">
-                                    <i class="icon-chart"></i>
-                                    تفکیک روز هفته
-                                </a>
-                            </li>
-                        @endcan
-                        @can('range_separation')
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                   href="{{ route('dashboard.report.rangeSeparation') }}">
-                                    <i class="icon-chart"></i>
-                                    تفکیک روز
-                                </a>
-                            </li>
-                        @endcan
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard.report.timeSeparation') }}">
+                                <i class="icon-chart"></i>
+                                تفکیک ساعت
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard.report.daySeparation') }}">
+                                <i class="icon-chart"></i>
+                                تفکیک روز هفته
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               href="{{ route('dashboard.report.rangeSeparation') }}">
+                                <i class="icon-chart"></i>
+                                تفکیک روز
+                            </a>
+                        </li>
                     </ul>
                 </li>
             @endif
-            @if(auth()->user()->can('all_user_activity') or auth()->user()->can('all_user_activity_full'))
+            @if(auth()->user()->can('view_users_report'))
                 <li class="nav-item nav-dropdown">
-                    <a class="nav-link" href="{{ route('dashboard.report.allUsersActivity') }}"><i
-                            class="icon-pie-chart"></i>گزارش وضعیت کاربران</a>
+                    <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-chart"></i>وضعیت کاربران</a>
+                    <ul class="nav-dropdown-items">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard.report.allUsersActivity') }}"><i
+                                    class="icon-list"></i>گزارش وضعیت کاربران</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard.report.userActivityCountChart') }}"><i
+                                    class="icon-chart"></i>نمودار وضعیت کاربران</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard.report.userActivityRangeChart') }}"><i
+                                    class="icon-chart"></i>نمودار وضعیت تراکنش در بازه</a>
+                        </li>
+                    </ul>
                 </li>
             @endif
-            @if(auth()->user()->can('all_project_activity'))
+            @if(auth()->user()->can('view_projects_report'))
                 <li class="nav-item nav-dropdown">
                     <a class="nav-link" href="{{ route('dashboard.report.allProjectsActivity') }}"><i
                             class="icon-pie-chart"></i>گزارش وضعیت پروژه</a>
@@ -78,19 +57,25 @@
                     <a class="nav-link" href="{{ route('dashboard.feedbacks') }}"><i class="icon-user"></i>بازخوردها</a>
                 </li>
             @endif
-            @if(auth()->user()->can('view_notifications'))
+            @if(auth()->user()->can('view_notification') or auth()->user()->can('view_banner'))
                 <li class="nav-item nav-dropdown">
-                    <a class="nav-link" href="{{ route('dashboard.notifications') }}"><i class="icon-bell"></i>تبلیغ‌ها</a>
-                </li>
-                <li class="nav-item nav-dropdown">
-                    <a class="nav-link" href="{{ route('dashboard.announcements') }}"><i class="icon-bell"></i>اعلان‌ها</a>
-                </li>
-                <li class="nav-item nav-dropdown">
-                    <a class="nav-link" href="{{ route('dashboard.banners') }}"><i
-                            class="icon-picture"></i>بنرها</a>
+                    <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-menu"></i>اعلان و بنر</a>
+                    <ul class="nav-dropdown-items">
+                        @if(auth()->user()->can('view_notification'))
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('dashboard.announcements') }}"><i class="icon-bell"></i>اعلان‌ها</a>
+                            </li>
+                        @endif
+                        @if(auth()->user()->can('view_banner'))
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('dashboard.banners') }}"><i
+                                        class="icon-picture"></i>بنرها</a>
+                            </li>
+                        @endif
+                    </ul>
                 </li>
             @endif
-            @if(auth()->user()->hasRole('Admin'))
+            @if(auth()->user()->can('edit_user_panels'))
                 <li class="nav-item nav-dropdown">
                     <a class="nav-link" href="{{ route('dashboard.admin.user_list') }}"><i class="icon-people"></i>کاربران
                         پنل</a>
@@ -101,7 +86,7 @@
                     <a class="nav-link" href="{{ route('dashboard.transactions') }}"><i class="icon-calculator"></i>تراکنش‌ها</a>
                 </li>
             @endif
-            @if(auth()->user()->can('view_promo_codes'))
+            @if(auth()->user()->can('view_promo_code'))
                 <li class="nav-item nav-dropdown">
                     <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-notebook"></i>کد تخفیف و کمپین</a>
                     <ul class="nav-dropdown-items">
@@ -120,6 +105,41 @@
                     </ul>
                 </li>
             @endif
+            @if(auth()->user()->can('view_automation'))
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-refresh"></i>اتوماسیون</a>
+                    <ul class="nav-dropdown-items">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard.automation.metrics') }}">
+                                <i class="icon-list"></i>
+                                متریک‌ها
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard.automation.types') }}">
+                                <i class="icon-list"></i>
+                                گزارش وضعیت
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                @endif
+                @if(auth()->user()->can('view_premium_report'))
+                    <li class="nav-item nav-dropdown">
+                        <a class="nav-link" href="{{ route('dashboard.report.premiumReport') }}"><i
+                                class="icon-wallet"></i> گزارش معیارهای سنجش پولی</a>
+                    </li>
+                @endif
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link" href="{{ route('dashboard.downloadCenter') }}"><i
+                            class="icon-cloud-download"></i>مرکز دانلود</a>
+                </li>
+                @if(auth()->user()->can('view_log_center'))
+                    <li class="nav-item nav-dropdown">
+                        <a class="nav-link" href="{{ route('dashboard.log_centers.index') }}"><i
+                                class="icon-notebook"></i>مرکز لاگ</a>
+                    </li>
+                @endif
         </ul>
     </nav>
 </div>

@@ -5,7 +5,6 @@
             <th>ردیف</th>
             <th onclick="sortTable('name')">نام و نام خانوادگی</th>
             <th onclick="sortTable('phone_number')">شماره تلفن</th>
-            <th>دسترسی</th>
         </tr>
         </thead>
         <tbody>
@@ -15,7 +14,6 @@
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $user->name }}</td>
                 <td>{{ $user->phone_number }}</td>
-                <td>{{ implode(',', $user->roles->pluck('name')->toArray()) }}</td>
             </tr>
         @endforeach
         </tbody>

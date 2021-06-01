@@ -2,30 +2,26 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Image;
-use App\ProjectStatus;
-use App\ProjectReport;
-use App\Constants\ProjectStatusType;
-use App\ProjectUser;
-use App\Constants\ProjectUserState;
-use App\User;
-use App\Project;
-use App\Constants\PremiumPrices;
-use App\Constants\PremiumDuration;
 use App\Campaign;
 use App\Constants\PremiumConstants;
+use App\Constants\PremiumDuration;
+use App\Constants\PremiumPrices;
+use App\Constants\ProjectUserState;
 use App\Constants\PurchaseType;
-use Carbon\Carbon;
+use App\Constants\UserStatusType;
+use App\Exports\ReleaseSmsExport;
 use App\Helpers\Helpers;
+use App\ProjectReport;
+use App\ProjectStatus;
+use App\ProjectUser;
+use App\User;
+use App\UserReport;
+use DB;
+use Exception;
+use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 use Kavenegar;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\AllUserExport;
-use App\Exports\ReleaseSmsExport;
-use App\UserReport;
-use Illuminate\Support\Collection;
-use Exception;
-use DB;
 
 class PremiumInitialize extends Command
 {
@@ -251,8 +247,8 @@ https://bitn.ir/IIS6x
             'volume_size' => 1000,
             'user_count' => $userCount,
             'type' => PurchaseType::NEW,
-            'status' => ProjectStatusType::SUCCEED,
-            'price_id' => $price['id']
+            'status' => UserStatusType::SUCCEED,
+            'price_id' => $price['id'],
         ]);
     }
 

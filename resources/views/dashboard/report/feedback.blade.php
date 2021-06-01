@@ -147,10 +147,12 @@
                 <div class="col-md-2">
                     <a class="form-control btn btn-outline-primary" href="?">ریست کردن فیلتر</a>
                 </div>
-                <div class="col-md-2">
-                    <a class="form-control btn btn-outline-success" href="{{ route('dashboard.commentView') }}">افزودن
-                        بازخورد</a>
-                </div>
+                @if(auth()->user()->can('new_feedback'))
+                    <div class="col-md-2">
+                        <a class="form-control btn btn-outline-success" href="{{ route('dashboard.commentView') }}">افزودن
+                            بازخورد</a>
+                    </div>
+                @endif
             </div>
         </div>
     </form>

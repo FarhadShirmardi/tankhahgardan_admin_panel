@@ -15,6 +15,12 @@ class UserStatus extends Model
         'end_date',
         'volume_size',
         'user_count',
-        'price_id'
+        'price_id',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
 }

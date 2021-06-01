@@ -13,6 +13,7 @@
             <th onclick="sortTable('user_count')">تعداد کاربر</th>
             <th onclick="sortTable('volume_size')">مقدار حجم</th>
             <th onclick="sortTable('type')">نوع تراکنش</th>
+            <th onclick="sortTable('price_id')">طرح</th>
             <th onclick="sortTable('payable_amount')">مبلغ قابل پرداخت</th>
             <th onclick="sortTable('total_amount')">مبلغ کل</th>
             <th onclick="sortTable('discount_amount')">مقدار تخفیف</th>
@@ -42,6 +43,7 @@
                 <td>{{ $transaction->user_count }}</td>
                 <td>{{ $transaction->volume_size }}</td>
                 <td>{{ $transaction->type }}</td>
+                <td>{{ \App\Constants\PremiumPrices::getPrice($transaction->plan_id)['title'] }}</td>
                 <td>{{ \App\Helpers\Helpers::formatNumber($transaction->payable_amount) }}</td>
                 <td>{{ \App\Helpers\Helpers::formatNumber($transaction->total_amount) }}</td>
                 <td>{{ \App\Helpers\Helpers::formatNumber($transaction->discount_amount) }}</td>

@@ -179,7 +179,7 @@
     <hr>
 
     @if(count($users))
-        @include('dashboard.report.listUser')
+        @include('dashboard.report.listUser', ['clickable' => true])
     @endif
 
     @if(count($feedbacks))

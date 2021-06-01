@@ -3,13 +3,8 @@
 namespace App;
 
 use App\Helpers\Helpers;
-use App\Payment as Payments;
-use Eloquent;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
 class Payment extends Model
 {
@@ -64,5 +59,11 @@ class Payment extends Model
     public function sentPayment()
     {
         return $this->hasOne(SentPayment::class, 'source_id', 'id');
+    }
+
+    public function projectOwnerUser()
+    {
+        return $this->belongsTo(ProjectUser::class, 'project_id', 'project_id')
+            ->where('is_owner', true);
     }
 }

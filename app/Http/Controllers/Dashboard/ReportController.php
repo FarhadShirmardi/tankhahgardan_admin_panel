@@ -4,58 +4,58 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Advertisement;
 use App\City;
+use App\Comment;
+use App\Constants\FeedbackSource;
+use App\Constants\FeedbackStatus;
+use App\Constants\LogType;
+use App\Constants\Platform;
+use App\Constants\PremiumConstants;
+use App\Constants\ProjectUserState;
+use App\Constants\UserPremiumState;
 use App\Device;
 use App\Feedback;
 use App\FeedbackResponse;
+use App\FeedbackTitle;
+use App\File;
 use App\Helpers\Helpers;
+use App\Http\Controllers\Controller;
 use App\Image;
+use App\Imports\ConvertToUser;
 use App\Imprest;
+use App\Jobs\FeedbackResponseSms;
+use App\Jobs\ProjectReportExportJob;
+use App\Jobs\UserReportExportJob;
 use App\Note;
 use App\PanelUser;
 use App\Payment;
 use App\Project;
+use App\ProjectReport;
+use App\ProjectUser;
 use App\Receive;
 use App\State;
+use App\StepByStep;
 use App\User;
+use App\UserReport;
+use App\UserStatus;
 use Carbon\Carbon;
 use DB;
+use Exception;
 use Faker\Provider\Uuid;
+use GuzzleHttp\Client;
 use Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Notification;
-use Validator;
-use App\File;
-use App\ProjectUser;
-use App\StepByStep;
-use App\Constants\ProjectUserState;
-use App\Constants\FeedbackSource;
-use App\Comment;
-use App\Constants\FeedbackStatus;
-use App\FeedbackTitle;
-use App\UserReport;
-use App\ProjectReport;
-use App\Jobs\UserReportExportJob;
 use Kavenegar;
-use App\Jobs\FeedbackResponseSms;
-use App\Constants\Platform;
-use Storage;
-use Exception;
-use URL;
-use App\UserStatus;
-use App\Constants\UserPremiumState;
-use GuzzleHttp\Client;
-use App\Constants\PremiumConstants;
-use App\Jobs\ProjectReportExportJob;
-use App\Imports\ConvertToUser;
 use Maatwebsite\Excel\Facades\Excel;
+use Notification;
+use Storage;
+use Validator;
 
 class ReportController extends Controller
 {
     public function timeSeparation(Request $request)
     {
-        list($startDate, $endDate) = $this->normalizeDate($request);
+        [$startDate, $endDate] = $this->normalizeDate($request);
 
         $usersTime =
             User::query()->whereDate('created_at', '>=', $startDate)
@@ -85,7 +85,7 @@ class ReportController extends Controller
         if ($endDate) {
             $endDate = Helpers::jalaliDateStringToGregorian(Helpers::getEnglishString($endDate));
         } elseif (!$setNull) {
-            $endDate = now()->toDateString();
+            $endDate = now()->addDay()->toDateString();
         }
         $startDate = $startDate ? str_replace('/', '-', $startDate) : null;
         $endDate = $endDate ? str_replace('/', '-', $endDate) : null;
@@ -94,7 +94,7 @@ class ReportController extends Controller
 
     public function daySeparation(Request $request)
     {
-        list($startDate, $endDate) = $this->normalizeDate($request);
+        [$startDate, $endDate] = $this->normalizeDate($request);
 
         $days = [
             'دوشنبه',
@@ -121,13 +121,13 @@ class ReportController extends Controller
             'days' => $days,
             'sum' => $sum,
             'start_date' => $startDate,
-            'end_date' => $endDate
+            'end_date' => $endDate,
         ]);
     }
 
     public function rangeSeparation(Request $request)
     {
-        list($startDate, $endDate) = $this->normalizeDate($request);
+        [$startDate, $endDate] = $this->normalizeDate($request);
 
         $userDays = User::query()
             ->whereDate('created_at', '>=', $startDate)
@@ -144,7 +144,7 @@ class ReportController extends Controller
         return view('dashboard.report.rangeSeparation', [
             'days' => $days,
             'start_date' => $startDate,
-            'end_date' => $endDate
+            'end_date' => $endDate,
         ]);
     }
 
@@ -158,44 +158,63 @@ class ReportController extends Controller
 
         $usersQuery = $this->applyFilterUserQuery($usersQuery, $filter);
 
-        $rangeUserQuery = clone $usersQuery;
+//        $rangeUserQuery = clone $usersQuery;
 
-        $userIds = $usersQuery->pluck('id')->toArray();
 
         $users = $usersQuery->paginate(100);
-
-        $counts = $this->getUserTypeCounts();
-
-        $rangeCounts = $this->getRangeCounts($rangeUserQuery);
 
         $userStates = collect();
         foreach (UserPremiumState::toArray() as $item) {
             $userStates->push([
                 'id' => $item,
                 'name' => UserPremiumState::getEnum($item),
-                'is_selected' => in_array($item, $filter['user_states'])
+                'is_selected' => in_array($item, $filter['user_states']),
             ]);
         }
 
-        list($sortableFields, $sortableTypes) = $this->getUserSortFields();
+        [$sortableFields, $sortableTypes] = $this->getUserSortFields();
 
         return view('dashboard.report.allUserActivity', [
                 'users' => $users,
-                'counts' => $counts,
                 'colors' => $this->colors(),
                 'filter' => $filter,
                 'sortable_fields' => $sortableFields,
                 'sortable_types' => $sortableTypes,
-                'range_counts' => $rangeCounts,
-                'userIds' => implode(',', $userIds),
-                'user_states' => $userStates
+                'user_states' => $userStates,
             ]
         );
     }
 
+    public function allUsersCountChart()
+    {
+        $counts = $this->getUserTypeCounts();
+        return view('dashboard.report.userActivityCountChart', [
+            'counts' => $counts,
+            'colors' => $this->colors(),
+        ]);
+    }
+
+    public function allUsersRangeChart()
+    {
+        $usersQuery = UserReport::query();
+        $rangeCounts = $this->getRangeCounts($usersQuery);
+        return view('dashboard.report.userActivityRangeChart', [
+            'range_counts' => $rangeCounts,
+        ]);
+    }
+
+    public function extractUserIdsWithFilter(Request $request)
+    {
+        $filter = $this->getAllUserActivityFilter($request);
+        $usersQuery = UserReport::query();
+        $usersQuery = $this->applyFilterUserQuery($usersQuery, $filter);
+        $userIds = $usersQuery->pluck('id')->toArray();
+        return redirect()->route($request->route, ['id' => 0, 'userIds' => implode(',', $userIds)]);
+    }
+
     private function getAllUserActivityFilter(Request $request)
     {
-        list($startDate, $endDate) = $this->normalizeDate($request, true);
+        [$startDate, $endDate] = $this->normalizeDate($request, true);
         if (!$startDate) {
             $startDate = UserReport::query()->selectRaw('min(Date(registered_at)) as date')->first()->date;
         }
@@ -209,7 +228,7 @@ class ReportController extends Controller
             'start_date' => $startDate,
             'end_date' => $endDate,
             'user_ids' => $request->input('user_ids', []),
-            'user_states' => $request->input('user_states', [])
+            'user_states' => $request->input('user_states', []),
         ];
     }
 
@@ -230,10 +249,10 @@ class ReportController extends Controller
             $usersQuery = $usersQuery->where('name', 'like', $name);
         }
         if ($filter['start_date']) {
-            $usersQuery = $usersQuery->where('registered_at', '>=', $filter['start_date']);
+            $usersQuery = $usersQuery->whereDate('registered_at', '>=', $filter['start_date']);
         }
         if ($filter['end_date']) {
-            $usersQuery = $usersQuery->where('registered_at', '<=', $filter['end_date']);
+            $usersQuery = $usersQuery->whereDate('registered_at', '<=', $filter['end_date']);
         }
         if (isset($filter['user_ids']) and $filter['user_ids'] != []) {
             $usersQuery = $usersQuery->whereIn('id', $filter['user_ids']);
@@ -335,38 +354,46 @@ class ReportController extends Controller
         $filter = $this->getAllUserActivityFilter($request);
 
 //        $users = $usersQuery->get();
-        $link = URL::temporarySignedRoute('dashboard.report.export.download', now()->addHour(), ['filename' => 'users.xlsx']);
-        $this->dispatch((new UserReportExportJob($filter, $link))->onQueue('activationSms'));
+        $this->dispatch((new UserReportExportJob($filter))->onQueue('activationSms'));
 
-        return redirect()->back()->with('success', 'فایل در حال ساخته شدن میباشد.')->with('link', $link);
+        return redirect()->route('dashboard.downloadCenter');
     }
 
     public function exportAllProjectsActivity(Request $request)
     {
         $filter = $this->getAllProjectActivityFilter($request);
 
-//        $users = $usersQuery->get();
-        $link = URL::temporarySignedRoute('dashboard.report.export.download', now()->addHour(), ['filename' => 'projects.xlsx']);
-        $this->dispatch((new ProjectReportExportJob($filter, $link))->onQueue('activationSms'));
+        $this->dispatch((new ProjectReportExportJob($filter))->onQueue('activationSms'));
 
-        return redirect()->back()->with('success', 'فایل در حال ساخته شدن میباشد.')->with('link', $link);
+        return redirect()->route('dashboard.downloadCenter');
     }
 
     public function getProjectQuery()
     {
-        $paymentCountQuery = Payment::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
-        $receiveCountQuery = Receive::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
-        $noteCountQuery = Note::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
-        $imprestCountQuery = Imprest::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
+        $paymentCountQuery =
+            Payment::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
+        $receiveCountQuery =
+            Receive::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
+        $noteCountQuery =
+            Note::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
+        $imprestCountQuery =
+            Imprest::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
 
-        $paymentMaxQuery = Payment::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('MAX(created_at)')->toSql();
-        $receiveMaxQuery = Receive::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('MAX(created_at)')->toSql();
-        $noteMaxQuery = Note::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('MAX(created_at)')->toSql();
-        $imprestMaxQuery = Imprest::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('MAX(created_at)')->toSql();
+        $paymentMaxQuery =
+            Payment::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('MAX(created_at)')->toSql();
+        $receiveMaxQuery =
+            Receive::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('MAX(created_at)')->toSql();
+        $noteMaxQuery =
+            Note::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('MAX(created_at)')->toSql();
+        $imprestMaxQuery =
+            Imprest::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('MAX(created_at)')->toSql();
 
-        $userCount = ProjectUser::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
-        $activeUserCount = ProjectUser::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('state', ProjectUserState::ACTIVE)->selectRaw('count(*)')->getQuery();
-        $notActiveUserCount = ProjectUser::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('state', '<>', ProjectUserState::ACTIVE)->selectRaw('count(*)')->getQuery();
+        $userCount =
+            ProjectUser::withoutTrashed()->whereColumn('project_id', 'projects.id')->selectRaw('count(*)')->getQuery();
+        $activeUserCount =
+            ProjectUser::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('state', ProjectUserState::ACTIVE)->selectRaw('count(*)')->getQuery();
+        $notActiveUserCount =
+            ProjectUser::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('state', '<>', ProjectUserState::ACTIVE)->selectRaw('count(*)')->getQuery();
 
         $maxTimeQuery = Project::query()
             ->selectRaw(
@@ -421,31 +448,48 @@ class ReportController extends Controller
         ];
     }
 
-    public function getUserQuery()
+    public function getUserQuery($userId = null)
     {
-        $paymentCountQuery = Payment::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
-        $receiveCountQuery = Receive::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
-        $noteCountQuery = Note::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
-        $imprestCountQuery = Imprest::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $paymentCountQuery =
+            Payment::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $receiveCountQuery =
+            Receive::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $noteCountQuery =
+            Note::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $imprestCountQuery =
+            Imprest::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
         $fileCountQuery = File::query()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
         $imageCountQuery = Image::query()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
         $deviceCountQuery = Device::query()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
         $feedbackCountQuery = Feedback::query()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
 
-        $paymentMaxQuery = Payment::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('MAX(created_at)')->toSql();
-        $receiveMaxQuery = Receive::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('MAX(created_at)')->toSql();
-        $noteMaxQuery = Note::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('MAX(created_at)')->toSql();
-        $imprestMaxQuery = Imprest::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('MAX(created_at)')->toSql();
+        $paymentMaxQuery =
+            Payment::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('MAX(created_at)')->toSql();
+        $receiveMaxQuery =
+            Receive::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('MAX(created_at)')->toSql();
+        $noteMaxQuery =
+            Note::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('MAX(created_at)')->toSql();
+        $imprestMaxQuery =
+            Imprest::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('MAX(created_at)')->toSql();
 
-        $imageSizeQuery = Image::whereColumn('user_id', 'users.id')->selectRaw('IFNULL(sum(size), 0) / 1024 / 1024')->getQuery();
+        $imageSizeQuery =
+            Image::whereColumn('user_id', 'users.id')->selectRaw('IFNULL(sum(size), 0) / 1024 / 1024')->getQuery();
 
-        $projectCount = ProjectUser::withoutTrashed()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
-        $ownProjectCount = ProjectUser::withoutTrashed()->whereColumn('user_id', 'users.id')->where('is_owner', true)->selectRaw('count(*)')->getQuery();
-        $notOwnProjectCount = ProjectUser::withoutTrashed()->whereColumn('user_id', 'users.id')->where('is_owner', false)->selectRaw('count(*)')->getQuery();
+        $projectCount =
+            ProjectUser::withoutTrashed()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $ownProjectCount =
+            ProjectUser::withoutTrashed()->whereColumn('user_id', 'users.id')->where('is_owner', true)->selectRaw('count(*)')->getQuery();
+        $notOwnProjectCount =
+            ProjectUser::withoutTrashed()->whereColumn('user_id', 'users.id')->where('is_owner', false)->selectRaw('count(*)')->getQuery();
 
         $stepByStep = StepByStep::query()->whereColumn('user_id', 'users.id')->selectRaw('IFNULL(step, 0)')->getQuery();
 
         $maxTimeQuery = User::query()
+            ->where(function ($query) use ($userId) {
+                if ($userId) {
+                    $query->where('id', $userId);
+                }
+            })
             ->selectRaw(
                 "NULLIF(
                     GREATEST(
@@ -486,6 +530,11 @@ class ReportController extends Controller
 
 
         return User::query()
+            ->where(function ($query) use ($userId) {
+                if ($userId) {
+                    $query->where('id', $userId);
+                }
+            })
             ->joinSub($maxTimeQuery, 'MaxTime', 'MaxTime.user_id', '=', 'users.id')
             ->selectRaw("CONCAT_WS(' ', IFNULL(users.name, ''), IFNULL(users.family, '')) as name")
             ->addSelect('users.id as id')
@@ -509,19 +558,23 @@ class ReportController extends Controller
             ->selectRaw($userTypeQuery);
     }
 
-    public function userActivity($id)
+    public function userActivity($id, PremiumController $premiumController)
     {
         /** @var User $user */
         $user = User::with('projects')->findOrFail($id);
 
-        $paymentCountQuery = Payment::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
-            ->selectRaw('count(*)')->getQuery();
-        $receiveCountQuery = Receive::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
-            ->selectRaw('count(*)')->getQuery();
-        $noteCountQuery = Note::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
-            ->selectRaw('count(*)')->getQuery();
-        $imprestCountQuery = Imprest::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
-            ->selectRaw('count(*)')->getQuery();
+        $paymentCountQuery =
+            Payment::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
+                ->selectRaw('count(*)')->getQuery();
+        $receiveCountQuery =
+            Receive::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
+                ->selectRaw('count(*)')->getQuery();
+        $noteCountQuery =
+            Note::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
+                ->selectRaw('count(*)')->getQuery();
+        $imprestCountQuery =
+            Imprest::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('creator_user_id', $id)
+                ->selectRaw('count(*)')->getQuery();
         $imageCountQuery = Image::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('user_id', $id)
             ->selectRaw('count(*)')->getQuery();
         $imageSizeQuery = Image::withoutTrashed()->whereColumn('project_id', 'projects.id')->where('user_id', $id)
@@ -549,10 +602,14 @@ class ReportController extends Controller
 
         $rangeCounts = $this->getRangeCounts(User::query()->where('id', $id));
 
-        $paymentSubQuery = Payment::withoutTrashed()->where('creator_user_id', $id)->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
-        $receiveSubQuery = Receive::withoutTrashed()->where('creator_user_id', $id)->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
-        $noteSubQuery = Note::withoutTrashed()->where('creator_user_id', $id)->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
-        $imprestSubQuery = Imprest::withoutTrashed()->where('creator_user_id', $id)->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
+        $paymentSubQuery =
+            Payment::withoutTrashed()->where('creator_user_id', $id)->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
+        $receiveSubQuery =
+            Receive::withoutTrashed()->where('creator_user_id', $id)->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
+        $noteSubQuery =
+            Note::withoutTrashed()->where('creator_user_id', $id)->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
+        $imprestSubQuery =
+            Imprest::withoutTrashed()->where('creator_user_id', $id)->selectRaw('project_id, substr(created_at, 1, 10) as date')->getQuery();
 
         $dateCounts = DB::connection('mysql')->query()
             ->selectRaw('count(*) as c, date, project_id')
@@ -579,7 +636,7 @@ class ReportController extends Controller
             $counts->push([
                 'id' => $projectId,
                 'name' => $user->projects->find($projectId)->name,
-                'data' => $data->toJson()
+                'data' => $data->toJson(),
             ]);
         }
         $dateCounts = $counts;
@@ -589,13 +646,28 @@ class ReportController extends Controller
 
         $devices = $user->devices()->get();
 
+        $userItem = $this->getUserQuery($id)->get();
+        $userItem = Helpers::paginateCollection($userItem);
+
+        $userStates = $premiumController->getUserStates($user);
+        $invoices = $user->invoices()->get();
+
+        $automationState = $user->automationData()->first();
+        $automationController = app()->make(AutomationController::class);
+
         return view('dashboard.report.userActivity', [
             'user' => $user,
+            'userItem' => $userItem,
             'projects' => $projects,
             'range_counts' => $rangeCounts,
             'date_counts' => $dateCounts,
             'dates' => $dates,
-            'devices' => $devices
+            'devices' => $devices,
+            'user_statuses' => $userStates,
+            'invoices' => $invoices,
+            'automationState' => $automationState,
+            'type_mappings' => $automationController->typeMapping,
+            'colors' => $this->colors(),
         ]);
     }
 
@@ -610,9 +682,9 @@ class ReportController extends Controller
 
         $counts = $this->getProjectTypeCounts();
 
-        list($states, $cities) = $this->getLocations();
+        [$states, $cities] = $this->getLocations();
 
-        list($sortableFields, $sortableTypes) = $this->getProjectSortFields();
+        [$sortableFields, $sortableTypes] = $this->getProjectSortFields();
 
         return view('dashboard.report.allProjectActivity', [
             'projects' => $projects,
@@ -622,7 +694,7 @@ class ReportController extends Controller
             'filter' => $filter,
             'colors' => $this->colors(),
             'sortable_fields' => $sortableFields,
-            'sortable_types' => $sortableTypes
+            'sortable_types' => $sortableTypes,
         ]);
     }
 
@@ -634,7 +706,7 @@ class ReportController extends Controller
             'sort_type' => $request->input('sort_type', 'DESC'),
             'state_id' => $request->input('state_id', 0),
             'city_id' => $request->input('city_id', 0),
-            'name' => $request->input('name', '')
+            'name' => $request->input('name', ''),
         ];
     }
 
@@ -758,13 +830,13 @@ class ReportController extends Controller
 
         return view('dashboard.report.projectActivity', [
             'project' => $project,
-            'users' => $users
+            'users' => $users,
         ]);
     }
 
     public function viewFeedback(Request $request)
     {
-        list($startDate, $endDate) = $this->normalizeDate($request, true);
+        [$startDate, $endDate] = $this->normalizeDate($request, true);
         if (!$startDate) {
             $startDate = Feedback::query()->selectRaw('min(Date(created_at)) as date')->first()->date;
         }
@@ -782,7 +854,7 @@ class ReportController extends Controller
             'platforms' => $request->input('platforms', []),
             'states' => $request->input('states', []),
             'start_date' => $startDate,
-            'end_date' => $endDate
+            'end_date' => $endDate,
         ];
 
 
@@ -811,7 +883,7 @@ class ReportController extends Controller
                 'users.name',
                 'users.family',
                 'users.phone_number',
-                DB::raw("false as is_selected")
+                DB::raw("false as is_selected"),
             ])
             ->get();
 
@@ -833,7 +905,7 @@ class ReportController extends Controller
             $scores->push([
                 'id' => $item,
                 'name' => $item == 0 ? 'بدون امتیاز' : $item,
-                'is_selected' => in_array($item, $filter['scores'])
+                'is_selected' => in_array($item, $filter['scores']),
             ]);
         }
 
@@ -842,7 +914,7 @@ class ReportController extends Controller
             $platforms->push([
                 'id' => $item,
                 'name' => Platform::getEnum($item),
-                'is_selected' => in_array($item, $filter['platforms'])
+                'is_selected' => in_array($item, $filter['platforms']),
             ]);
         }
 
@@ -851,7 +923,7 @@ class ReportController extends Controller
             $states->push([
                 'id' => $item,
                 'name' => FeedbackStatus::getEnum($item),
-                'is_selected' => in_array($item, $filter['states'])
+                'is_selected' => in_array($item, $filter['states']),
             ]);
         }
 
@@ -929,7 +1001,7 @@ class ReportController extends Controller
                 DB::raw("'" . FeedbackSource::APPLICATION . "'" . ' as source'),
                 'devices.platform',
                 'devices.model',
-                'devices.os_version'
+                'devices.os_version',
             ])->getQuery();
 
         $commentSubQuery = Comment::query()
@@ -954,7 +1026,7 @@ class ReportController extends Controller
                 'comments.source',
                 DB::raw('0 as platform'),
                 DB::raw("'-' as model"),
-                DB::raw("'-' as os_version")
+                DB::raw("'-' as os_version"),
             ])->getQuery();
 
         $feedbacks = DB::connection('mysql')->query()
@@ -1078,7 +1150,7 @@ class ReportController extends Controller
             'filter' => $filter,
             'selected_user' => $selectedUser,
             'users' => $users,
-            'colors' => $this->colors()
+            'colors' => $this->colors(),
         ]);
     }
 
@@ -1095,17 +1167,29 @@ class ReportController extends Controller
             Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->response_date)) : null;
         if (!$id) {
             Comment::create($request->all());
+            $comment = null;
         } else {
             $comment = Comment::findOrFail($id);
             $comment->update($request->all());
         }
+
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $type = $id ? LogType::EDIT_COMMENT : LogType::NEW_COMMENT;
+        $panelUser->logs()->create([
+            'user_id' => null,
+            'type' => $type,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription($type, $panelUser),
+            'old_json' => $comment,
+            'new_json' => Comment::findOrFail($id),
+        ]);
 
         return redirect()->route('dashboard.commentView')->with('success', 'با موفقیت انجام شد.');
     }
 
     public function responseFeedbackView($id)
     {
-        /** @var Feedback $feedback */
         $feedback = Feedback::query()->findOrFail($id);
         $images = $feedback->images()->get()->toArray();
         $responseImages = [];
@@ -1144,6 +1228,7 @@ class ReportController extends Controller
     {
         $feedback = Feedback::query()->findOrFail($id);
         $responseText = $request->input('response', '');
+        $oldResponse = $feedback->feedbackResponse()->first();
         $isSpam = $request->state == FeedbackStatus::SPAM;
         if (trim($responseText) == '' and !$isSpam) {
             return redirect()->back()->withErrors('پاسخ بازخورد نباید خالی باشد.');
@@ -1182,9 +1267,9 @@ class ReportController extends Controller
                                 [
                                     'name' => 'image',
                                     'filename' => $image->getClientOriginalName(),
-                                    'contents' => file_get_contents(storage_path() . '/app/' . $image->getClientOriginalName())
-                                ]
-                            ]
+                                    'contents' => file_get_contents(storage_path() . '/app/' . $image->getClientOriginalName()),
+                                ],
+                            ],
                         ]
                     );
                     Storage::delete('/' . $image->getClientOriginalName());
@@ -1198,6 +1283,17 @@ class ReportController extends Controller
             $user = $feedback->user()->first();
             $this->dispatch((new FeedbackResponseSms($user))->onQueue('activationSms'));
         }
+
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $panelUser->logs()->create([
+            'user_id' => $user->id,
+            'type' => LogType::RESPONSE_FEEDBACK,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription(LogType::BURN_USER, $panelUser),
+            'old_json' => $oldResponse,
+            'new_json' => $feedback->feedbackResponse()->first(),
+        ]);
 
         return redirect()->route('dashboard.viewFeedback', ['feedback_id' => $id])->with('success', 'با موفقیت انجام شد');
     }
@@ -1376,19 +1472,9 @@ class ReportController extends Controller
         $sort[1] = $sort[1] == 'DESC' ? 'ASC' : 'DESC';
     }
 
-    public function downloadReport($filename)
-    {
-        if (!file_exists(storage_path('app/' . $filename))) {
-            $validator = Validator::make([], []);
-            $validator->errors()->add('file', 'فایل آماده نشده است.');
-            return redirect()->back()->withErrors($validator);
-        }
-        return response()->download(storage_path('app/' . $filename), $filename)->deleteFileAfterSend(true);
-    }
-
     public function sendSms(Request $request)
     {
-        $phoneNumber = Helpers::formatPhoneNumber($request->phone_number);
+        $phoneNumber = Helpers::formatPhoneNumber(Helpers::getEnglishString($request->phone_number));
         $text = $request->text;
         try {
             $result = Kavenegar::Send('10005000000550', $phoneNumber, $text);

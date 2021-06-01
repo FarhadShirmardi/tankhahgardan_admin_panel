@@ -9,6 +9,7 @@ class Platform
 {
     const ANDROID = 1;
     const WEB = 3;
+    const WEB_APP = 5;
 
     /**
      * @return array
@@ -27,6 +28,8 @@ class Platform
                 return 'اندروید';
             case self::WEB:
                 return 'وب';
+            case self::WEB_APP:
+                return 'وب اپ';
             default:
                 return ' - ';
         }
