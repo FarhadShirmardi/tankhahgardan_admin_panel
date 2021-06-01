@@ -50,7 +50,7 @@ class AutomationSmsJob implements ShouldQueue
             return;
         }
 
-        if (in_array($pattern, ['active-18Day', 'active-first-discount', 'active-discount-yearly'])) {
+        if (in_array($pattern, ['active-18Day', 'active-first-discount', 'active-discount-yearly', 'active-before-automation-discount'])) {
             /** @var Campaign $campaign */
             $campaign = Campaign::query()->firstOrCreate([
                 'symbol' => 'ACTIVE_A',
@@ -180,6 +180,24 @@ https://www.aparat.com/v/bUA9J', ['تنخواه']];
 
 شروع پاسخگویی:‌', ['تنخواه']];
                 }
+            case -2:
+                return ['active-questionnaire', 'کاربر گرامی %token1 گردان
+پرسشنامه پیش رو جهت بهبود خدمات تنخواه‌گردان تهیه شده است.
+خواهشمندیم زمان کوتاهی از وقت ارزشمند خود را صرف پاسخگویی به پرسشنامه زیر کنید.
+
+شروع پاسخگویی:‌', ['تنخواه']];
+            case -3:
+                return ['active-info-support', 'کاربر گرامی %token1 گردان
+برای آموزش سریع استفاده از تنخواه‌گردان از لینک زیر استفاده کنید و یا با همکاران واحد پشتیبانی تماس بگیرید.
+شماره تماس پشتیبانی:‌ 02162995555
+لینک آموزش سریع: https://tankhahgardan.com/blog/app-education/
+', ['تنخواه']];
+            case -7:
+                return ['active-before-automation-discount', 'کاربر گرامی تنخواه‌گردان
+%token1 درصد تخفیف خرید اشتراک اپلیکیشن تنخواه‌گردان
+
+کد تخفیف:‌ %token2
+مهلت استفاده: %token3', ['#PROMO_CODE_PERCENT#', '#PROMO_CODE#', '#PROMO_CODE_DATE#']];
             default:
                 return [null, null, null];
         }

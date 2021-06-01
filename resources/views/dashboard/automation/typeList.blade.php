@@ -19,7 +19,7 @@
                     style="background-color: @if($mapping['type'] == 'none') #F1F3F4 @elseif($mapping['type'] == 'call')
                         #FBE9E7 @else #DCE1FF @endif "
                     data-href="{{ route('dashboard.automation.typeItem', ['id' => $type]) }}">
-                    <td class="text-center flex-column">
+                    <td class="text-center flex-column ltr">
                         {{ $type }}
                         @if($mapping['type'] == 'call')
                             <i class="fa fa-phone">

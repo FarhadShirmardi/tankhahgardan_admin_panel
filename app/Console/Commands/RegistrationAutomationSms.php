@@ -43,7 +43,7 @@ class RegistrationAutomationSms extends Command
         $start = now();
         $this->info('start');
 
-        foreach (range(1, 27) as $type) {
+        foreach (range(-7, 27) as $type) {
             $users = $this->filterByType($type);
             foreach ($users as $user) {
                 dispatch(

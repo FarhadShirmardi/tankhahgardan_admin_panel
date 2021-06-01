@@ -45,7 +45,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('automation:update')
             ->everyFifteenMinutes()
             ->then(function () {
-                $this->call('automation:update');
+                $this->call('automation:metric');
             });
 
         $schedule->command('automation:sms')
