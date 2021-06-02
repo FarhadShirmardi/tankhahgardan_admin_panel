@@ -7,6 +7,7 @@
             <th>تاریخ پایان طرح</th>
             <th>تعداد کاربر</th>
             <th>مقدار حجم</th>
+            <th>مبلغ</th>
             <th>نوع</th>
             <th>طرح</th>
             <th>وضعیت</th>
@@ -29,6 +30,9 @@
                 ($invoice->end_date) }}</td>
                 <td>{{ $invoice->user_count }}</td>
                 <td>{{ $invoice->volume_size }}</td>
+                <td>{{ \App\Helpers\Helpers::formatNumber(\App\Helpers\Helpers::getPayableAmount
+                ($invoice->total_amount, $invoice->added_value_amount, $invoice->discount_amount,
+                $invoice->wallet_amount)) }}</td>
                 <td>{{ \App\Constants\PurchaseType::getEnum($invoice->type) }}</td>
                 <td>{{ \App\Constants\PremiumPrices::getPrice($invoice->price_id)['title'] }}</td>
                 <td>{{ \App\Constants\UserStatusType::getEnum($invoice->status) }}</td>

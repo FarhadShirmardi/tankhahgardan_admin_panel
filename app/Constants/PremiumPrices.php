@@ -82,7 +82,7 @@ class PremiumPrices
                 'day_count' => 31,
                 'discount_percent' => 0,
                 'active' => true,
-                'is_gift' => true,
+                'is_gift' => false,
             ],
         ];
     }

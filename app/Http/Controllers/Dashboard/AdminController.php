@@ -34,8 +34,7 @@ class AdminController extends Controller
         ['view_promo_code' => 'نمایش کد تخفیف',
             'edit_promo_code' => 'ثبت کد تخفیف جدید',],
 
-        ['view_transactions' => 'نمایش تراکنش',
-            'edit_transactions' => 'ثبت تراکنش جدید',],
+        ['view_transactions' => 'نمایش تراکنش'],
 
         ['edit_user_panels' => 'ویرایش کاربران پنل',],
 

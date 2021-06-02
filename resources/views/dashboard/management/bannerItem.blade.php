@@ -75,9 +75,9 @@
                     </div>
                     @if($banner['id'] ?? false)
                         <div class="col-md-2">
-                            <button class="form-control btn btn-danger">
-                                <a href="{{ route('dashboard.deleteBanner', ['id' => $banner->id]) }}">حذف</a>
-                            </button>
+                            <a class="form-control btn btn-danger" href="{{ route('dashboard.deleteBanner', ['id' =>
+                                $banner->id])
+                                }}">حذف</a>
                         </div>
                     @endif
 

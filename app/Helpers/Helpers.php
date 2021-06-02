@@ -9,6 +9,7 @@
 namespace App\Helpers;
 
 use App\Constants\PremiumConstants;
+use App\Constants\PremiumDuration;
 use App\Constants\ProjectUserState;
 use App\Constants\PurchaseType;
 use App\Constants\UserActivationConstant;
@@ -564,30 +565,32 @@ class Helpers
                         $state
                     ))->onQueue('activationSms')->delay($delayTime);
                 }
-            } else if ($state == UserActivationConstant::STATE_NPS_SMS or
-                $state == UserActivationConstant::STATE_REFERRAL_SMS) {
-                //Update user activation state
-                $userActivationState = UserActivationState::where(
-                    'user_id',
-                    $user->id
-                )->first();
-                $userActivationState->state = $state;
-                $userActivationState->save();
+            } else {
+                if ($state == UserActivationConstant::STATE_NPS_SMS or
+                    $state == UserActivationConstant::STATE_REFERRAL_SMS) {
+                    //Update user activation state
+                    $userActivationState = UserActivationState::where(
+                        'user_id',
+                        $user->id
+                    )->first();
+                    $userActivationState->state = $state;
+                    $userActivationState->save();
 
-                if ($sendSms == true) {
-                    if (app()->environment() != 'production') {
-                        $delayTime = now();
-                    } else {
-                        $delayTime = now()->addHours(12);
+                    if ($sendSms == true) {
+                        if (app()->environment() != 'production') {
+                            $delayTime = now();
+                        } else {
+                            $delayTime = now()->addHours(12);
+                        }
+
+                        dispatch(new UserActivationSmsJob(
+                            $user,
+                            $smsText,
+                            $state
+                        ))->onQueue('activationSms')->delay($delayTime);
                     }
 
-                    dispatch(new UserActivationSmsJob(
-                        $user,
-                        $smsText,
-                        $state
-                    ))->onQueue('activationSms')->delay($delayTime);
                 }
-
             }
         }
     }
@@ -674,15 +677,15 @@ class Helpers
             if (!$limit) {
                 $counts = $counts->merge([
                     $key . '_remain' => $limits[$key . '_limit'] - $used,
-                    $key . '_limit' => $limits[$key . '_limit']
+                    $key . '_limit' => $limits[$key . '_limit'],
                 ]);
             } else {
                 $counts = $userStatus ? $counts->merge([
                     $key . '_remain' => $limits[$key . '_limit'] - $used,
-                    $key . '_limit' => $limit
+                    $key . '_limit' => $limit,
                 ]) : $counts->merge([
                     $key . '_remain' => $limit - $used,
-                    $key . '_limit' => $limit
+                    $key . '_limit' => $limit,
                 ]);
             }
         }
@@ -731,7 +734,7 @@ class Helpers
                 'user_count_limit' => $projectStatus->user_count,
                 'image_count_limit' => 1000000,
                 'activity_count_limit' => 1000000,
-                'pdf_count_limit' => 1000000
+                'pdf_count_limit' => 1000000,
             ];
         }
         $activity = $project->activities()->selectRaw('count(*)')->getQuery();
@@ -759,18 +762,18 @@ class Helpers
             if (!$limit) {
                 $counts = $counts->merge([
                     $key . '_remain' => $limits[$key . '_limit'] - $used,
-                    $key . '_limit' => $limits[$key . '_limit']
+                    $key . '_limit' => $limits[$key . '_limit'],
                 ]);
             } else {
                 if ($projectStatus) {
                     $counts = $counts->merge([
                         $key . '_remain' => $limits[$key . '_limit'] - $used,
-                        $key . '_limit' => $limit
+                        $key . '_limit' => $limit,
                     ]);
                 } else {
                     $counts = $counts->merge([
                         $key . '_remain' => $limit - $used,
-                        $key . '_limit' => $limit
+                        $key . '_limit' => $limit,
                     ]);
                 }
             }
@@ -863,9 +866,21 @@ class Helpers
         /** UserStatus $userStatus */
         if ($userStatus and $type == PurchaseType::UPGRADE) {
             $carbon = new Carbon();
-            $startDate = $carbon->parse($userStatus->start_date);
-            $endDate = $carbon->parse($userStatus->end_date);
-            $total = $startDate->diffInDays($endDate);
+            $startDate = $userStatus->start_date;
+            $endDate = $userStatus->end_date;
+            try {
+                $startDate = Helpers::convertDateTimeToGregorian($userStatus->start_date);
+                $endDate = Helpers::convertDateTimeToGregorian($userStatus->end_date);
+            } catch (Exception $exception) {
+
+            }
+            $startDate = $carbon->parse($startDate);
+            $endDate = $carbon->parse($endDate);
+            if ($userStatus->price_id == PremiumDuration::SPECIAL) {
+                $total = 30;
+            } else {
+                $total = $startDate->diffInDays($endDate);
+            }
             $remain = $endDate->diffInDays(now());
             $percent = $remain / $total;
         }

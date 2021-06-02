@@ -21,6 +21,7 @@ class ProjectReport extends Model
         'imprest_count',
         'max_time',
         'type',
+        'project_state',
         'project_type',
     ];
 }

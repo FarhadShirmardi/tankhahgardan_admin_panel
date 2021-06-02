@@ -20,6 +20,7 @@
     <form id="filter" method="get" action="">
         {{ csrf_field() }}
         <input type="hidden" id="route" name="route"/>
+        <input type="hidden" id="user_ids" name="user_ids" value="{{ implode(',', $filter['user_ids']) ?? '' }}">
         <div class="row pb-5 pt-5 justify-content-center">
             <div class="col-md-3 col-sm-12">
                 <table class="table table-bordered table-responsive">
@@ -159,7 +160,6 @@
             form.action = '{{ route('dashboard.report.export.allUsersActivity') }}';
 
             document.getElementById('filter').submit();
-            form.action = '';
         }
 
         function extractIds(route) {

@@ -134,9 +134,10 @@
                     </div>
                     @if($announcement['id'] ?? false)
                         <div class="col-md-2">
-                            <button class="form-control btn btn-danger">
-                                <a href="{{ route('dashboard.deleteAnnouncement', ['id' => $announcement->id]) }}">حذف</a>
-                            </button>
+                            <a class="btn btn-danger form-control" href="{{ route('dashboard.deleteAnnouncement', ['id' =>
+                            $announcement->id]) }}">
+                                حذف
+                            </a>
                         </div>
                     @endif
                 </div>

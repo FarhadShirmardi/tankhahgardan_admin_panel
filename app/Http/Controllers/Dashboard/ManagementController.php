@@ -98,6 +98,7 @@ class ManagementController extends Controller
                     'panel_users.name as panel_user_name',
                     'users.phone_number',
                 ])
+                ->orderBy('updated_at', 'desc')
                 ->get();
             $promoCodes = $promoCodes->map(function ($item) {
                 $item['start_at'] = $item['start_at'] ? Helpers::convertDateTimeToJalali($item['start_at']) : ' - ';
@@ -444,7 +445,7 @@ class ManagementController extends Controller
                     'user_id' => $user->id,
                     'max_count' => 1,
                 ]);
-                $promoCode = $campaign->promoCodes()->firstOrCreate(['id' => $id], $request->all());
+                $promoCode = $campaign->promoCodes()->updateOrCreate(['id' => $id], $request->all());
 
                 if (!$id and isset($request->template) and $request->template != '') {
                     $this->dispatch((new PromoCodeSmsJob($user->full_phone_number, $request->template, $code))->onQueue('activationSms'));
@@ -478,7 +479,7 @@ class ManagementController extends Controller
             'date_time' => now()->toDateTimeString(),
             'description' => LogType::getDescription($type, $panelUser),
             'old_json' => $oldPromoCode,
-            'new_json' => ($userIds and sizeof($userIds) > 1) ? [] : $promoCode,
+            'new_json' => ($userIds and sizeof($userIds) > 1) ? json_encode([]) : PromoCode::find($id),
         ]);
 
         return redirect()->route('dashboard.campaignItem', ['id' => $campaignId])->with('success', 'با موفقیت انجام شد');
@@ -612,7 +613,7 @@ class ManagementController extends Controller
                 'panel_users.name as panel_user_name',
                 'banners.*',
                 \DB::raw("IF(
-                                    banners.expire_at < {$now},
+                                    banners.expire_at <= {$now},
                                     " . BannerStatus::EXPIRED . ",
                                     IF(
                                         banners.start_at > {$now},
@@ -710,15 +711,13 @@ class ManagementController extends Controller
                 'id' => $id,
             ], $request->all());
 
-            $id = $banner->id;
-
             if ($userIds) {
                 $banner->user()->delete();
             }
             /** @var User $user */
             foreach ($users as $user) {
                 $user->banner()->create([
-                    'banner_id' => $id,
+                    'banner_id' => $banner->id,
                 ]);
             }
 
@@ -731,7 +730,7 @@ class ManagementController extends Controller
                 $image->storeAs('/', $path = 'Banner_image' . '.' . $image->getClientOriginalExtension());
                 $http = new Client;
                 $response = $http->post(
-                    env('TANKHAH_URL') . '/panel/' . env('TANKHAH_TOKEN') . '/banner/' . $id . '/image',
+                    env('TANKHAH_URL') . '/panel/' . env('TANKHAH_TOKEN') . '/banner/' . $banner->id . '/image',
                     [
                         'headers' => [
                             'Accept' => 'application/json',
@@ -774,6 +773,18 @@ class ManagementController extends Controller
         $banner = Banner::query()->findOrFail($id);
         $banner->update([
             'expire_at' => now()->toDateTimeString(),
+        ]);
+
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $type = LogType::DELETE_BANNER;
+        $panelUser->logs()->create([
+            'user_id' => null,
+            'type' => $type,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription($type, $panelUser),
+            'old_json' => $banner,
+            'new_json' => Banner::query()->findOrFail($id),
         ]);
 
         return redirect()->route('dashboard.banners')->with('success', 'با موفقیت انجام شد');
@@ -868,7 +879,7 @@ class ManagementController extends Controller
                 }
             })->where(function ($query) use ($filter) {
                 if (!empty($filter['types'])) {
-                    $query->whereIn('type', $filter['types']);
+                    $query->whereIn('log_centers.type', $filter['types']);
                 }
             })
             ->where(function ($query) use ($filter) {
@@ -877,6 +888,7 @@ class ManagementController extends Controller
                         ->orWhereNull('user_id');
                 }
             })
+            ->orderBy('date_time', 'desc')
             ->get([
                 'user_reports.phone_number',
                 'user_reports.name',
@@ -886,7 +898,7 @@ class ManagementController extends Controller
 
         $logs->transform(function ($log) {
             $log['username'] = $log['user_id'] ?
-                ($log['name'] ? $log['name'] : $log['phone_number']) :
+                (!empty(trim($log['name'])) ? $log['name'] : $log['phone_number']) :
                 'عمومی';
             return $log;
         });
@@ -925,7 +937,7 @@ class ManagementController extends Controller
             ])->findOrFail($id);
 
         $log['username'] = $log['user_id'] ?
-            ($log['name'] ? $log['name'] : $log['phone_number']) :
+            (!empty(trim($log['name'])) ? $log['name'] : $log['phone_number']) :
             'عمومی';
 
         return view('dashboard.management.logCenterItem', [

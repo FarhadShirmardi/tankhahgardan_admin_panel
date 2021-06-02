@@ -42,9 +42,9 @@ class PremiumController extends Controller
 
 //        dd($user->wallet, $user->wallet_amount);
         $isMinus = $request->input('minus', 'off') == 'on' ? -1 : 1;
-        $charge_amount = (int)$request->charge_amount;
+        $charge_amount = (int)Helpers::getEnglishString($request->charge_amount);
 
-        $charge_amount = $isMinus ? min($charge_amount, $user->wallet_amount) : $charge_amount;
+        $charge_amount = $isMinus == -1 ? min($charge_amount, $user->wallet_amount) : $charge_amount;
         $user->wallet = max(0, $user->wallet + ($isMinus * $charge_amount));
         $user->save();
 
@@ -93,12 +93,14 @@ class PremiumController extends Controller
             PremiumDuration::SPECIAL,
         ];
 
+        $currentPlan = PurchaseType::UPGRADE ? $userStates->where('is_active', true)->first() : null;
 
         return view('dashboard.premium.purchase', [
             'user' => $user,
             'type' => $type,
             'selected_plan' => $selectedPlan,
             'prices' => $prices,
+            'current_plan' => $currentPlan,
         ]);
     }
 
@@ -116,7 +118,8 @@ class PremiumController extends Controller
                 ->get();
 
             $amount = 0;
-            if ($item['is_active']) {
+            $price = PremiumPrices::getPrice($item['price_id']);
+            if ($item['is_active'] and !$price['is_gift']) {
                 /** @var UserStatusLog $userStatusLog */
                 foreach ($userStatusLogs as $userStatusLog) {
                     $percent = Helpers::calculatePercent($userStatusLog, PurchaseType::UPGRADE);
@@ -161,8 +164,6 @@ class PremiumController extends Controller
         } catch (\UnexpectedValueException $exception) {
             $validator = Validator::make([], []);
             $validator->errors()->add('error', $exception->getMessage());
-            $validator->errors()->add('error', $exception->getFile());
-            $validator->errors()->add('error', $exception->getLine());
             return redirect()->back()->withErrors($validator);
         } catch (\Exception $exception) {
             dd($exception);
@@ -179,6 +180,9 @@ class PremiumController extends Controller
         $request = $this->convertDate($request);
         $priceId = $request->price_id;
         if ($type == PurchaseType::UPGRADE) {
+            if ($request->user_count == 0 and $request->volume_size == 0) {
+                throw new \UnexpectedValueException('هر ۲ فیلد حجم و کاربر نمی‌توانند صفر باشند.');
+            }
             $priceId = $selectedPlan->price_id;
             $price = PremiumPrices::getPrice($priceId, $selectedPlan->user_count, $selectedPlan->volume_size, true);
         } else {
@@ -226,7 +230,7 @@ class PremiumController extends Controller
         $totalAmount =
             $priceId == PremiumDuration::SPECIAL ? $request->total_price :
                 max(1000, ceil(($userPrice + $volumePrice + $constantPrice) * $percent));
-        $discountAmount = (int)$request->discount_amount;
+        $discountAmount = (int)Helpers::getEnglishString($request->discount_price);
         $payableAmount = Helpers::getPayableAmount($totalAmount, 0, $discountAmount, 0);
         $useWallet = $request->use_wallet == 'on';
         $walletAmount = $useWallet ? min($user->wallet_amount, $payableAmount) : 0;
@@ -249,6 +253,17 @@ class PremiumController extends Controller
         $invoice->added_value_amount = $addedValueAmount;
         $invoice->price_id = $priceId;
         $invoice->save();
+
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $panelUser->logs()->create([
+            'user_id' => $invoice->user_id,
+            'type' => LogType::NEW_INVOICE,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription(LogType::NEW_INVOICE, $panelUser),
+            'old_json' => json_encode([]),
+            'new_json' => $invoice->toJson(),
+        ]);
 
         return redirect(route('dashboard.report.userActivity', ['id' => $user->id]))->with('success', 'پیش فاکتور با موفقیت ایجاد شد');
     }
@@ -282,9 +297,9 @@ class PremiumController extends Controller
             $panelUser = auth()->user();
             $panelUser->logs()->create([
                 'user_id' => $invoice->user_id,
-                'type' => LogType::NEW_INVOICE,
+                'type' => LogType::DELETE_INVOICE,
                 'date_time' => now()->toDateTimeString(),
-                'description' => LogType::getDescription(LogType::NEW_INVOICE, $panelUser),
+                'description' => LogType::getDescription(LogType::DELETE_INVOICE, $panelUser),
                 'old_json' => $invoice->toJson(),
                 'new_json' => json_encode([]),
             ]);
