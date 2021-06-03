@@ -51,8 +51,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('automation:sms')
             ->dailyAt('15:00');
 
-//        $schedule->command('sms:nearExpire')
-//            ->dailyAt('09:00');
+        $schedule->command('sms:nearExpire')
+            ->dailyAt('09:00');
 
     }
 

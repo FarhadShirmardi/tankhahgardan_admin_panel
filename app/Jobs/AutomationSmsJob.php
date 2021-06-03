@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Campaign;
+use App\Constants\PremiumDuration;
 use App\Helpers\Helpers;
 use App\User;
 use Illuminate\Bus\Queueable;
@@ -63,6 +64,7 @@ class AutomationSmsJob implements ShouldQueue
 
             $code = Helpers::generatePromoCode();
             $discount = $pattern == 'active-discount-yearly' ? 50 : 30;
+            $priceId = $pattern == 'active-discount-yearly' ? PremiumDuration::YEAR : null;
             $date = Helpers::gregorianDateStringToJalali(now()->addDays(5)->toDateString());
             $promoCode = $campaign->promoCodes()->create([
                 'user_id' => $this->user->id,
@@ -73,6 +75,7 @@ class AutomationSmsJob implements ShouldQueue
                 'text' => 'هدیه اپلیکیشن',
                 'start_at' => now()->toDateTimeString(),
                 'end_date' => now()->addDays(5)->endOfDay()->toDateTimeString(),
+                'price_id' => $priceId,
             ]);
         }
         foreach ($params as $key => $param) {
@@ -82,6 +85,8 @@ class AutomationSmsJob implements ShouldQueue
                 $tokens[$key] = $code;
             } elseif ($param == '#PROMO_CODE_DATE#') {
                 $tokens[$key] = $date;
+            } elseif ($param == '#USER_ID') {
+                $tokens[$key] = $this->user->id;
             } else {
                 $tokens[$key] = $param;
             }
@@ -127,6 +132,7 @@ https://www.aparat.com/v/bUA9J', ['تنخواه']];
 کد تخفیف:‌ %token2
 مهلت استفاده:‌ %token3', ['#PROMO_CODE_PERCENT#', '#PROMO_CODE#', '#PROMO_CODE_DATE#']];
             case 9:
+            case -3:
             case 10:
                 return ['active-info-support', 'کاربر گرامی %token1 گردان
 برای آموزش سریع استفاده از تنخواه‌گردان از لینک زیر استفاده کنید و یا با همکاران واحد پشتیبانی تماس بگیرید.
@@ -140,12 +146,13 @@ https://www.aparat.com/v/bUA9J', ['تنخواه']];
 
 کد تخفیف:‌ %token2
 مهلت استفاده: %token3', ['#PROMO_CODE_PERCENT#', '#PROMO_CODE#', '#PROMO_CODE_DATE#']];
+            case -2:
             case 15:
                 return ['active-questionnaire', 'کاربر گرامی %token1 گردان
 پرسشنامه پیش رو جهت بهبود خدمات تنخواه‌گردان تهیه شده است.
 خواهشمندیم زمان کوتاهی از وقت ارزشمند خود را صرف پاسخگویی به پرسشنامه زیر کنید.
 
-شروع پاسخگویی:‌', ['تنخواه']];
+شروع پاسخگویی:‌ https://tankhahgardan.com/blog?page_id=%token2&q=%token3', ['تنخواه', '630', '#USER_ID']];
             case 17:
             case 22:
                 return ['active-discount-yearly', 'کاربر گرامی تنخواه‌گردان
@@ -154,44 +161,32 @@ https://www.aparat.com/v/bUA9J', ['تنخواه']];
 کد تخفیف: %token2
 مهلت استفاده: %token3', ['#PROMO_CODE_PERCENT#', '#PROMO_CODE#', '#PROMO_CODE_DATE#']];
             case 20:
-                if ($user->automationSms()->whereIn('type', [15, 20, 26])->exists()) {
+                if ($user->automationSms()->whereIn('type', [-2, 15, 20, 26])->exists()) {
                     return ['active-info-support', 'کاربر گرامی %token1 گردان
 برای آموزش سریع استفاده از تنخواه‌گردان از لینک زیر استفاده کنید و یا با همکاران واحد پشتیبانی تماس بگیرید.
 شماره تماس پشتیبانی:‌ 02162995555
 لینک آموزش سریع: https://tankhahgardan.com/blog/app-education/
 ', ['تنخواه']];
                 } else {
-                    ['active-questionnaire', 'کاربر گرامی %token1 گردان
+                    return ['active-questionnaire', 'کاربر گرامی %token1 گردان
 پرسشنامه پیش رو جهت بهبود خدمات تنخواه‌گردان تهیه شده است.
 خواهشمندیم زمان کوتاهی از وقت ارزشمند خود را صرف پاسخگویی به پرسشنامه زیر کنید.
 
-شروع پاسخگویی:‌', ['تنخواه']];
+شروع پاسخگویی:‌ https://tankhahgardan.com/blog?page_id=%token2&q=%token3', ['تنخواه', '630', '#USER_ID']];
                 }
             case 26:
-                if ($user->automationSms()->whereIn('type', [15, 20, 26])->exists()) {
+                if ($user->automationSms()->whereIn('type', [-2, 15, 20, 26])->exists()) {
                     return ['active-60Day', 'کاربر گرامی %token1 گردان
 جهت مشاوره و ارائه انتقادات و پیشنهادات خود می‌توانید همه روزه با شماره 02162995555 تماس حاصل فرمایید.
 
 حذف کاغذهای اضافی، حفظ طبیعت، حفظ زندگی', ['تنخواه']];
                 } else {
-                    ['active-questionnaire', 'کاربر گرامی %token1 گردان
+                    return ['active-questionnaire', 'کاربر گرامی %token1 گردان
 پرسشنامه پیش رو جهت بهبود خدمات تنخواه‌گردان تهیه شده است.
 خواهشمندیم زمان کوتاهی از وقت ارزشمند خود را صرف پاسخگویی به پرسشنامه زیر کنید.
 
-شروع پاسخگویی:‌', ['تنخواه']];
+شروع پاسخگویی:‌ https://tankhahgardan.com/blog?page_id=%token2&q=%token3', ['تنخواه', '630', '#USER_ID']];
                 }
-            case -2:
-                return ['active-questionnaire', 'کاربر گرامی %token1 گردان
-پرسشنامه پیش رو جهت بهبود خدمات تنخواه‌گردان تهیه شده است.
-خواهشمندیم زمان کوتاهی از وقت ارزشمند خود را صرف پاسخگویی به پرسشنامه زیر کنید.
-
-شروع پاسخگویی:‌', ['تنخواه']];
-            case -3:
-                return ['active-info-support', 'کاربر گرامی %token1 گردان
-برای آموزش سریع استفاده از تنخواه‌گردان از لینک زیر استفاده کنید و یا با همکاران واحد پشتیبانی تماس بگیرید.
-شماره تماس پشتیبانی:‌ 02162995555
-لینک آموزش سریع: https://tankhahgardan.com/blog/app-education/
-', ['تنخواه']];
             case -7:
                 return ['active-before-automation-discount', 'کاربر گرامی تنخواه‌گردان
 %token1 درصد تخفیف خرید اشتراک اپلیکیشن تنخواه‌گردان

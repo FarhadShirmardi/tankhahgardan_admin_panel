@@ -14,7 +14,7 @@
                 </label>
                 <select name="user_count" id="user_count" class="form-control col-md-7">
                     @foreach(\App\Constants\PremiumPrices::filterPrice(\App\Constants\PremiumConstants::USER_PRICE,
-                    1, $current_plan ? $current_plan->user_count : 0, $type == \App\Constants\PurchaseType::UPGRADE) as
+                    1, $current_plan ? $current_plan->user_count : $user_count_min, $type == \App\Constants\PurchaseType::UPGRADE) as
                     $price)
                         <option value="{{ $price['value'] }}">{{ \App\Helpers\Helpers::formatNumber($price['value'])
                         }}</option>

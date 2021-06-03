@@ -9,6 +9,7 @@ use App\Constants\PremiumPrices;
 use App\Constants\PurchaseType;
 use App\Constants\UserStatusType;
 use App\Helpers\Helpers;
+use App\Helpers\UtilHelpers;
 use App\Http\Controllers\Controller;
 use App\PanelInvoice;
 use App\PanelUser;
@@ -95,12 +96,16 @@ class PremiumController extends Controller
 
         $currentPlan = PurchaseType::UPGRADE ? $userStates->where('is_active', true)->first() : null;
 
+        $userCounts = Helpers::getUserCounts($user);
+        $userCountMin = max($userCounts['user_count_limit'] - $userCounts['user_count_remain'], 1);
+
         return view('dashboard.premium.purchase', [
             'user' => $user,
             'type' => $type,
             'selected_plan' => $selectedPlan,
             'prices' => $prices,
             'current_plan' => $currentPlan,
+            'user_count_min' => $userCountMin,
         ]);
     }
 
@@ -123,7 +128,7 @@ class PremiumController extends Controller
                 /** @var UserStatusLog $userStatusLog */
                 foreach ($userStatusLogs as $userStatusLog) {
                     $percent = Helpers::calculatePercent($userStatusLog, PurchaseType::UPGRADE);
-                    $amount += $percent * Helpers::getPayableAmount($userStatusLog->total_amount, $userStatusLog->added_value_amount, 0, 0);
+                    $amount += $percent * Helpers::getPayableAmount($userStatusLog->total_amount, $userStatusLog->added_value_amount, $userStatusLog->discount_amount, 0);
                 }
             }
 
@@ -217,10 +222,11 @@ class PremiumController extends Controller
                     throw new \UnexpectedValueException('تاریخ شروع نمیتواند بزرگتر از تاریخ پایان باشد.');
                 }
             } elseif ($priceId == PremiumDuration::MONTH) {
-                $endDate = $startDate->addDays(31)->endOfDay()->toDateTimeString();
+                $endDate = $startDate->copy()->addDays(31)->endOfDay()->toDateTimeString();
             } elseif ($priceId == PremiumDuration::YEAR) {
-                $endDate = $startDate->addDays(365)->endOfDay()->toDateTimeString();
+                $endDate = $startDate->copy()->addDays(365)->endOfDay()->toDateTimeString();
             }
+            $startDate = $startDate->toDateTimeString();
         }
 
         $percent = Helpers::calculatePercent($selectedPlan, $type);

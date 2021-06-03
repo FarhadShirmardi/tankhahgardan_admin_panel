@@ -15,6 +15,7 @@
                 <th>ردیف</th>
                 <th>نام کاربر</th>
                 <th>مالک پروژه</th>
+                <th>وضعیت کاربر</th>
                 <th>تعداد پرداخت</th>
                 <th>تعداد دریافت</th>
                 <th>تعداد یادداشت</th>
@@ -32,6 +33,7 @@
                         @if($user->is_owner) <img src="{{ asset('dashboard/icons/icon_check.png') }}">
                         @endif
                     </td>
+                    <td>{{ \App\Constants\ProjectUserState::getEnum($user->user_state)  }}</td>
                     <td>{{ $user->payment_count }}</td>
                     <td>{{ $user->receive_count }}</td>
                     <td>{{ $user->note_count }}</td>
@@ -43,6 +45,7 @@
             <tr class="table-primary">
                 <td></td>
                 <td>جمع</td>
+                <td></td>
                 <td></td>
                 <td>{{ $users->pluck('payment_count')->sum() }}</td>
                 <td>{{ $users->pluck('receive_count')->sum() }}</td>

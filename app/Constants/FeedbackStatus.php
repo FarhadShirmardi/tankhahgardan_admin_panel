@@ -11,7 +11,6 @@ class FeedbackStatus
     const NEED_RE_EXAMINED = 2;
     const DOING = 3;
     const DONE = 4;
-    const CLOSED = 5;
     const SPAM = 6;
 
     /**
@@ -37,8 +36,6 @@ class FeedbackStatus
                 return 'در حال انجام';
             case self::DONE:
                 return 'انجام شده';
-            case self::CLOSED:
-                return 'اتمام شده';
             default:
                 return '';
         }

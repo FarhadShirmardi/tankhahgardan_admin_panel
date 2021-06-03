@@ -429,7 +429,7 @@ class ManagementController extends Controller
                 'id' => $id,
             ], $request->all());
 
-            if ($id == 0) {
+            if ($id == 0 and !$isHidden) {
                 dispatch(
                     (new SendFirebaseNotificationJob([
                         'type' => NotificationType::PROMO_CODE,
@@ -456,7 +456,7 @@ class ManagementController extends Controller
                         'text' => $request->template . ' - ' . $code,
                     ]);
                 }
-                if ($id == 0) {
+                if ($id == 0 and !$isHidden) {
                     dispatch(
                         (new SendFirebaseNotificationJob([
                             'type' => NotificationType::PROMO_CODE,
@@ -479,7 +479,8 @@ class ManagementController extends Controller
             'date_time' => now()->toDateTimeString(),
             'description' => LogType::getDescription($type, $panelUser),
             'old_json' => $oldPromoCode,
-            'new_json' => ($userIds and sizeof($userIds) > 1) ? json_encode([]) : PromoCode::find($id),
+            'new_json' => ($userIds and sizeof($userIds) > 1) ? json_encode([]) :
+                ($id ? PromoCode::find($id) : $promoCode),
         ]);
 
         return redirect()->route('dashboard.campaignItem', ['id' => $campaignId])->with('success', 'با موفقیت انجام شد');

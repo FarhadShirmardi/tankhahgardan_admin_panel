@@ -62,7 +62,7 @@ class AdminController extends Controller
         return view('dashboard.admin.user_item', [
             'user' => $user,
             'permissions' => $this->permissions,
-            'user_permissions' => $user->permissions()->pluck('name')->toArray(),
+            'user_permissions' => $user ? $user->permissions()->pluck('name')->toArray() : [],
         ]);
     }
 

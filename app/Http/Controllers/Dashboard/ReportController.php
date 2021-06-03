@@ -227,7 +227,7 @@ class ReportController extends Controller
             'name' => $request->input('name', ''),
             'start_date' => $startDate,
             'end_date' => $endDate,
-            'user_ids' => $request->input('user_ids', []),
+            'user_ids' => $request->input('user_ids', []) ?? [],
             'user_states' => $request->input('user_states', []),
         ];
     }
@@ -816,6 +816,7 @@ class ReportController extends Controller
                 $join->on('project_user.user_id', 'users.id')
                     ->where('project_user.project_id', $projectId);
             })
+            ->addSelect('project_user.state as user_state')
             ->addSelect('project_user.is_owner as is_owner')
             ->addSelect('users.name as name')
             ->addSelect('users.family as family')
