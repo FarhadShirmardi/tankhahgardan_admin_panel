@@ -62,7 +62,7 @@ class RegistrationAutomationMetric extends Command
                 \DB::raw("IF(transaction_count >= 50, 'T50+', IF(transaction_count >= 10, 'T10-49', 'T10-')) as T"),
                 \DB::raw("IF(registered_at > '{$days15}', 'R15-', IF(registered_at > '{$days60}', 'R15-60', 'R60+')) as R"),
                 \DB::raw("IF(premium_state in (" . UserPremiumState::PREMIUM . ',' . UserPremiumState::NEAR_ENDING_PREMIUM . "), 'P+', 'P-') as P"),
-                \DB::raw("IF(automation_state = -1, 'A-', 'A+') as A"),
+                \DB::raw("IF(automation_state <= -1, 'A-', 'A+') as A"),
             ]);
 //        dd($automationMetrics->toSql());
 
