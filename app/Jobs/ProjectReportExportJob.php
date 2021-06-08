@@ -40,7 +40,15 @@ class ProjectReportExportJob implements ShouldQueue
     {
         $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
         $filename = "export/allProjectActivity - {$today} - " . Str::random('6') . '.xlsx';
+        $panelId = null;
         try {
+            $panelId = PanelFile::query()
+                ->create([
+                    'user_id' => auth()->id(),
+                    'path' => $filename,
+                    'description' => 'گزارش وضعیت پروژه - ' . str_replace('_', '/', $today),
+                    'date_time' => now()->toDateTimeString(),
+                ]);
             \DB::beginTransaction();
             $projectsQuery = ProjectReport::query();
             $reportController = app()->make(ReportController::class);
@@ -50,17 +58,13 @@ class ProjectReportExportJob implements ShouldQueue
                 \Storage::disk('local')->makeDirectory('export');
             }
             Excel::store((new AllProjectExport($projects)), $filename, 'local');
-            PanelFile::query()
-                ->create([
-                    'user_id' => auth()->id(),
-                    'path' => $filename,
-                    'description' => 'گزارش وضعیت پروژه - ' . str_replace('_', '/', $today),
-                    'date_time' => now()->toDateTimeString(),
-                ]);
             \DB::commit();
         } catch (\Exception $exception) {
             \DB::rollBack();
             \Storage::disk('local')->delete($filename);
+            if ($panelId) {
+                PanelFile::query()->find($panelId)->delete();
+            }
             \Log::info($exception->getLine());
             \Log::info($exception->getFile());
             \Log::info($exception->getMessage());

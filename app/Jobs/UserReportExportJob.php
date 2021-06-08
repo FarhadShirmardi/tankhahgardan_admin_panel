@@ -40,7 +40,15 @@ class UserReportExportJob implements ShouldQueue
     {
         $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
         $filename = "export/allUserActivity - {$today} - " . Str::random('6') . '.xlsx';
+        $panelId = null;
         try {
+            $panelId = PanelFile::query()
+                ->create([
+                    'user_id' => auth()->id(),
+                    'path' => $filename,
+                    'description' => 'گزارش وضعیت کاربران - ' . str_replace('_', '/', $today),
+                    'date_time' => now()->toDateTimeString(),
+                ]);
             \DB::beginTransaction();
             $usersQuery = UserReport::query();
             $reportController = app()->make(ReportController::class);
@@ -50,16 +58,12 @@ class UserReportExportJob implements ShouldQueue
                 \Storage::disk('local')->makeDirectory('export');
             }
             Excel::store((new AllUserExport($users)), $filename, 'local');
-            PanelFile::query()
-                ->create([
-                    'user_id' => auth()->id(),
-                    'path' => $filename,
-                    'description' => 'گزارش وضعیت کاربران - ' . str_replace('_', '/', $today),
-                    'date_time' => now()->toDateTimeString(),
-                ]);
             \DB::commit();
         } catch (\Exception $exception) {
             \DB::rollBack();
+            if ($panelId) {
+                PanelFile::query()->find($panelId)->delete();
+            }
             \Storage::disk('local')->delete($filename);
             \Log::info($exception->getMessage());
         }
