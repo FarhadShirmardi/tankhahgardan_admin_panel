@@ -7,6 +7,7 @@
     <!-- Icons -->
     <link rel="stylesheet" href="{{ asset('dashboard/css/font-awesome.css') }}"/>
     <link rel="stylesheet" href="{{ asset('dashboard/css/simple-line-icons.css') }}"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/logo.png') }}">
 
     {{--    <link rel="stylesheet" href="{{ asset('dashboard/css/selectr.css') }}">--}}
     <link rel="stylesheet" href="{{ asset('dashboard/css/jstree.min.css') }}"/>
@@ -20,4 +21,6 @@
     <link href="{{ asset('/dashboard/css/style.css') }}" rel="stylesheet">
     <script src="{{ asset("js/jquery.min.js") }}"></script>
     <script src="{{ asset('js/dropzone.min.js') }}"></script>
+
+    @yield('extra_css')
 </head>

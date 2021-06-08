@@ -21,12 +21,17 @@
             <th onclick="sortTable('feedback_count')">تعداد بازخورد</th>
             <th onclick="sortTable('device_count')">تعداد دستگاه‌ها</th>
             <th onclick="sortTable('step_by_step')">گام به گام</th>
+            @if(isset($extraData))
+                @foreach($extraData as $key => $item)
+                    <th>{{ $key }}</th>
+                @endforeach
+            @endif
         </tr>
         </thead>
         <tbody>
         @foreach($users as $user)
-            <tr class="clickableRow table-row-clickable"
-                data-href="{{ route('dashboard.report.userActivity', ['id' => $user->id]) }}"
+            <tr @if($clickable) class="clickableRow table-row-clickable"
+                data-href="{{ route('dashboard.report.userActivity', ['id' => $user->id]) }} @endif"
                 style="background-color: {{ $colors[$user['user_type']][0] }}">
                 <td>{{($users->currentPage() - 1) * $users->perPage() + $loop->iteration}}</td>
                 <td>{{ $user->name }}</td>
@@ -47,6 +52,11 @@
                 <td>{{ $user->feedback_count }}</td>
                 <td>{{ $user->device_count }}</td>
                 <td>{{ $user->step_by_step }}</td>
+                @if(isset($extraData))
+                    @foreach($extraData as $key => $value)
+                        <td>{{ $value }}</td>
+                    @endforeach
+                @endif
             </tr>
         @endforeach
         </tbody>

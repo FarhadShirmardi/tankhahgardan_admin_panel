@@ -15,7 +15,8 @@
 
     @if($user)
         <div class="col-md-2 justify-content-center">
-            <a class="form-control btn btn-success" href="{{ route('dashboard.campaignUser', ['id' => $user->id]) }}">افزودن
+            <a class="form-control btn btn-success" href="{{ route('dashboard.campaignUser', ['userIds' => $user->id])
+            }}">افزودن
                 کد تخفیف</a>
         </div>
     @endif

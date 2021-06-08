@@ -24,7 +24,6 @@
                     <label class="col-md-5 col-form-label text-md-left">موضوع بازخورد</label>
                     <div class="ms-list col-md-7">
                         <select name="titles[]" multiple="multiple" id="title_ids" style="width: 100%">
-                            <option onselect="selectAll()"></option>
                             @foreach($titles as $title)
                                 <option @if($title['is_selected']) selected @endif
                                 value="{{$title['id']}}">{{$title['title']}}</option>
@@ -147,10 +146,12 @@
                 <div class="col-md-2">
                     <a class="form-control btn btn-outline-primary" href="?">ریست کردن فیلتر</a>
                 </div>
-                <div class="col-md-2">
-                    <a class="form-control btn btn-outline-success" href="{{ route('dashboard.commentView') }}">افزودن
-                        بازخورد</a>
-                </div>
+                @if(auth()->user()->can('new_feedback'))
+                    <div class="col-md-2">
+                        <a class="form-control btn btn-outline-success" href="{{ route('dashboard.commentView') }}">افزودن
+                            بازخورد</a>
+                    </div>
+                @endif
             </div>
         </div>
     </form>

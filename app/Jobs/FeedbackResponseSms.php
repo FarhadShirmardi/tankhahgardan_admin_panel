@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Constants\NotificationType;
 use App\Project;
 use App\User;
 use Illuminate\Bus\Queueable;
@@ -9,13 +10,13 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Log;
 use Kavenegar;
-use App\Constants\NotificationType;
+use Log;
 
 class FeedbackResponseSms implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
     /**
      * @var User
      */
@@ -50,15 +51,15 @@ class FeedbackResponseSms implements ShouldQueue
         $token3 = '';
         $template = 'tankhah-feedback';
         $type = "sms";//sms | call
-//        $result = Kavenegar::VerifyLookup($receptor, $token1, $token2, $token3, $template, $type);
-//        if ($result) {
-//            $message = $result[0]->statustext;
-//            Log::info('Send to kavenegar   ====>   ' . $receptor . '  ' . $message);
-//        }
+        $result = Kavenegar::VerifyLookup($receptor, $token1, $token2, $token3, $template, $type);
+        if ($result) {
+            $message = $result[0]->statustext;
+            Log::info('Send to kavenegar   ====>   ' . $receptor . '  ' . $message);
+        }
         dispatch(
             (new SendFirebaseNotificationJob([
                 'type' => NotificationType::FEEDBACK_RESPONSE,
-                'receiver_id' => $this->user->id
+                'receiver_id' => $this->user->id,
             ]))->onQueue('activationSms')
         );
     }

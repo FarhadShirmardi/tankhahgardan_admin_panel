@@ -6,35 +6,49 @@
 @section('content')
     <form method="post" action="">
         {{ csrf_field() }}
-        <div class="pb-5 pt-5 justify-content-center col-md-8">
+        <div class="pb-5 pt-5 justify-content-center">
             <div class="row">
-                <label class="col-md-5 col-form-label text-md-left">شماره تلفن</label>
+                <label class="col-md-3 col-form-label text-md-left">شماره تلفن</label>
                 <input type="text" id="phone_number" name="phone_number" required
                        value="{{ $user['phone_number'] ?? '' }}" class="form-control col-md-7">
             </div>
             <div class="row pt-5">
-                <label class="col-md-5 col-form-label text-md-left">نام</label>
+                <label class="col-md-3 col-form-label text-md-left">نام</label>
                 <input type="text" id="name" name="name" required
                        value="{{ $user['name'] ?? '' }}" class="form-control col-md-7">
             </div>
             @if(!$user)
                 <div class="row pt-5">
-                    <label class="col-md-5 col-form-label text-md-left">رمزعبور</label>
+                    <label class="col-md-3 col-form-label text-md-left">رمزعبور</label>
                     <input type="text" id="password" name="password" required
                            class="form-control col-md-7">
                 </div>
             @endif
-            <div class="row pt-5">
-                <label class="col-md-5 col-form-label text-md-left">سطح دسترسی</label>
-                <select id="role" name="type" class="form-control col-md-7">
-                    @foreach($roles as $key => $role)
-                        <option @if ($user) @if ($role['id'] == $user->roles->first()->id) selected
-                                @endif @endif value="{{ $role['id'] }}">{{ $role['name'] }}</option>
+            <div class="pt-5 row justify-content-center">
+                <div class="row col-md-12 justify-content-center">
+                    <div class="col-md-4 ">
+                        <h3 ondblclick="toggle()">سطح دسترسی</h3>
+                    </div>
+                </div>
+
+                <div class="row">
+                    @foreach($permissions as $groupPermission)
+                        <div class="col-md-12 row pb-2">
+                            <div class="col-md-2"></div>
+                            @foreach($groupPermission as $permission => $permissionName)
+                                <div class="col-md-3">
+                                    <input type="checkbox" name="permission_checkbox[]" value="{{ $permission }}"
+                                           @if(in_array($permission, $user_permissions)) checked @endif
+                                           id="{{ $permission }}">
+                                    <label for="{{ $permission }}">{{ $permissionName }}</label>
+                                </div>
+                            @endforeach
+                            <div class="col-md-2"></div>
+                        </div>
                     @endforeach
-                </select>
+                </div>
             </div>
-            <div class="row pt-5">
-                <div class="col-md-7 col-sm-12 pr-2"></div>
+            <div class="row pt-5 justify-content-center">
                 <input class="btn btn-success" type="submit" value="ثبت">
             </div>
         </div>
@@ -62,4 +76,15 @@
             </div>
         </form>
     @endif
+@endsection
+@section('scripts')
+    <script>
+        function toggle() {
+            checkboxes = document.getElementsByName('permission_checkbox[]');
+            let value = !checkboxes[0].checked;
+            for (var i = 0, n = checkboxes.length; i < n; i++) {
+                checkboxes[i].checked = value;
+            }
+        }
+    </script>
 @endsection

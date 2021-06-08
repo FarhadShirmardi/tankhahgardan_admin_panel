@@ -7,6 +7,7 @@
 @section('filter')
     <form id="filter" method="get" action="">
         {{ csrf_field() }}
+        <input type="hidden" name="user_id" value="{{ $filter['user_id'] }}">
         <div class="pb-5 pt-5 justify-content-center">
             <div class="row">
                 <div class="col-md-4 row">

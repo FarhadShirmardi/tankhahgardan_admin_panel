@@ -2,14 +2,9 @@
 
 namespace App;
 
-use App\Project as Projects;
-use Eloquent;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use App\Helpers\Helpers;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
-use App\Helpers\Helpers;
 
 class Project extends Model
 {
@@ -47,11 +42,6 @@ class Project extends Model
     public function city()
     {
         return $this->hasOne(City::class, 'id', 'city_id');
-    }
-
-    public function constructionComponents()
-    {
-        return $this->hasMany(ConstructionComponent::class);
     }
 
     public function notes()

@@ -2,20 +2,18 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use App\Helpers\Helpers;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Carbon\Carbon;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
-use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
-use App\State;
 use App\City;
 use App\Constants\ProjectTypes;
+use App\State;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class AllProjectExport implements FromCollection, WithStrictNullComparison,
     WithMapping, WithHeadingRow, WithHeadings, WithColumnFormatting
@@ -48,8 +46,8 @@ class AllProjectExport implements FromCollection, WithStrictNullComparison,
         return [
             $this->row,
             $project->name,
-            State::query()->firstWhere('id', $project->state_id)['name'],
-            City::query()->firstWhere('id', $project->city_id)['name'],
+            State::query()->firstWhere('id', $project->state_id)['name'] ?? '',
+            City::query()->firstWhere('id', $project->city_id)['name'] ?? '',
             $project->type ? ProjectTypes::getProjectType($project->type)['text'] : '',
             $project->created_at ? $this->carbon->parse($project->created_at)->format($dateFormat) : ' - ',
             $project->created_at ? $this->carbon->parse($project->created_at)->toTimeString() : ' - ',

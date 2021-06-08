@@ -2,8 +2,9 @@
 
 namespace App;
 
+use App\Constants\UserStatusType;
 use App\Helpers\Helpers;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Helpers\UtilHelpers;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -28,7 +29,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'verification_code', 'vcode_genration_time', 'state'
+        'password', 'remember_token', 'verification_code', 'vcode_genration_time', 'state',
     ];
 
     protected $dates = [
@@ -47,7 +48,8 @@ class User extends Authenticatable
 
     public function getFullNameAttribute()
     {
-        return ($this->name or $this->family) ? "{$this->name} {$this->family}" : Helpers::getPersianString($this->phone_number);
+        return ($this->name or $this->family) ? "{$this->name} {$this->family}" :
+            Helpers::getPersianString($this->phone_number);
     }
 
     public function getCreatedAtDateAttribute()
@@ -64,6 +66,14 @@ class User extends Authenticatable
     public function projects()
     {
         return $this->belongsToMany(Project::class)
+            ->withPivot(['id', 'is_owner', 'state', 'expired_date', 'added_date', 'note'])
+            ->withTimestamps();
+    }
+
+    public function ownedProjects()
+    {
+        return $this->belongsToMany(Project::class)
+            ->where('is_owner', true)
             ->withPivot(['id', 'is_owner', 'state', 'expired_date', 'added_date', 'note'])
             ->withTimestamps();
     }
@@ -142,5 +152,46 @@ class User extends Authenticatable
     public function banner()
     {
         return $this->hasMany(BannerUser::class, 'user_id', 'id');
+    }
+
+    public function getPremiumStateAttribute($value)
+    {
+        return Helpers::getUserStatus($this);
+    }
+
+    public function automationSms()
+    {
+        return $this->hasMany(AutomationSms::class, 'user_id', 'id');
+    }
+
+    public function automationCall()
+    {
+        return $this->hasMany(AutomationCall::class, 'user_id', 'id');
+    }
+
+    public function automationData()
+    {
+        return $this->hasOne(AutomationData::class, 'id', 'id');
+    }
+
+    public function automationBurn()
+    {
+        return $this->hasMany(AutomationBurntUser::class, 'user_id', 'id');
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(PanelInvoice::class, 'user_id', 'id');
+    }
+
+    public function getWalletAmountAttribute()
+    {
+        $usedWalletQuery = (int)(UserStatusLog::query()
+            ->where('status', UserStatusType::SUCCEED)
+            ->where('user_id', $this->id)
+            ->selectRaw('sum(wallet_amount) as wallet')
+            ->first()->wallet);
+
+        return $this->wallet - $this->reserve_wallet - $usedWalletQuery;
     }
 }

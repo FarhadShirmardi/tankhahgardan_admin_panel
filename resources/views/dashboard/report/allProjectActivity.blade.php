@@ -7,7 +7,7 @@
             وضعیت پروژه‌ها
         </div>
         <div class="col-md-6 ltr">
-            @if(auth()->user()->hasRole('Admin'))
+            @if(auth()->user()->can('refresh_projects_report'))
                 <a href="{{ route('dashboard.generateReport') }}">
                     <i class="fa fa-refresh"></i>
                 </a>
@@ -24,15 +24,12 @@
                 <table class="table table-bordered table-responsive">
                     <tr class="text-center">
                         <input id="projectType" type="hidden" value="{{ $filter['project_type'] }}" name="project_type">
-                        <td style="border: solid black 1px;">
-                            <div onclick="changeUserType({{0}})"
-                                 style="cursor: pointer;">همه
-                            </div>
+                        <td style="cursor: pointer; border: solid black 1px;" onclick="changeUserType({{0}})">
+                            <span>همه</span>
                         </td>
                         @foreach($colors as $key => $color)
-                            <td style="background-color: {{$color[0]}}">
-                                <div onclick="changeUserType({{$key}})"
-                                     style="cursor: pointer;">{{$color[1]}}</div>
+                            <td style="background-color: {{$color[0]}}; cursor: pointer;" onclick="changeUserType({{$key}})">
+                                <span>{{$color[1]}}</span>
                             </td>
                         @endforeach
                     </tr>
@@ -90,7 +87,7 @@
         </div>
         <div class="row pb-5 pt-2 justify-content-center">
             <input class="btn btn-info pt-2" type="submit" value="اعمال فیلتر">
-            @if(auth()->user()->hasRole('Admin'))
+            @if(auth()->user()->can('export_projects_report'))
                 <input class="btn btn-warning mr-2" type="button" value="فایل خروجی" onclick="exportClick()">
             @endif
         </div>
@@ -195,6 +192,7 @@
 
         function changeSelect() {
             let cities = JSON.parse('{!! json_encode($cities) !!}');
+            let selectedCity = '{{ $filter['city_id'] }}'
             var stateSelect = document.getElementById('state_id');
             var citySelect = document.getElementById('city_id');
             removeOptions(citySelect);
@@ -203,6 +201,7 @@
                     var opt = document.createElement("option");
                     opt.value = cities[i]['id'];
                     opt.textContent = cities[i]['name'];
+                    opt.selected = cities[i]['id'] == selectedCity;
 
                     // then append it to the select element
                     citySelect.appendChild(opt);

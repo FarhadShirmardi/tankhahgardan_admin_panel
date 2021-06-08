@@ -7,7 +7,7 @@
             وضعیت کاربران
         </div>
         <div class="col-md-6 ltr">
-            @if(auth()->user()->hasRole('Admin'))
+            @if(auth()->user()->can('refresh_users_report'))
                 <a href="{{ route('dashboard.generateReport') }}">
                     <i class="fa fa-refresh"></i>
                 </a>
@@ -19,46 +19,50 @@
     @include('dashboard.layouts.link_message')
     <form id="filter" method="get" action="">
         {{ csrf_field() }}
+        <input type="hidden" id="route" name="route"/>
+        <input type="hidden" id="user_ids" name="user_ids" value="{{ is_array($filter['user_ids']) ?
+        (implode(',', $filter['user_ids']) ?? '') :
+        $filter['user_ids'] }}">
         <div class="row pb-5 pt-5 justify-content-center">
-            <div class="col-md-3 col-sm-10">
+            <div class="col-md-3 col-sm-12">
                 <table class="table table-bordered table-responsive">
                     <tr class="text-center">
                         <input id="userType" type="hidden" value="{{ $filter['user_type'] }}" name="user_type">
-                        <td style="border: solid black 1px; cursor: pointer;">
-                            <div onclick="changeUserType({{0}})">همه</div>
+                        <td style="border: solid black 1px; cursor: pointer;" onclick="changeUserType({{0}})">
+                            <span>همه</span>
                         </td>
                         @foreach($colors as $key => $color)
-                            <td style="background-color: {{$color[0]}}; cursor: pointer;">
-                                <div onclick="changeUserType({{$key}})">{{$color[1]}}</div>
+                            <td style="background-color: {{$color[0]}}; cursor: pointer;" onclick="changeUserType({{$key}})">
+                                <span>{{$color[1]}}</span>
                             </td>
                         @endforeach
                     </tr>
                 </table>
             </div>
-            <div class="col-md-3 col-sm-10 pr-2">
+            <div class="col-md-3 col-sm-12">
                 <div class="row">
                     <label class="col-md-5 col-form-label text-md-left">جستجوی شماره</label>
                     <input type="text" id="phone_number" name="phone_number" value="{{$filter['phone_number']}}"
                            placeholder="جستجوی شماره" class="form-control col-md-7">
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12 pr-2">
+            <div class="col-md-3 col-sm-12">
                 <div class="row">
                     <label class="col-md-5 col-form-label text-md-left">جستجوی نام</label>
                     <input type="text" id="name" name="name" value="{{$filter['name']}}"
                            placeholder="جستجوی نام" class="form-control col-md-7">
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12 pr-2">
+            <div class="col-md-3 col-sm-12">
                 <div class="row">
-                    <label class="col-md-5 col-form-label text-md-left">مرتب‌سازی</label>
-                    <select id="sort_field" name="sort_field">
+                    <label class="col-md-5 col-lg-5 col-form-label text-md-left">مرتب‌سازی</label>
+                    <select id="sort_field" class="form-control col-md-4 col-lg-4" name="sort_field">
                         @foreach($sortable_fields as $key => $sortable_field)
                             <option @if ($key == $filter['sort_field']) selected
                                     @endif value="{{ $key }}">{{ $sortable_field }}</option>
                         @endforeach
                     </select>
-                    <select id="sort_type" name="sort_type">
+                    <select id="sort_type" class="form-control col-md-3 col-lg-3" name="sort_type">
                         @foreach($sortable_types as $key => $sortable_type)
                             <option @if ($key == $filter['sort_type']) selected
                                     @endif value="{{ $key }}">{{ $sortable_type }}</option>
@@ -66,22 +70,22 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12 pr-2"></div>
-            <div class="col-md-3 col-sm-12 pr-2">
+            <div class="col-md-3 col-sm-12"></div>
+            <div class="col-md-3 col-sm-12">
                 <div class="row">
                     <label class="col-md-5 col-form-label text-md-left">تاریخ شروع</label>
                     <input id="start_date" class="form-control range_date col-md-7" type="text" name="start_date"
                            value="{{$filter['start_date']}}">
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12 pr-2">
+            <div class="col-md-3 col-sm-12">
                 <div class="row">
                     <label class="col-md-5 col-form-label text-md-left">تاریخ پایان</label>
                     <input id="end_date" class="form-control range_date col-md-7" type="text" name="end_date"
                            value="{{$filter['end_date']}}">
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12 pr-2">
+            <div class="col-md-3 col-sm-12">
                 <div class="row">
                     <label class="col-md-5 col-form-label text-md-left">وضعیت کاربر</label>
                     <div class="ms-list col-md-7">
@@ -97,7 +101,7 @@
             <input type="hidden" name="page" value="1"/>
             <div class="row pt-2">
                 <input class="btn btn-info" type="submit" value="اعمال فیلتر">
-                @if(auth()->user()->hasRole('Admin'))
+                @if(auth()->user()->can('export_users_report'))
                     <input class="btn btn-warning mr-2" type="button" value="فایل خروجی" onclick="exportClick()">
                 @endif
             </div>
@@ -108,25 +112,24 @@
     <div></div>
     <div class="row">
         <div class="col-md-4">{{ $users->appends(request()->input())->links() }}</div>
-        <div class="col-md-8"><p>تعداد {{ $users->total() }} کاربر با شرایط فوق پیدا شد.</p></div>
+        <div class="col-md-8 text-center">
+            <p>تعداد {{ $users->total() }} کاربر با شرایط فوق پیدا شد.</p></div>
     </div>
-    @include('dashboard.report.listUser')
+    @include('dashboard.report.listUser', ['clickable' => true])
     {{ $users->appends(request()->input())->links() }}
     <hr>
     <div class="row">
         <div class="col-md-2">
-            <a class="form-control btn btn-success"
-               href="{{ route('dashboard.campaignUser', ['userIds' => $userIds]) }}">افزودن
-                کد تخفیف</a>
+            <input class="form-control btn btn-success" onclick="extractIds('dashboard.campaignUser');" value="افزودن کد تخفیف">
         </div>
         <div class="col-md-2">
-            <a class="form-control btn btn-success"
-               href="{{ route('dashboard.announcementItem', ['id' => 0, 'userIds' => $userIds]) }}">افزودن
-                اعلان</a>
+            <input class="form-control btn btn-success" onclick="extractIds('dashboard.announcementItem');"
+                   value="افزودن اعلان">
         </div>
         <div class="col-md-2">
-            <a class="form-control btn btn-success"
-               href="{{ route('dashboard.bannerItem', ['id' => 0, 'userIds' => $userIds]) }}">افزودن بنر</a>
+            <input class="form-control btn btn-success" onclick="extractIds('dashboard' +
+             '.bannerItem');" value="افزودن بنر">
+
         </div>
         <div class="col-md-6">
             <div class="row">
@@ -144,17 +147,9 @@
             </div>
         </div>
     </div>
-    <hr>
-    <div id="dateChart" style="width:100%;"></div>
-    <div id="rangeCount" class="my-5" style="width:100%;"></div>
-@endsection
-@section('chart')
-    @include('dashboard.report.charts.allUserActivity')
-    @include('dashboard.report.charts.rangeCount')
 @endsection
 @section('scripts')
     <script>
-
         function changeUserType(userType) {
             var input = document.getElementById('userType');
             input.value = userType;
@@ -167,7 +162,15 @@
             form.action = '{{ route('dashboard.report.export.allUsersActivity') }}';
 
             document.getElementById('filter').submit();
-            form.action = '';
+        }
+
+        function extractIds(route) {
+            var routeEl = document.getElementById('route');
+            routeEl.value = route;
+
+            var form = document.getElementById('filter');
+            form.action = '{{ route('dashboard.report.extractUserIdsWithFilter') }}';
+            document.getElementById('filter').submit();
         }
 
         $('#user_states').select2({width: 'element'});

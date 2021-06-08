@@ -8,11 +8,23 @@
 
 namespace App\Helpers;
 
+use App\Constants\PremiumConstants;
+use App\Constants\PremiumDuration;
+use App\Constants\ProjectUserState;
+use App\Constants\PurchaseType;
 use App\Constants\UserActivationConstant;
+use App\Constants\UserPremiumState;
+use App\File;
+use App\Image;
 use App\Jobs\UserActivationSmsJob;
 use App\Project;
+use App\ProjectUser;
+use App\PromoCode;
+use App\SentImage;
 use App\User;
 use App\UserActivationState;
+use App\UserStatus;
+use App\UserStatusLog;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -25,22 +37,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Validator;
 use Log;
 use RangeException;
 use Storage;
-use App\Constants\ProjectUserState;
-use App\Constants\PremiumConstants;
-use App\Constants\UserPremiumState;
-use App\UserStatus;
-use Illuminate\Support\Facades\DB;
-use App\UserStatusLog;
-use Illuminate\Support\Str;
-use App\PromoCode;
-use App\Image;
-use App\SentImage;
-use App\ProjectUser;
-use App\File;
 
 class Helpers
 {
@@ -140,8 +142,7 @@ class Helpers
         &$data = null,
         string $jsonResourceClassName = null,
         $metaData = []
-    )
-    {
+    ) {
         $metaData += [
             self::RESPONSE_MESSAGE => $message == null ? [] : [$message],
         ];
@@ -182,8 +183,7 @@ class Helpers
         $fileName = null,
         $path = 'public',
         $fileColumn = 'image'
-    )
-    {
+    ) {
         if ($request->hasFile($fileColumn)) {
             $fileExtension = $request->file($fileColumn)->getClientOriginalExtension();
             if ($fileName == null) {
@@ -466,8 +466,7 @@ class Helpers
     public static function generateRandomToken(
         $length = 10,
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    )
-    {
+    ) {
         $charactersLength = strlen($characters);
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {
@@ -566,30 +565,32 @@ class Helpers
                         $state
                     ))->onQueue('activationSms')->delay($delayTime);
                 }
-            } else if ($state == UserActivationConstant::STATE_NPS_SMS or
-                $state == UserActivationConstant::STATE_REFERRAL_SMS) {
-                //Update user activation state
-                $userActivationState = UserActivationState::where(
-                    'user_id',
-                    $user->id
-                )->first();
-                $userActivationState->state = $state;
-                $userActivationState->save();
+            } else {
+                if ($state == UserActivationConstant::STATE_NPS_SMS or
+                    $state == UserActivationConstant::STATE_REFERRAL_SMS) {
+                    //Update user activation state
+                    $userActivationState = UserActivationState::where(
+                        'user_id',
+                        $user->id
+                    )->first();
+                    $userActivationState->state = $state;
+                    $userActivationState->save();
 
-                if ($sendSms == true) {
-                    if (app()->environment() != 'production') {
-                        $delayTime = now();
-                    } else {
-                        $delayTime = now()->addHours(12);
+                    if ($sendSms == true) {
+                        if (app()->environment() != 'production') {
+                            $delayTime = now();
+                        } else {
+                            $delayTime = now()->addHours(12);
+                        }
+
+                        dispatch(new UserActivationSmsJob(
+                            $user,
+                            $smsText,
+                            $state
+                        ))->onQueue('activationSms')->delay($delayTime);
                     }
 
-                    dispatch(new UserActivationSmsJob(
-                        $user,
-                        $smsText,
-                        $state
-                    ))->onQueue('activationSms')->delay($delayTime);
                 }
-
             }
         }
     }
@@ -666,7 +667,7 @@ class Helpers
             ->selectSub($userCount, 'user_count')
             ->selectSub($pdfCount, 'pdf_count');
         $results = $query->first();
-        list($results->image_count, $results->volume_size) = explode('-', $results->images);
+        [$results->image_count, $results->volume_size] = explode('-', $results->images);
         unset($results->images);
         $counts = collect();
         $r = new \ReflectionClass(PremiumConstants::class);
@@ -676,15 +677,15 @@ class Helpers
             if (!$limit) {
                 $counts = $counts->merge([
                     $key . '_remain' => $limits[$key . '_limit'] - $used,
-                    $key . '_limit' => $limits[$key . '_limit']
+                    $key . '_limit' => $limits[$key . '_limit'],
                 ]);
             } else {
                 $counts = $userStatus ? $counts->merge([
                     $key . '_remain' => $limits[$key . '_limit'] - $used,
-                    $key . '_limit' => $limit
+                    $key . '_limit' => $limit,
                 ]) : $counts->merge([
                     $key . '_remain' => $limit - $used,
-                    $key . '_limit' => $limit
+                    $key . '_limit' => $limit,
                 ]);
             }
         }
@@ -733,7 +734,7 @@ class Helpers
                 'user_count_limit' => $projectStatus->user_count,
                 'image_count_limit' => 1000000,
                 'activity_count_limit' => 1000000,
-                'pdf_count_limit' => 1000000
+                'pdf_count_limit' => 1000000,
             ];
         }
         $activity = $project->activities()->selectRaw('count(*)')->getQuery();
@@ -761,18 +762,18 @@ class Helpers
             if (!$limit) {
                 $counts = $counts->merge([
                     $key . '_remain' => $limits[$key . '_limit'] - $used,
-                    $key . '_limit' => $limits[$key . '_limit']
+                    $key . '_limit' => $limits[$key . '_limit'],
                 ]);
             } else {
                 if ($projectStatus) {
                     $counts = $counts->merge([
                         $key . '_remain' => $limits[$key . '_limit'] - $used,
-                        $key . '_limit' => $limit
+                        $key . '_limit' => $limit,
                     ]);
                 } else {
                     $counts = $counts->merge([
                         $key . '_remain' => $limit - $used,
-                        $key . '_limit' => $limit
+                        $key . '_limit' => $limit,
                     ]);
                 }
             }
@@ -808,5 +809,81 @@ class Helpers
         } while ($promoCode);
 
         return $code;
+    }
+
+    public static function getUserStatus(User &$user)
+    {
+        $userState = $user->userStatuses->first();
+        if (!$userState) {
+            return UserPremiumState::FREE;
+        } else {
+            $carbon = new Carbon();
+            $endDate = $carbon->parse($userState->end_date);
+            if ($endDate->lt(now())) {
+                return UserPremiumState::EXPIRED_PREMIUM;
+            } elseif ($endDate->diffInDays(now()) < PremiumConstants::NEAR_END_THRESHOLD) {
+                return UserPremiumState::NEAR_ENDING_PREMIUM;
+            } else {
+                return UserPremiumState::PREMIUM;
+            }
+        }
+    }
+
+    public static function getMonthName($month)
+    {
+        switch ((int)$month) {
+            case 1:
+                return 'فروردین';
+            case 2:
+                return 'اردیبهشت';
+            case 3:
+                return 'خرداد';
+            case 4:
+                return 'تیر';
+            case 5:
+                return 'مرداد';
+            case 6:
+                return 'شهریور';
+            case 7:
+                return 'مهر';
+            case 8:
+                return 'آبان';
+            case 9:
+                return 'آذر';
+            case 10:
+                return 'دی';
+            case 11:
+                return 'بهمن';
+            case 12:
+                return 'اسفند';
+        }
+        return '';
+    }
+
+    public static function calculatePercent(&$userStatus, $type)
+    {
+        $percent = 1;
+        /** UserStatus $userStatus */
+        if ($userStatus and $type == PurchaseType::UPGRADE) {
+            $carbon = new Carbon();
+            $startDate = $userStatus->start_date;
+            $endDate = $userStatus->end_date;
+            try {
+                $startDate = Helpers::convertDateTimeToGregorian($userStatus->start_date);
+                $endDate = Helpers::convertDateTimeToGregorian($userStatus->end_date);
+            } catch (Exception $exception) {
+
+            }
+            $startDate = $carbon->parse($startDate);
+            $endDate = $carbon->parse($endDate);
+            if ($userStatus->price_id == PremiumDuration::SPECIAL) {
+                $total = 30;
+            } else {
+                $total = $startDate->diffInDays($endDate);
+            }
+            $remain = $endDate->diffInDays(now());
+            $percent = $remain / $total;
+        }
+        return $percent;
     }
 }

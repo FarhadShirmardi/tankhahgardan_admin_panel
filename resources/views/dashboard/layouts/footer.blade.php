@@ -1,3 +1,3 @@
 <footer class="app-footer ltr">
-    <a href="http://mapsa.ir">مپسا </a> © {{ now()->year }}.
+    <a href="https://tankhahgardan.com">تنخواه‌گردان </a> © {{ now()->year }}.
 </footer>
