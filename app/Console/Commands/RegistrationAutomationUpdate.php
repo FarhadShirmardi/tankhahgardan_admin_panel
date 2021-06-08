@@ -126,13 +126,13 @@ class RegistrationAutomationUpdate extends Command
             ->where(function ($query) {
                 $query->where(function ($startQuery) {
                     $startQuery->whereDate('start_date', '>=', now()->subDay()->toDateString())
-                        ->orWhereDate('start_date', '<=', now()->addDay()->toDateString());
+                        ->whereDate('start_date', '<=', now()->addDay()->toDateString());
                 })->orWhere(function ($endQuery) {
                     $endQuery->whereDate('end_date', '>=', now()->subDay()->toDateString())
-                        ->orWhereDate('end_date', '<=', now()->addDay()->toDateString());
+                        ->whereDate('end_date', '<=', now()->addDay()->toDateString());
                 })->orWhere(function ($createQuery) {
                     $createQuery->whereDate('created_at', '>=', now()->subDay()->toDateString())
-                        ->orWhereDate('created_at', '<=', now()->addDay()->toDateString());
+                        ->whereDate('created_at', '<=', now()->addDay()->toDateString());
                 });
             })
             ->get();
