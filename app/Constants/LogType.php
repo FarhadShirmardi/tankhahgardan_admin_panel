@@ -12,7 +12,7 @@ class LogType
 
     const RESPONSE_FEEDBACK = 2;
     const NEW_COMMENT = 3;
-    const EDIT_COMMENT = 4;
+    const EDIT_FEEDBACK = 4;
 
     const NEW_ANNOUNCEMENT = 5;
     const EDIT_ANNOUNCEMENT = 6;
@@ -32,6 +32,7 @@ class LogType
     const NEW_INVOICE = 16;
     const PAY_INVOICE = 17;
     const CLOSE_PLAN = 18;
+    const DELETE_INVOICE = 19;
 
     /**
      * @return array
@@ -52,7 +53,7 @@ class LogType
                 return $user->name . ' بازخوردی را پاسخ داد.';
             case self::NEW_COMMENT:
                 return $user->name . ' بازخورد جدیدی را ثبت کرد.';
-            case self::EDIT_COMMENT:
+            case self::EDIT_FEEDBACK:
                 return $user->name . ' بازخوردی را ویرایش کرد.';
             case self::NEW_ANNOUNCEMENT:
                 return $user->name . ' اعلان جدیدی را ثبت کرد.';
@@ -78,6 +79,12 @@ class LogType
                 return $user->name . ' یک پیش‌فاکتور را پرداخت کرد.';
             case self::CLOSE_PLAN:
                 return $user->name . ' یک طرح را اتمام کرد.';
+            case self::NEW_AUTOMATION_CALL:
+                return $user->name . ' یک تماس جدید ثبت کرده است.';
+            case self::EDIT_AUTOMATION_CALL:
+                return $user->name . ' یک تماس را ویرایش کرد.';
+            case self::DELETE_INVOICE:
+                return $user->name . ' یک پیش‌فاکتور را حذف کرد.';
         }
     }
 
@@ -90,7 +97,7 @@ class LogType
                 return 'پاسخ بازخورد';
             case self::NEW_COMMENT:
                 return 'ثبت بازخورد';
-            case self::EDIT_COMMENT:
+            case self::EDIT_FEEDBACK:
                 return 'ویرایش بازخورد';
             case self::NEW_ANNOUNCEMENT:
                 return 'ثبت اعلان';
@@ -116,6 +123,12 @@ class LogType
                 return 'پرداخت پیش‌فاکتور';
             case self::CLOSE_PLAN:
                 return 'اتمام طرح';
+            case self::NEW_AUTOMATION_CALL:
+                return 'تماس اتوماسیون';
+            case self::EDIT_AUTOMATION_CALL:
+                return 'ویرایش تماس اتوماسیون';
+            case self::DELETE_INVOICE:
+                return 'اتمام پیش‌فاکتور';
             default:
                 return '';
         }

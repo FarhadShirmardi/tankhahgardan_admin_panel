@@ -51,8 +51,8 @@
                 'users' => $userItem,
                 'clickable' => false,
                 'extraData' => [
-                    'کیف پول' => $user->wallet_amount,
-                    'کیف پول رزرو شده' => $user->reserve_wallet
+                    'کیف پول' => \App\Helpers\Helpers::formatNumber($user->wallet_amount),
+                    'کیف پول رزرو شده' => \App\Helpers\Helpers::formatNumber($user->reserve_wallet)
                 ]
         ])
     </div>

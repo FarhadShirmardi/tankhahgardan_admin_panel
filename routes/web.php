@@ -116,15 +116,15 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
             Route::get('feedbacks', 'Dashboard\ReportController@viewFeedback')->name('feedbacks');
             Route::get('comment/new/{id?}', 'Dashboard\ReportController@commentView')->name('commentView');
             Route::get('feedback/{feedback_id}/response', 'Dashboard\ReportController@responseFeedbackView')->name('viewFeedback');
+            Route::group(['middleware' => ['permission:new_feedback']], function () {
+                Route::post('comment/new/{id?}', 'Dashboard\ReportController@addComment')->name('newComment');
+            });
         });
         Route::middleware(['permission:response_feedback'])->group(function () {
             Route::group(['middleware' => ['permission:response_feedback']], function () {
                 Route::post('feedback/{feedback_id}/response', 'Dashboard\ReportController@responseFeedback')->name('responseFeedback');
             });
             Route::get('sendSms', 'Dashboard\ReportController@sendSms')->name('sendSms');
-            Route::group(['middleware' => ['permission:new_feedback']], function () {
-                Route::post('comment/new/{id?}', 'Dashboard\ReportController@addComment')->name('newComment');
-            });
         });
 
         Route::group(['middleware' => ['permission:view_feedback']], function () {
@@ -169,6 +169,8 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
 
         Route::prefix('automation')->name('automation.')->middleware('permission:view_automation')->group(function () {
             Route::get('metrics', 'Dashboard\AutomationController@metrics')->name('metrics');
+            Route::get('exportMetrics', 'Dashboard\AutomationController@exportMetrics')
+                ->name('export_metrics')->middleware(['permission:export_automation_metrics']);
             Route::get('types', 'Dashboard\AutomationController@typeList')->name('types');
             Route::get('typeItem/{id}', 'Dashboard\AutomationController@typeItem')->name('typeItem');
             Route::get('callLogs/{id}', 'Dashboard\AutomationController@callLogs')->name('callLogs');

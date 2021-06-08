@@ -9,6 +9,7 @@ use App\Constants\PremiumPrices;
 use App\Constants\PurchaseType;
 use App\Constants\UserStatusType;
 use App\Helpers\Helpers;
+use App\Helpers\UtilHelpers;
 use App\Http\Controllers\Controller;
 use App\PanelInvoice;
 use App\PanelUser;
@@ -42,9 +43,9 @@ class PremiumController extends Controller
 
 //        dd($user->wallet, $user->wallet_amount);
         $isMinus = $request->input('minus', 'off') == 'on' ? -1 : 1;
-        $charge_amount = (int)$request->charge_amount;
+        $charge_amount = (int)Helpers::getEnglishString($request->charge_amount);
 
-        $charge_amount = $isMinus ? min($charge_amount, $user->wallet_amount) : $charge_amount;
+        $charge_amount = $isMinus == -1 ? min($charge_amount, $user->wallet_amount) : $charge_amount;
         $user->wallet = max(0, $user->wallet + ($isMinus * $charge_amount));
         $user->save();
 
@@ -93,12 +94,18 @@ class PremiumController extends Controller
             PremiumDuration::SPECIAL,
         ];
 
+        $currentPlan = PurchaseType::UPGRADE ? $userStates->where('is_active', true)->first() : null;
+
+        $userCounts = Helpers::getUserCounts($user);
+        $userCountMin = max($userCounts['user_count_limit'] - $userCounts['user_count_remain'], 1);
 
         return view('dashboard.premium.purchase', [
             'user' => $user,
             'type' => $type,
             'selected_plan' => $selectedPlan,
             'prices' => $prices,
+            'current_plan' => $currentPlan,
+            'user_count_min' => $userCountMin,
         ]);
     }
 
@@ -116,11 +123,12 @@ class PremiumController extends Controller
                 ->get();
 
             $amount = 0;
-            if ($item['is_active']) {
+            $price = PremiumPrices::getPrice($item['price_id']);
+            if ($item['is_active'] and !$price['is_gift']) {
                 /** @var UserStatusLog $userStatusLog */
                 foreach ($userStatusLogs as $userStatusLog) {
                     $percent = Helpers::calculatePercent($userStatusLog, PurchaseType::UPGRADE);
-                    $amount += $percent * Helpers::getPayableAmount($userStatusLog->total_amount, $userStatusLog->added_value_amount, 0, 0);
+                    $amount += $percent * Helpers::getPayableAmount($userStatusLog->total_amount, $userStatusLog->added_value_amount, $userStatusLog->discount_amount, 0);
                 }
             }
 
@@ -161,8 +169,6 @@ class PremiumController extends Controller
         } catch (\UnexpectedValueException $exception) {
             $validator = Validator::make([], []);
             $validator->errors()->add('error', $exception->getMessage());
-            $validator->errors()->add('error', $exception->getFile());
-            $validator->errors()->add('error', $exception->getLine());
             return redirect()->back()->withErrors($validator);
         } catch (\Exception $exception) {
             dd($exception);
@@ -179,6 +185,9 @@ class PremiumController extends Controller
         $request = $this->convertDate($request);
         $priceId = $request->price_id;
         if ($type == PurchaseType::UPGRADE) {
+            if ($request->user_count == 0 and $request->volume_size == 0) {
+                throw new \UnexpectedValueException('هر ۲ فیلد حجم و کاربر نمی‌توانند صفر باشند.');
+            }
             $priceId = $selectedPlan->price_id;
             $price = PremiumPrices::getPrice($priceId, $selectedPlan->user_count, $selectedPlan->volume_size, true);
         } else {
@@ -213,10 +222,11 @@ class PremiumController extends Controller
                     throw new \UnexpectedValueException('تاریخ شروع نمیتواند بزرگتر از تاریخ پایان باشد.');
                 }
             } elseif ($priceId == PremiumDuration::MONTH) {
-                $endDate = $startDate->addDays(31)->endOfDay()->toDateTimeString();
+                $endDate = $startDate->copy()->addDays(31)->endOfDay()->toDateTimeString();
             } elseif ($priceId == PremiumDuration::YEAR) {
-                $endDate = $startDate->addDays(365)->endOfDay()->toDateTimeString();
+                $endDate = $startDate->copy()->addDays(365)->endOfDay()->toDateTimeString();
             }
+            $startDate = $startDate->toDateTimeString();
         }
 
         $percent = Helpers::calculatePercent($selectedPlan, $type);
@@ -226,7 +236,7 @@ class PremiumController extends Controller
         $totalAmount =
             $priceId == PremiumDuration::SPECIAL ? $request->total_price :
                 max(1000, ceil(($userPrice + $volumePrice + $constantPrice) * $percent));
-        $discountAmount = (int)$request->discount_amount;
+        $discountAmount = (int)Helpers::getEnglishString($request->discount_price);
         $payableAmount = Helpers::getPayableAmount($totalAmount, 0, $discountAmount, 0);
         $useWallet = $request->use_wallet == 'on';
         $walletAmount = $useWallet ? min($user->wallet_amount, $payableAmount) : 0;
@@ -249,6 +259,17 @@ class PremiumController extends Controller
         $invoice->added_value_amount = $addedValueAmount;
         $invoice->price_id = $priceId;
         $invoice->save();
+
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $panelUser->logs()->create([
+            'user_id' => $invoice->user_id,
+            'type' => LogType::NEW_INVOICE,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription(LogType::NEW_INVOICE, $panelUser),
+            'old_json' => json_encode([]),
+            'new_json' => $invoice->toJson(),
+        ]);
 
         return redirect(route('dashboard.report.userActivity', ['id' => $user->id]))->with('success', 'پیش فاکتور با موفقیت ایجاد شد');
     }
@@ -282,9 +303,9 @@ class PremiumController extends Controller
             $panelUser = auth()->user();
             $panelUser->logs()->create([
                 'user_id' => $invoice->user_id,
-                'type' => LogType::NEW_INVOICE,
+                'type' => LogType::DELETE_INVOICE,
                 'date_time' => now()->toDateTimeString(),
-                'description' => LogType::getDescription(LogType::NEW_INVOICE, $panelUser),
+                'description' => LogType::getDescription(LogType::DELETE_INVOICE, $panelUser),
                 'old_json' => $invoice->toJson(),
                 'new_json' => json_encode([]),
             ]);

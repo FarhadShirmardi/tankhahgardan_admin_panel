@@ -34,13 +34,13 @@ class AdminController extends Controller
         ['view_promo_code' => 'نمایش کد تخفیف',
             'edit_promo_code' => 'ثبت کد تخفیف جدید',],
 
-        ['view_transactions' => 'نمایش تراکنش',
-            'edit_transactions' => 'ثبت تراکنش جدید',],
+        ['view_transactions' => 'نمایش تراکنش'],
 
         ['edit_user_panels' => 'ویرایش کاربران پنل',],
 
         ['view_automation' => 'نمایش اطلاعات اتوماسیون',
-            'edit_automation' => 'ثبت زنگ و تغییر استیت کاربران'],
+            'edit_automation' => 'ثبت زنگ و تغییر استیت کاربران',
+            'export_automation_metrics' => 'خروجی گزارش متریک‌ها'],
 
         ['edit_premium' => 'افزایش کیف پول و ایجاد طرح', 'view_premium_report' => 'نمایش گزارش معیار سنجش پولی'],
         ['view_log_center' => 'نمایش مرکز لاگ'],
@@ -62,7 +62,7 @@ class AdminController extends Controller
         return view('dashboard.admin.user_item', [
             'user' => $user,
             'permissions' => $this->permissions,
-            'user_permissions' => $user->permissions()->pluck('name')->toArray(),
+            'user_permissions' => $user ? $user->permissions()->pluck('name')->toArray() : [],
         ]);
     }
 

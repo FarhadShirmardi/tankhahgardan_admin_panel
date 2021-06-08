@@ -227,7 +227,7 @@ class ReportController extends Controller
             'name' => $request->input('name', ''),
             'start_date' => $startDate,
             'end_date' => $endDate,
-            'user_ids' => $request->input('user_ids', []),
+            'user_ids' => $request->input('user_ids', []) ?? [],
             'user_states' => $request->input('user_states', []),
         ];
     }
@@ -255,6 +255,9 @@ class ReportController extends Controller
             $usersQuery = $usersQuery->whereDate('registered_at', '<=', $filter['end_date']);
         }
         if (isset($filter['user_ids']) and $filter['user_ids'] != []) {
+            if (is_string($filter['user_ids'])) {
+                $filter['user_ids'] = explode(',', $filter['user_ids']);
+            }
             $usersQuery = $usersQuery->whereIn('id', $filter['user_ids']);
         }
         if (isset($filter['user_states']) and $filter['user_states'] != []) {
@@ -813,6 +816,7 @@ class ReportController extends Controller
                 $join->on('project_user.user_id', 'users.id')
                     ->where('project_user.project_id', $projectId);
             })
+            ->addSelect('project_user.state as user_state')
             ->addSelect('project_user.is_owner as is_owner')
             ->addSelect('users.name as name')
             ->addSelect('users.family as family')
@@ -1166,8 +1170,7 @@ class ReportController extends Controller
         $request['response_date'] = $request->response_date ?
             Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->response_date)) : null;
         if (!$id) {
-            Comment::create($request->all());
-            $comment = null;
+            $comment = Comment::create($request->all());
         } else {
             $comment = Comment::findOrFail($id);
             $comment->update($request->all());
@@ -1175,14 +1178,14 @@ class ReportController extends Controller
 
         /** @var PanelUser $panelUser */
         $panelUser = auth()->user();
-        $type = $id ? LogType::EDIT_COMMENT : LogType::NEW_COMMENT;
+        $type = $id ? LogType::EDIT_FEEDBACK : LogType::NEW_COMMENT;
         $panelUser->logs()->create([
-            'user_id' => null,
+            'user_id' => $comment->user_id,
             'type' => $type,
             'date_time' => now()->toDateTimeString(),
             'description' => LogType::getDescription($type, $panelUser),
-            'old_json' => $comment,
-            'new_json' => Comment::findOrFail($id),
+            'old_json' => $id ? $comment : null,
+            'new_json' => Comment::findOrFail($comment->id),
         ]);
 
         return redirect()->route('dashboard.commentView')->with('success', 'با موفقیت انجام شد.');
@@ -1286,11 +1289,12 @@ class ReportController extends Controller
 
         /** @var PanelUser $panelUser */
         $panelUser = auth()->user();
+        $type = $id ? LogType::EDIT_FEEDBACK : LogType::RESPONSE_FEEDBACK;
         $panelUser->logs()->create([
-            'user_id' => $user->id,
-            'type' => LogType::RESPONSE_FEEDBACK,
+            'user_id' => $feedback->user_id,
+            'type' => $type,
             'date_time' => now()->toDateTimeString(),
-            'description' => LogType::getDescription(LogType::BURN_USER, $panelUser),
+            'description' => LogType::getDescription($type, $panelUser),
             'old_json' => $oldResponse,
             'new_json' => $feedback->feedbackResponse()->first(),
         ]);

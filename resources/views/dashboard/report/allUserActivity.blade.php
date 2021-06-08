@@ -20,17 +20,20 @@
     <form id="filter" method="get" action="">
         {{ csrf_field() }}
         <input type="hidden" id="route" name="route"/>
+        <input type="hidden" id="user_ids" name="user_ids" value="{{ is_array($filter['user_ids']) ?
+        (implode(',', $filter['user_ids']) ?? '') :
+        $filter['user_ids'] }}">
         <div class="row pb-5 pt-5 justify-content-center">
             <div class="col-md-3 col-sm-12">
                 <table class="table table-bordered table-responsive">
                     <tr class="text-center">
                         <input id="userType" type="hidden" value="{{ $filter['user_type'] }}" name="user_type">
-                        <td style="border: solid black 1px; cursor: pointer;">
-                            <div onclick="changeUserType({{0}})">همه</div>
+                        <td style="border: solid black 1px; cursor: pointer;" onclick="changeUserType({{0}})">
+                            <span>همه</span>
                         </td>
                         @foreach($colors as $key => $color)
-                            <td style="background-color: {{$color[0]}}; cursor: pointer;">
-                                <div onclick="changeUserType({{$key}})">{{$color[1]}}</div>
+                            <td style="background-color: {{$color[0]}}; cursor: pointer;" onclick="changeUserType({{$key}})">
+                                <span>{{$color[1]}}</span>
                             </td>
                         @endforeach
                     </tr>
@@ -159,7 +162,6 @@
             form.action = '{{ route('dashboard.report.export.allUsersActivity') }}';
 
             document.getElementById('filter').submit();
-            form.action = '';
         }
 
         function extractIds(route) {

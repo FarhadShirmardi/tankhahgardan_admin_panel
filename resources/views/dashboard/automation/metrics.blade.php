@@ -4,7 +4,7 @@
     متریک‌ها
 @endsection
 @section('content')
-    <form method="get" action="">
+    <form method="get" action="" id="filter">
         {{ csrf_field() }}
         <div class="pb-5 pt-5 justify-content-center">
             <div class="row pt-5">
@@ -37,38 +37,26 @@
             </div>
             <div class="row pt-5 justify-content-center">
                 <input class="btn btn-success" type="submit" value="ثبت">
+                @if(auth()->user()->can('export_automation_metrics'))
+                    <input class="btn btn-warning mr-2" type="button" value="فایل خروجی" onclick="exportClick()">
+                @endif
             </div>
         </div>
     </form>
     <div class="col-md-4">{{ $metrics->appends(request()->input())->links() }}</div>
-    <div id="ajax-table" style="overflow-x: auto;">
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>ردیف</th>
-                <th onclick="sortTable('date')">تاریخ</th>
-                @foreach($metricKeys as $key)
-                    <th style="direction: ltr;" onclick="sortTable({{$key}})
-                        "><p>{{$key}}</p></th>
-                @endforeach
-            </tr>
-            </thead>
-            <tbody>
-            @foreach($metrics as $metric)
-                <tr>
-                    <td>{{($metrics->currentPage() - 1) * $metrics->perPage() + $loop->iteration}}</td>
-                    <td>{{ $metric->date }}</td>
-                    @foreach($metricKeys as $key)
-                        <td>{{$metric['metric'][$key]}}</td>
-                    @endforeach
-                </tr>
-            @endforeach
-            </tbody>
-        </table>
-    </div>
+
+    @include('dashboard.automation.metricsList')
 
     {{ $metrics->appends(request()->input())->links() }}
 @endsection
 @section('scripts')
+    <script>
+        function exportClick() {
+            var form = document.getElementById('filter');
+            form.action = '{{ route('dashboard.automation.export_metrics') }}';
 
+            document.getElementById('filter').submit();
+            form.action = '';
+        }
+    </script>
 @endsection
