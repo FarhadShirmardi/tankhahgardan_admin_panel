@@ -190,4 +190,5 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('changePassword', 'Dashboard\ReportController@changePasswordView')->name('changePasswordView');
         Route::post('changePassword', 'Dashboard\ReportController@changePassword')->name('changePassword');
     });
+    Route::get('test', 'Dashboard\ReportController@monthlyReport');
 });

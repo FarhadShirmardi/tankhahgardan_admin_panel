@@ -886,4 +886,13 @@ class Helpers
         }
         return $percent;
     }
+
+    public static function normalizeDate($year, $month, $day, $str = '/'): string
+    {
+        return implode($str, [
+            str_pad($year, 4, '0', STR_PAD_LEFT),
+            str_pad($month, 2, '0', STR_PAD_LEFT),
+            str_pad($day, 2, '0', STR_PAD_LEFT),
+        ]);
+    }
 }

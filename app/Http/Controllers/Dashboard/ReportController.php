@@ -542,7 +542,7 @@ class ReportController extends Controller
             ->selectRaw("CONCAT_WS(' ', IFNULL(users.name, ''), IFNULL(users.family, '')) as name")
             ->addSelect('users.id as id')
             ->addSelect('phone_number')
-            ->addSelect('users.created_at as registered_at')
+            ->addSelect('users.verification_time as registered_at')
             ->selectSub($paymentCountQuery, 'payment_count')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($noteCountQuery, 'note_count')
@@ -1296,7 +1296,7 @@ class ReportController extends Controller
             'date_time' => now()->toDateTimeString(),
             'description' => LogType::getDescription($type, $panelUser),
             'old_json' => $oldResponse,
-            'new_json' => $feedback->feedbackResponse()->first(),
+            'new_json' => $feedback->feedbackResponse()->first() ?? json_encode([]),
         ]);
 
         return redirect()->route('dashboard.viewFeedback', ['feedback_id' => $id])->with('success', 'با موفقیت انجام شد');
@@ -1509,5 +1509,53 @@ class ReportController extends Controller
         return redirect()
             ->route('dashboard.report.allUsersActivity', ['user_ids' => $userIds])
             ->with('success', 'با موفقیت انجام شد');
+    }
+
+    public function monthlyReport(Request $request)
+    {
+        $startTime = now();
+        $date = explode('/', Helpers::gregorianDateStringToJalali(now()->toDateString()));
+        $startDate = Helpers::normalizeDate($date[0], $date[1], $date[2]);
+        $startDate[-2] = '0';
+        $startDate[-1] = '1';
+        $startDate = explode('-', str_replace('/', '-', Helpers::jalaliDateStringToGregorian($startDate)));
+        $startDate = Helpers::normalizeDate($startDate[0], $startDate[1], $startDate[2], '-');
+        $startDate = $request->input('start_date', $startDate);
+        $endDate = $request->input('end_date', now()->toDateString());
+        $monthUsers = UserReport::query()
+            ->whereBetween('registered_at', [$startDate, $endDate])
+            ->orderBy('id')
+            ->get();
+
+        $monthUsersReal = User::query()
+            ->with(['devices', 'userStatus'])
+            ->whereIn('id', $monthUsers->pluck('id')->toArray())
+            ->orderBy('id')
+            ->get();
+
+        $result = collect();
+        foreach ($monthUsers as $key => $monthUser) {
+            /** @var User $user */
+            $user = $monthUsersReal->skip($key)->first();
+            $result->push([
+                'id' => $user->id,
+                'platform' => $user->devices->first()->platform,
+                'is_premium' => in_array($user->premium_state, [2, 3]),
+                'price_id' => $user->userStatus[0]->price_id ?? null,
+                'transaction_10+' => ($monthUser->payment_count + $monthUser->receive_count) > 10,
+            ]);
+        }
+        $finalResult = $result->groupBy(['platform', 'is_premium', 'price_id', 'transaction_10+']);
+        $result = collect();
+        foreach ($finalResult as $platform => $premiumItems) {
+            foreach ($premiumItems as $isPremium => $priceIdItems) {
+                foreach ($priceIdItems as $priceId => $transactionItems) {
+
+                }
+                dd($platform, $isPremium);
+            }
+        }
+        dd($result->toArray(), now()->diffForHumans($startTime), $result->groupBy('premium_state'));
+//        return
     }
 }
