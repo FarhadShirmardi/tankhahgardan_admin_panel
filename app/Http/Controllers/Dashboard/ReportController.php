@@ -13,6 +13,7 @@ use App\Constants\PremiumConstants;
 use App\Constants\ProjectUserState;
 use App\Constants\UserPremiumState;
 use App\Device;
+use App\Exports\MonthlyExport;
 use App\Feedback;
 use App\FeedbackResponse;
 use App\FeedbackTitle;
@@ -1513,49 +1514,8 @@ class ReportController extends Controller
 
     public function monthlyReport(Request $request)
     {
-        $startTime = now();
-        $date = explode('/', Helpers::gregorianDateStringToJalali(now()->toDateString()));
-        $startDate = Helpers::normalizeDate($date[0], $date[1], $date[2]);
-        $startDate[-2] = '0';
-        $startDate[-1] = '1';
-        $startDate = explode('-', str_replace('/', '-', Helpers::jalaliDateStringToGregorian($startDate)));
-        $startDate = Helpers::normalizeDate($startDate[0], $startDate[1], $startDate[2], '-');
-        $startDate = $request->input('start_date', $startDate);
-        $endDate = $request->input('end_date', now()->toDateString());
-        $monthUsers = UserReport::query()
-            ->whereBetween('registered_at', [$startDate, $endDate])
-            ->orderBy('id')
-            ->get();
-
-        $monthUsersReal = User::query()
-            ->with(['devices', 'userStatus'])
-            ->whereIn('id', $monthUsers->pluck('id')->toArray())
-            ->orderBy('id')
-            ->get();
-
-        $result = collect();
-        foreach ($monthUsers as $key => $monthUser) {
-            /** @var User $user */
-            $user = $monthUsersReal->skip($key)->first();
-            $result->push([
-                'id' => $user->id,
-                'platform' => $user->devices->first()->platform,
-                'is_premium' => in_array($user->premium_state, [2, 3]),
-                'price_id' => $user->userStatus[0]->price_id ?? null,
-                'transaction_10+' => ($monthUser->payment_count + $monthUser->receive_count) > 10,
-            ]);
-        }
-        $finalResult = $result->groupBy(['platform', 'is_premium', 'price_id', 'transaction_10+']);
-        $result = collect();
-        foreach ($finalResult as $platform => $premiumItems) {
-            foreach ($premiumItems as $isPremium => $priceIdItems) {
-                foreach ($priceIdItems as $priceId => $transactionItems) {
-
-                }
-                dd($platform, $isPremium);
-            }
-        }
-        dd($result->toArray(), now()->diffForHumans($startTime), $result->groupBy('premium_state'));
-//        return
+        $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
+        $filename = "export/monthlyReport - {$today}" . '.xlsx';
+        Excel::store((new MonthlyExport()), $filename, 'local');
     }
 }
