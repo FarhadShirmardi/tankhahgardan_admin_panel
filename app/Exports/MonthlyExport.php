@@ -12,8 +12,10 @@ use App\Exports\Backups\Shared\MemoExport;
 use App\Exports\Backups\Shared\NoteExport;
 use App\Exports\Backups\Shared\ProjectExport;
 use App\Exports\Backups\Shared\ReminderExport;
+use App\Exports\Monthly\MonthlyActiveUserExport;
 use App\Exports\Monthly\MonthlyOldRegisterExport;
 use App\Exports\Monthly\MonthlyRegisterExport;
+use App\Exports\Monthly\MonthlyUserReturnExport;
 use App\Helpers\Helpers;
 use App\MonthlyReport;
 use Maatwebsite\Excel\Concerns\Exportable;
@@ -42,6 +44,8 @@ class MonthlyExport implements WithMultipleSheets
 
         $sheets[] = new MonthlyRegisterExport($report);
         $sheets[] = new MonthlyOldRegisterExport($report);
+        $sheets[] = new MonthlyUserReturnExport($report);
+        $sheets[] = new MonthlyActiveUserExport($report);
 
         return $sheets;
     }

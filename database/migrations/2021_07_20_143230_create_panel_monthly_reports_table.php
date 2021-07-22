@@ -19,6 +19,9 @@ class CreatePanelMonthlyReportsTable extends Migration
             $table->integer('month');
             $table->json('new_user_data')->nullable();
             $table->json('old_user_data')->nullable();
+            $table->json('user_return_data')->nullable();
+            $table->json('active_user_counts')->nullable();
+            $table->json('user_assessment_data')->nullable();
             $table->timestamps();
         });
     }

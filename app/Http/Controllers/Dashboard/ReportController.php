@@ -10,10 +10,10 @@ use App\Constants\FeedbackStatus;
 use App\Constants\LogType;
 use App\Constants\Platform;
 use App\Constants\PremiumConstants;
+use App\Constants\PremiumDuration;
 use App\Constants\ProjectUserState;
 use App\Constants\UserPremiumState;
 use App\Device;
-use App\Exports\MonthlyExport;
 use App\Feedback;
 use App\FeedbackResponse;
 use App\FeedbackTitle;
@@ -1514,8 +1514,27 @@ class ReportController extends Controller
 
     public function monthlyReport(Request $request)
     {
-        $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
-        $filename = "export/monthlyReport - {$today}" . '.xlsx';
-        Excel::store((new MonthlyExport()), $filename, 'local');
+//        $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
+//        $filename = "export/monthlyReport - {$today}" . '.xlsx';
+//        Excel::store((new MonthlyExport()), $filename, 'local');
+        $date = explode('/', Helpers::gregorianDateStringToJalali(now()->toDateString()));
+        $year = $date[0];
+        $month = $date[1];
+        $startDate = Helpers::normalizeDate($date[0], $date[1], $date[2]);
+        $startDate[-2] = '0';
+        $startDate[-1] = '1';
+        $startDate = explode('-', str_replace('/', '-', Helpers::jalaliDateStringToGregorian($startDate)));
+        $startDate = Helpers::normalizeDate($startDate[0], $startDate[1], $startDate[2], '-');
+        $startDate = Carbon::parse($startDate);
+        $daysAgo = now()->subDays(10)->toDateTimeString();
+        $month5 = now()->subMonths(5)->toDateTimeString();
+        $month4 = now()->subMonths(4)->toDateTimeString();
+
+
+        $prices = PremiumDuration::toArray();
+        return view('dashboard.report.monthlyUserAssessment', [
+            'data' => $finalResult,
+            'prices' => $prices,
+        ]);
     }
 }
