@@ -5,8 +5,10 @@ namespace App\Console\Commands;
 use App\Constants\Platform;
 use App\Constants\PremiumDuration;
 use App\Constants\UserPremiumState;
+use App\Exports\MonthlyExport;
 use App\Helpers\Helpers;
 use App\MonthlyReport;
+use App\PanelFile;
 use App\Payment;
 use App\ProjectUser;
 use App\Receive;
@@ -14,6 +16,7 @@ use App\User;
 use App\UserReport;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Maatwebsite\Excel\Facades\Excel;
 
 class GenerateMonthlyReport extends Command
 {
@@ -41,6 +44,12 @@ class GenerateMonthlyReport extends Command
         parent::__construct();
     }
 
+    private function convertDate($date)
+    {
+        $date = explode('-', str_replace('/', '-', Helpers::jalaliDateStringToGregorian($date)));
+        return Helpers::normalizeDate($date[0], $date[1], $date[2], '-');
+    }
+
     /**
      * Execute the console command.
      *
@@ -54,17 +63,28 @@ class GenerateMonthlyReport extends Command
 
         $date = explode('/', Helpers::gregorianDateStringToJalali(now()->toDateString()));
         $year = $date[0];
-        $month = $date[1];
-        $day = $date[2];
-//        if ($day != 1) {
-//            return;
-//        }
-        $startDate = Helpers::normalizeDate($date[0], $date[1], $date[2]);
-        $startDate[-2] = '0';
-        $startDate[-1] = '1';
-        $startDate = explode('-', str_replace('/', '-', Helpers::jalaliDateStringToGregorian($startDate)));
-        $startDate = Helpers::normalizeDate($startDate[0], $startDate[1], $startDate[2], '-');
-        $endDate = Helpers::normalizeDate($date[0], $date[1], $date[2]);
+        $month = (int)$date[1] - 1;
+
+        $filename = "export/monthlyReport - $year - $month" . '.xlsx';
+        if (PanelFile::query()->where('path', $filename)->exists()) {
+            return;
+        }
+        $panelFile = PanelFile::query()
+            ->create([
+                'user_id' => 0,
+                'path' => $filename,
+                'description' => 'گزارش ماهانه - ' . Helpers::getMonthName($month) . ' - ' . $year,
+                'date_time' => now()->toDateTimeString(),
+            ]);
+
+        $startDate = Helpers::normalizeDate($date[0], $month, 1);
+        $startDate = $this->convertDate($startDate);
+        $endDate = [
+            $year,
+            $month,
+            Helpers::getDayCount($year, $month),
+        ];
+        $endDate = $this->convertDate(implode('/', $endDate));
 
         $report = MonthlyReport::query()->firstOrCreate([
             'year' => $year,
@@ -78,6 +98,8 @@ class GenerateMonthlyReport extends Command
         $report->user_assessment_data = json_encode($this->getUserAssessmentData());
 
         $report->save();
+
+        Excel::store((new MonthlyExport()), $filename, 'local');
 
         $end = now();
         $this->info($end);

@@ -8,6 +8,7 @@ use App\Constants\LogType;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
 use App\Jobs\AutomationMetricExportJob;
+use App\PanelFile;
 use App\PanelUser;
 use App\User;
 use Illuminate\Http\Request;
@@ -225,7 +226,17 @@ class AutomationController extends Controller
     {
         $filter = $this->getMetricsFilter($request);
 
-        $this->dispatch((new AutomationMetricExportJob($filter))->onQueue('activationSms'));
+        $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
+        $filename = "export/automationMetric - {$today}" . '.xlsx';
+        $panelFile = PanelFile::query()
+            ->create([
+                'user_id' => auth()->id(),
+                'path' => $filename,
+                'description' => 'گزارش وضعیت اتوماسیون - ' . str_replace('_', '/', $today),
+                'date_time' => now()->toDateTimeString(),
+            ]);
+
+        $this->dispatch((new AutomationMetricExportJob($filter, $panelFile))->onQueue('activationSms'));
 
         return redirect()->route('dashboard.downloadCenter');
     }

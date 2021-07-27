@@ -15,6 +15,7 @@ use App\Exports\Backups\Shared\ReminderExport;
 use App\Exports\Monthly\MonthlyActiveUserExport;
 use App\Exports\Monthly\MonthlyOldRegisterExport;
 use App\Exports\Monthly\MonthlyRegisterExport;
+use App\Exports\Monthly\MonthlyUserAssessmentExport;
 use App\Exports\Monthly\MonthlyUserReturnExport;
 use App\Helpers\Helpers;
 use App\MonthlyReport;
@@ -38,13 +39,14 @@ class MonthlyExport implements WithMultipleSheets
     {
         $date = explode('/', Helpers::gregorianDateStringToJalali(now()->toDateString()));
         $year = $date[0];
-        $month = $date[1];
+        $month = $date[1] - 1;
         $report = MonthlyReport::query()->where('year', $year)->where('month', $month)->first();
         $sheets = [];
 
         $sheets[] = new MonthlyRegisterExport($report);
         $sheets[] = new MonthlyOldRegisterExport($report);
         $sheets[] = new MonthlyUserReturnExport($report);
+        $sheets[] = new MonthlyUserAssessmentExport($report);
         $sheets[] = new MonthlyActiveUserExport($report);
 
         return $sheets;

@@ -14,6 +14,7 @@ use App\Constants\PremiumDuration;
 use App\Constants\ProjectUserState;
 use App\Constants\UserPremiumState;
 use App\Device;
+use App\Exports\MonthlyExport;
 use App\Feedback;
 use App\FeedbackResponse;
 use App\FeedbackTitle;
@@ -27,6 +28,7 @@ use App\Jobs\FeedbackResponseSms;
 use App\Jobs\ProjectReportExportJob;
 use App\Jobs\UserReportExportJob;
 use App\Note;
+use App\PanelFile;
 use App\PanelUser;
 use App\Payment;
 use App\Project;
@@ -46,6 +48,7 @@ use GuzzleHttp\Client;
 use Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Kavenegar;
 use Maatwebsite\Excel\Facades\Excel;
 use Notification;
@@ -357,8 +360,18 @@ class ReportController extends Controller
     {
         $filter = $this->getAllUserActivityFilter($request);
 
-//        $users = $usersQuery->get();
-        $this->dispatch((new UserReportExportJob($filter))->onQueue('activationSms'));
+
+        $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
+        $filename = "export/allUserActivity - {$today} - " . Str::random('6') . '.xlsx';
+        $panelFile = PanelFile::query()
+            ->create([
+                'user_id' => auth()->id(),
+                'path' => $filename,
+                'description' => 'گزارش وضعیت کاربران - ' . str_replace('_', '/', $today),
+                'date_time' => now()->toDateTimeString(),
+            ]);
+
+        $this->dispatch((new UserReportExportJob($filter, $panelFile))->onQueue('activationSms'));
 
         return redirect()->route('dashboard.downloadCenter');
     }
@@ -367,7 +380,16 @@ class ReportController extends Controller
     {
         $filter = $this->getAllProjectActivityFilter($request);
 
-        $this->dispatch((new ProjectReportExportJob($filter))->onQueue('activationSms'));
+        $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
+        $filename = "export/allProjectActivity - {$today} - " . Str::random('6') . '.xlsx';
+        $panelFile = PanelFile::query()
+            ->create([
+                'user_id' => auth()->id(),
+                'path' => $filename,
+                'description' => 'گزارش وضعیت پروژه - ' . str_replace('_', '/', $today),
+                'date_time' => now()->toDateTimeString(),
+            ]);
+        $this->dispatch((new ProjectReportExportJob($filter, $panelFile))->onQueue('activationSms'));
 
         return redirect()->route('dashboard.downloadCenter');
     }
@@ -1514,9 +1536,9 @@ class ReportController extends Controller
 
     public function monthlyReport(Request $request)
     {
-//        $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
-//        $filename = "export/monthlyReport - {$today}" . '.xlsx';
-//        Excel::store((new MonthlyExport()), $filename, 'local');
+        $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
+        $filename = "export/monthlyReport - {$today}" . '.xlsx';
+        Excel::store((new MonthlyExport()), $filename, 'local');
         $date = explode('/', Helpers::gregorianDateStringToJalali(now()->toDateString()));
         $year = $date[0];
         $month = $date[1];

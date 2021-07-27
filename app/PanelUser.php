@@ -22,7 +22,7 @@ class PanelUser extends Authenticatable
 
     public function files()
     {
-        return $this->hasMany(PanelFile::class, 'user_id', 'id');
+        return $this->hasMany(PanelFile::class, 'user_id', 'id')->orWhere('user_id', 0);
     }
 
     public function logs()
