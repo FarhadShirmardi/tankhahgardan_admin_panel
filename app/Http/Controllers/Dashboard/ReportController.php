@@ -14,7 +14,6 @@ use App\Constants\PremiumDuration;
 use App\Constants\ProjectUserState;
 use App\Constants\UserPremiumState;
 use App\Device;
-use App\Exports\MonthlyExport;
 use App\Feedback;
 use App\FeedbackResponse;
 use App\FeedbackTitle;
@@ -40,6 +39,7 @@ use App\StepByStep;
 use App\User;
 use App\UserReport;
 use App\UserStatus;
+use App\UserStatusLog;
 use Carbon\Carbon;
 use DB;
 use Exception;
@@ -1534,29 +1534,33 @@ class ReportController extends Controller
             ->with('success', 'با موفقیت انجام شد');
     }
 
-    public function monthlyReport(Request $request)
+    public function extendUserReport()
     {
-        $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
-        $filename = "export/monthlyReport - {$today}" . '.xlsx';
-        Excel::store((new MonthlyExport()), $filename, 'local');
-        $date = explode('/', Helpers::gregorianDateStringToJalali(now()->toDateString()));
-        $year = $date[0];
-        $month = $date[1];
-        $startDate = Helpers::normalizeDate($date[0], $date[1], $date[2]);
-        $startDate[-2] = '0';
-        $startDate[-1] = '1';
-        $startDate = explode('-', str_replace('/', '-', Helpers::jalaliDateStringToGregorian($startDate)));
-        $startDate = Helpers::normalizeDate($startDate[0], $startDate[1], $startDate[2], '-');
-        $startDate = Carbon::parse($startDate);
-        $daysAgo = now()->subDays(10)->toDateTimeString();
-        $month5 = now()->subMonths(5)->toDateTimeString();
-        $month4 = now()->subMonths(4)->toDateTimeString();
-
-
-        $prices = PremiumDuration::toArray();
-        return view('dashboard.report.monthlyUserAssessment', [
-            'data' => $finalResult,
-            'prices' => $prices,
-        ]);
+        $logs = UserStatusLog::query()
+            ->with('user')
+            ->whereNotNull('transaction_id')
+            ->orderBy('created_at')
+            ->get();
+        $logs = $logs->groupBy('user_id');
+        $results = collect();
+        $now = now()->toDateTimeString();
+        foreach ($logs as $items) {
+            $lastItem = $items->last();
+            if ($lastItem->end_date < $now) {
+                /** @var User $user */
+                $user = $lastItem->user;
+                $results->push([
+                    'phone_number' => $user->phone_number,
+                    'username' => ($user->name or $user->family) ? "$user->name $user->family" : '',
+                    'price' => PremiumDuration::getSecondTitle($lastItem->price_id),
+                    'user_count' => $lastItem->user_count,
+                    'volume_size' => $lastItem->volume_size,
+                    'days' => now()->diffInDays(Carbon::parse($lastItem->end_date)),
+                    'end_date' => $lastItem->end_date,
+                ]);
+            }
+        }
+        $results = $results->sortBy('days');
+        return $results->values();
     }
 }
