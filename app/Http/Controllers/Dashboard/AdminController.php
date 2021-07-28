@@ -42,7 +42,9 @@ class AdminController extends Controller
             'edit_automation' => 'ثبت زنگ و تغییر استیت کاربران',
             'export_automation_metrics' => 'خروجی گزارش متریک‌ها'],
 
-        ['edit_premium' => 'افزایش کیف پول و ایجاد طرح', 'view_premium_report' => 'نمایش گزارش معیار سنجش پولی'],
+        ['edit_premium' => 'افزایش کیف پول و ایجاد طرح',
+            'view_premium_report' => 'نمایش گزارش معیار سنجش پولی',
+            'view_extend_user_report' => 'نمایش گزارش کاربرانی که تمدید نکرده‌اند'],
         ['view_log_center' => 'نمایش مرکز لاگ'],
     ];
 

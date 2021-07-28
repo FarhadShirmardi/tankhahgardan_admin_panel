@@ -12,6 +12,7 @@ use App\Constants\Platform;
 use App\Constants\PremiumConstants;
 use App\Constants\PremiumDuration;
 use App\Constants\ProjectUserState;
+use App\Constants\PurchaseType;
 use App\Constants\UserPremiumState;
 use App\Device;
 use App\Feedback;
@@ -485,7 +486,8 @@ class ReportController extends Controller
         $imprestCountQuery =
             Imprest::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
         $fileCountQuery = File::query()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
-        $imageCountQuery = Image::query()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $imageCountQuery =
+            Image::query()->withoutTrashed()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
         $deviceCountQuery = Device::query()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
         $feedbackCountQuery = Feedback::query()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
 
@@ -499,7 +501,7 @@ class ReportController extends Controller
             Imprest::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('MAX(created_at)')->toSql();
 
         $imageSizeQuery =
-            Image::whereColumn('user_id', 'users.id')->selectRaw('IFNULL(sum(size), 0) / 1024 / 1024')->getQuery();
+            Image::withoutTrashed()->whereColumn('user_id', 'users.id')->selectRaw('IFNULL(sum(size), 0) / 1024 / 1024')->getQuery();
 
         $projectCount =
             ProjectUser::withoutTrashed()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
@@ -1534,33 +1536,72 @@ class ReportController extends Controller
             ->with('success', 'با موفقیت انجام شد');
     }
 
-    public function extendUserReport()
+    public function userExtendReport(Request $request)
     {
+        $filter = [
+            'start_day' => $request->input('start_day', 5),
+            'end_day' => $request->input('end_day', 10),
+            'start_user' => $request->input('start_user', 0),
+            'end_user' => $request->input('end_user', 100),
+            'start_volume' => $request->input('start_volume', 0),
+            'end_volume' => $request->input('end_volume', 100000),
+        ];
         $logs = UserStatusLog::query()
             ->with('user')
-            ->whereNotNull('transaction_id')
+            ->whereIn('price_id', [PremiumDuration::YEAR, PremiumDuration::MONTH, PremiumDuration::SPECIAL])
+            ->where('status', 1)
             ->orderBy('created_at')
             ->get();
         $logs = $logs->groupBy('user_id');
         $results = collect();
         $now = now()->toDateTimeString();
         foreach ($logs as $items) {
-            $lastItem = $items->last();
+            $lastItem = $items->pop();
             if ($lastItem->end_date < $now) {
                 /** @var User $user */
                 $user = $lastItem->user;
+                $userCount = $lastItem->user_count;
+                $volumeSize = $lastItem->volume_size;
+                $day = now()->diffInDays(Carbon::parse($lastItem->end_date));
+                if ($lastItem->type == PurchaseType::UPGRADE) {
+                    $preLast = $items->last();
+                    $userCount += $preLast->user_count;
+                    $volumeSize += $preLast->volume_size;
+                }
+                if ($day > $filter['end_day'] or $day < $filter['start_day']) {
+                    continue;
+                }
+                if ($userCount > $filter['end_user'] or $userCount < $filter['start_user']) {
+                    continue;
+                }
+                if ($volumeSize > $filter['end_volume'] or $volumeSize < $filter['start_volume']) {
+                    continue;
+                }
                 $results->push([
+                    'id' => $user->id,
                     'phone_number' => $user->phone_number,
                     'username' => ($user->name or $user->family) ? "$user->name $user->family" : '',
                     'price' => PremiumDuration::getSecondTitle($lastItem->price_id),
-                    'user_count' => $lastItem->user_count,
-                    'volume_size' => $lastItem->volume_size,
-                    'days' => now()->diffInDays(Carbon::parse($lastItem->end_date)),
+                    'user_count' => $userCount,
+                    'volume_size' => $volumeSize,
+                    'days' => $day,
                     'end_date' => $lastItem->end_date,
                 ]);
             }
         }
-        $results = $results->sortBy('days');
-        return $results->values();
+        $filter['start_user'] = $results->min('user_count');
+        $filter['end_user'] = $results->max('user_count');
+        $filter['start_volume'] = $results->min('volume_size');
+        $filter['end_volume'] = $results->max('volume_size');
+        $results = $results->sortBy('days')->values();
+        $users = Helpers::paginateCollection(
+            $results,
+            100
+        );
+//        return $results;
+        return view('dashboard.report.userExtend', [
+            'users' => $users,
+            'filter' => $filter,
+        ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\AutomationCall;
 use App\AutomationData;
 use App\AutomationMetric;
 use App\Constants\LogType;
@@ -274,8 +275,18 @@ class AutomationController extends Controller
 
     public function typeItem(Request $request, $type)
     {
+        $callQuery = AutomationCall::query()->whereColumn('user_id', 'automation_data.id')
+            ->selectRaw('count(*)');
+        $missedCallQuery = AutomationCall::query()->whereColumn('user_id', 'automation_data.id')
+            ->where('is_missed_call', true)
+            ->selectRaw('count(*)');
         $automationData = AutomationData::query()
+            ->selectSub($callQuery, 'total_count')
+            ->selectSub($missedCallQuery, 'missed_count')
+            ->addSelect('automation_data.*')
             ->where('automation_state', $type)
+            ->orderBy('total_count')
+            ->orderBy('missed_count', 'desc')
             ->orderBy('transaction_count', 'desc')
             ->paginate();
 
@@ -321,6 +332,7 @@ class AutomationController extends Controller
         $data = [
             'text' => $request->text,
             'type' => $user->automationData()->first()->automation_state,
+            'is_missed_call' => false,
         ];
         if (!$id) {
             $data['call_time'] = now()->toDateTimeString();
@@ -339,6 +351,31 @@ class AutomationController extends Controller
             'date_time' => now()->toDateTimeString(),
             'description' => LogType::getDescription($type, $panelUser),
             'old_json' => $oldCall,
+            'new_json' => $call,
+        ]);
+
+        return redirect()->route('dashboard.automation.callLogs', ['id' => $userId]);
+    }
+
+    public function missCall($userId)
+    {
+        $user = User::query()->findOrFail($userId);
+        $call = $user->automationCall()->create([
+            'text' => null,
+            'is_missed_call' => true,
+            'type' => $user->automationData()->first()->automation_state,
+            'call_time' => now()->toDateTimeString(),
+        ]);
+
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $type = LogType::NEW_AUTOMATION_MISS_CALL;
+        $panelUser->logs()->create([
+            'user_id' => $userId,
+            'type' => $type,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription($type, $panelUser),
+            'old_json' => null,
             'new_json' => $call,
         ]);
 

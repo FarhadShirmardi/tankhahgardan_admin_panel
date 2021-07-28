@@ -15,18 +15,26 @@
                 <div class="col-md-6 row">
                     <label class="col-md-5 col-form-label text-md-left">متن</label>
                     <div class="ms-list col-md-7">
-                        <textarea name="text" id="text" cols="50" rows="10">{{ $call->text ?? '' }}</textarea>
+                        <textarea name="text" id="text" required cols="50" rows="10">{{ $call->text ?? '' }}</textarea>
                     </div>
                 </div>
             </div>
             <div class="pt-5 pb-3 justify-content-center align-center row">
-                <div class="col-md-2">
-                    @if($id == 0)
+                @if($id == 0)
+                    <div class="col-md-3"></div>
+                    <div class="col-md-3">
                         <input class="form-control btn btn-success" type="submit" value="افزودن">
-                    @else
-                        <input class="form-control btn btn-warning" type="submit" value="ویرایش">
-                    @endif
-                </div>
+                    </div>
+                    <div class="col-md-3">
+                        <a class="form-control btn btn-danger"
+                           href="{{ route('dashboard.automation.missCall', ['userId' => $user->id]) }}">
+                            ثبت عدم پاسخ
+                        </a>
+                    </div>
+                    <div class="col-md-3"></div>
+                @else
+                    <input class="form-control btn btn-warning" type="submit" value="ویرایش">
+                @endif
             </div>
         </div>
     </form>
