@@ -18,15 +18,17 @@ class AutomationMetricExportJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private $filter;
+    private $user;
 
     /**
      * Create a new job instance.
      *
      * @param $filter
      */
-    public function __construct($filter)
+    public function __construct($user, $filter)
     {
         $this->filter = $filter;
+        $this->user = $user;
     }
 
     /**
@@ -48,7 +50,7 @@ class AutomationMetricExportJob implements ShouldQueue
             Excel::store((new MetricsExport($metrics)), $filename, 'local');
             PanelFile::query()
                 ->create([
-                    'user_id' => auth()->id(),
+                    'user_id' => $this->user->id,
                     'path' => $filename,
                     'description' => 'گزارش وضعیت اتوماسیون - ' . str_replace('_', '/', $today),
                     'date_time' => now()->toDateTimeString(),

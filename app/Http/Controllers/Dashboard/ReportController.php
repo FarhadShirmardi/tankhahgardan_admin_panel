@@ -357,7 +357,7 @@ class ReportController extends Controller
         $filter = $this->getAllUserActivityFilter($request);
 
 //        $users = $usersQuery->get();
-        $this->dispatch((new UserReportExportJob($filter))->onQueue('activationSms'));
+        $this->dispatch((new UserReportExportJob(auth()->user(), $filter))->onQueue('activationSms'));
 
         return redirect()->route('dashboard.downloadCenter');
     }
@@ -366,7 +366,7 @@ class ReportController extends Controller
     {
         $filter = $this->getAllProjectActivityFilter($request);
 
-        $this->dispatch((new ProjectReportExportJob($filter))->onQueue('activationSms'));
+        $this->dispatch((new ProjectReportExportJob(auth()->user(), $filter))->onQueue('activationSms'));
 
         return redirect()->route('dashboard.downloadCenter');
     }
