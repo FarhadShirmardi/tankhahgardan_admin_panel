@@ -1,21 +1,24 @@
-version: '2'
+version: '2.4'
 
 services:
   nginx-php-fpm:
-    build:
-      context: ./
-      dockerfile: docker/Dockerfile
+    image: "ahpiri/tankhah-production:4"
+    #build:
+    #  context: ./
+    #  dockerfile: docker/Dockerfile
     volumes:
       - ./:/usr/share/nginx/html/home
+      - $PWD/docker/nginx.conf:/etc/nginx/nginx.conf
+      - $PWD/docker/default.conf:/etc/nginx/conf.d/default.conf
+      - $PWD/docker/supervisord.conf.new:/etc/supervisord.conf
+    ports:
+      - "7979:8185"
     networks:
-      vpcbr:
-        ipv4_address: 10.25.0.5
+      tankhahgardan_vpcbr:
+        ipv4_address: 10.4.0.100
     restart: always
 
 networks:
-  vpcbr:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 10.25.0.0/16
-          gateway: 10.25.0.1
+  tankhahgardan_vpcbr:
+    external: true
+
