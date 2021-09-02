@@ -450,12 +450,6 @@ class ManagementController extends Controller
 
                 if (!$id and isset($request->template) and $request->template != '') {
                     $this->dispatch((new PromoCodeSmsJob($user->full_phone_number, $request->template, $code))->onQueue('activationSms'));
-                    SmsLog::query()->create([
-                        'user_id' => $user->id,
-                        'phone_number' => $user->full_phone_number,
-                        'type' => PromoCode::class,
-                        'text' => $request->template . ' - ' . $code,
-                    ]);
                 }
                 if ($id == 0 and !$isHidden) {
                     dispatch(
