@@ -10,24 +10,27 @@ use Illuminate\Queue\SerializesModels;
 use App\FirebaseToken;
 use Kavenegar;
 use Log;
+use App\PromoCode;
+use App\Helpers\Helpers;
 
 class PromoCodeSmsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private $phoneNumber;
-    private $template;
-    private $code;
+    /**
+     * @var PromoCode
+     */
+    private $promoCode;
 
     /**
      * Create a new job instance.
      *
      */
-    public function __construct($phoneNumber, $template, $code)
+    public function __construct($phoneNumber, PromoCode $promoCode)
     {
         $this->phoneNumber = $phoneNumber;
-        $this->template = $template;
-        $this->code = $code;
+        $this->promoCode = $promoCode;
     }
 
     /**
@@ -37,7 +40,10 @@ class PromoCodeSmsJob implements ShouldQueue
      */
     public function handle()
     {
-        $result = Kavenegar::VerifyLookup($this->phoneNumber, $this->code, '', '', $this->template, 'sms');
+        $percent = Helpers::getPersianString($this->promoCode->discount_percent);
+        $code = $this->promoCode->code;
+        $datetime = explode(' ', Helpers::convertDateTimeToJalali($this->promoCode->end_date))[0];
+        $result = Kavenegar::VerifyLookup($this->phoneNumber, $percent, $code, $datetime, 'active-18Day', 'sms');
         if ($result) {
             $message = $result[0]->statustext;
             Log::info('Send to kavenegar   ====>   ' . $this->phoneNumber . '  ' . $message);
