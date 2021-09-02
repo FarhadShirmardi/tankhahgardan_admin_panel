@@ -449,7 +449,7 @@ class ManagementController extends Controller
                 $promoCode = $campaign->promoCodes()->updateOrCreate(['id' => $id], $request->all());
 
                 if (!$id and isset($request->template) and $request->template != '') {
-                    $this->dispatch((new PromoCodeSmsJob($user->full_phone_number, $request->template, $code))->onQueue('activationSms'));
+                    $this->dispatch((new PromoCodeSmsJob($user->phone_number, $request->template, $code))->onQueue('activationSms'));
                 }
                 if ($id == 0 and !$isHidden) {
                     dispatch(
