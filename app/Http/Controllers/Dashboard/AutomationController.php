@@ -225,7 +225,7 @@ class AutomationController extends Controller
     {
         $filter = $this->getMetricsFilter($request);
 
-        $this->dispatch((new AutomationMetricExportJob($filter))->onQueue('activationSms'));
+        $this->dispatch((new AutomationMetricExportJob(auth()->user(), $filter))->onQueue('activationSms'));
 
         return redirect()->route('dashboard.downloadCenter');
     }
