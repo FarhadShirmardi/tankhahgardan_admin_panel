@@ -1296,7 +1296,7 @@ class ReportController extends Controller
             'date_time' => now()->toDateTimeString(),
             'description' => LogType::getDescription($type, $panelUser),
             'old_json' => $oldResponse,
-            'new_json' => $feedback->feedbackResponse()->first(),
+            'new_json' => $feedback->feedbackResponse()->first() ?? json_encode([]),
         ]);
 
         return redirect()->route('dashboard.viewFeedback', ['feedback_id' => $id])->with('success', 'با موفقیت انجام شد');
