@@ -886,4 +886,28 @@ class Helpers
         }
         return $percent;
     }
+
+    public static function normalizeDate($year, $month, $day, $str = '/'): string
+    {
+        return implode($str, [
+            str_pad($year, 4, '0', STR_PAD_LEFT),
+            str_pad($month, 2, '0', STR_PAD_LEFT),
+            str_pad($day, 2, '0', STR_PAD_LEFT),
+        ]);
+    }
+
+    public static function isLeapYear($year)
+    {
+        if ($year > 0) {
+            $y = $year - 474;
+        } else {
+            $y = 473;
+        }
+        return ((((($y % 2820) + 474) + 38) * 682) % 2816) < 682;
+    }
+
+    public static function getDayCount($year, $month)
+    {
+        return $month <= 6 ? 31 : ($month < 12 ? 30 : (self::isLeapYear($year) ? 30 : 29));
+    }
 }

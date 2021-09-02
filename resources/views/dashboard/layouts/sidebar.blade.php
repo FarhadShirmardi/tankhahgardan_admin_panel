@@ -124,10 +124,23 @@
                     </ul>
                 </li>
                 @endif
-                @if(auth()->user()->can('view_premium_report'))
+                @if(auth()->user()->can('view_premium_report') or auth()->user()->can('view_extend_user_report'))
                     <li class="nav-item nav-dropdown">
-                        <a class="nav-link" href="{{ route('dashboard.report.premiumReport') }}"><i
-                                class="icon-wallet"></i> گزارش معیارهای سنجش پولی</a>
+                        <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-wallet"></i>گزارش‌های پولی</a>
+                        <ul class="nav-dropdown-items">
+                            @if(auth()->user()->can('view_premium_report'))
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('dashboard.report.premiumReport') }}"><i
+                                            class="icon-list"></i> گزارش معیارهای سنجش پولی</a>
+                                </li>
+                            @endif
+                            @if(auth()->user()->can('view_extend_user_report'))
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('dashboard.report.userExtendReport') }}"><i
+                                            class="icon-list"></i> گزارش کاربران تمدید نکرده</a>
+                                </li>
+                            @endif
+                        </ul>
                     </li>
                 @endif
                 <li class="nav-item nav-dropdown">

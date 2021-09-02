@@ -253,7 +253,7 @@ class FirebaseController extends Controller
                 $delay = $sendTime;
             }
 
-            dispatch(new AnnouncementJob($announcement))->onQueue('activationSms')
+            dispatch(new AnnouncementJob($announcement))->onQueue('activationSms')->onConnection('sync')
                 ->delay($delay);
         } catch (Exception $exception) {
             dd($exception);

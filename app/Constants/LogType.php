@@ -27,6 +27,7 @@ class LogType
 
     const NEW_AUTOMATION_CALL = 13;
     const EDIT_AUTOMATION_CALL = 14;
+    const NEW_AUTOMATION_MISS_CALL = 20;
 
     const EDIT_WALLET = 15;
     const NEW_INVOICE = 16;
@@ -85,6 +86,8 @@ class LogType
                 return $user->name . ' یک تماس را ویرایش کرد.';
             case self::DELETE_INVOICE:
                 return $user->name . ' یک پیش‌فاکتور را حذف کرد.';
+            case self::NEW_AUTOMATION_MISS_CALL:
+                return $user->name . ' یک تماس بی پاسخ ثبت کرد.';
         }
     }
 
@@ -129,6 +132,8 @@ class LogType
                 return 'ویرایش تماس اتوماسیون';
             case self::DELETE_INVOICE:
                 return 'اتمام پیش‌فاکتور';
+            case self::NEW_AUTOMATION_MISS_CALL:
+                return 'ثبت تماس بی پاسخ';
             default:
                 return '';
         }

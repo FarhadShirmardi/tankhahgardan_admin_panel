@@ -196,3 +196,15 @@ input, button, select, optgroup, textarea {
     max-width: 300px;
     word-wrap: break-word;
 }
+
+.badge-corner {
+    background-color: black;
+    color: white;
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    border-radius: 16px;
+    top: -10px;
+    right: 5px;
+}

@@ -98,6 +98,10 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
                     ->get('projectActivity', 'Dashboard\ReportController@exportAllProjectsActivity')
                     ->name('allProjectsActivity');
             });
+
+            Route::middleware(['permission:view_extend_user_report'])
+                ->get('userExtendReport', 'Dashboard\ReportController@userExtendReport')
+                ->name('userExtendReport');
         });
 
         Route::post('extractUserIds', 'Dashboard\ReportController@extractUserIds')->name('extractUserIds');
@@ -177,6 +181,7 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
             Route::post('burnUser/{id}', 'Dashboard\AutomationController@burnUser')->name('burnUser');
             Route::get('call/{userId}/{id}', 'Dashboard\AutomationController@newCallView')->name('callView');
             Route::post('newCall/{userId}/{id}', 'Dashboard\AutomationController@newCall')->name('newCall');
+            Route::get('missCall/{userId}', 'Dashboard\AutomationController@missCall')->name('missCall');
         });
 
         Route::group(['middleware' => ['permission:view_transactions']], function () {

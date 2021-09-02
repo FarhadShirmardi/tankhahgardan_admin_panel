@@ -22,6 +22,7 @@
                 <th>نام و نام‌خانوادگی</th>
                 <th>تعداد تراکنش</th>
                 <th>آخرین ثبت</th>
+                <th>تماس‌ها</th>
             </tr>
             </thead>
             <tbody>
@@ -35,6 +36,19 @@
                     <td class="ltr" style="text-align: right">{{ $item['max_time'] ?
                     \App\Helpers\Helpers::convertDateTimeToJalali
                     ($item['max_time']) : '' }}</td>
+                    <td>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <img src="{{ asset('dashboard/icons/missed-call.png') }}" width="24" alt="">
+                                <div class="badge-corner"><span>{{ $item['missed_count'] }}</span></div>
+                            </div>
+                            <div class="col-md-6">
+                                <img src="{{ asset('dashboard/icons/phone-call.png') }}" width="24" alt="">
+                                <div class="badge-corner"><span>{{ $item['total_count'] - $item['missed_count']
+                                }}</span></div>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
             @endforeach
             </tbody>

@@ -12,5 +12,6 @@ class AutomationCall extends Model
         'text',
         'type',
         'call_time',
+        'is_missed_call',
     ];
 }
