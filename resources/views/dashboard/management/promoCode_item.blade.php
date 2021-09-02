@@ -81,11 +81,9 @@
                            class="form-control time_picker col-md-7" type="text"
                            name="expire_at">
                 </div>
-                <div class="col-md-4 row">
-                    <label class="col-md-5 col-form-label text-md-left">تمپلیت sms</label>
-                    <input style="width: 100%;" value="" id="template"
-                           class="form-control col-md-7" type="text"
-                           name="template">
+                <div class="row col-md-4">
+                    <label class="col-md-5 col-form-label text-md-left">ارسال sms</label>
+                    <input name="use_template" type="checkbox" class="form-group pull-right"/>
                 </div>
             </div>
             <div class="row pt-2">
