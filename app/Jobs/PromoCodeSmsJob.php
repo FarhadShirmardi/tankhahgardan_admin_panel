@@ -7,13 +7,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Announcement;
 use App\FirebaseToken;
-use App\AnnouncementUser;
-use Kreait\Firebase\Messaging;
-use Kreait\Firebase\Messaging\CloudMessage;
+use Kavenegar;
 use Log;
-use App\Constants\NotificationType;
 
 class PromoCodeSmsJob implements ShouldQueue
 {
