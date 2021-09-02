@@ -17,6 +17,7 @@ use App\Constants\UserStatusType;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendFirebaseNotificationJob;
+use App\Jobs\PromoCodeSmsJob;
 use App\PanelLogCenter;
 use App\PanelUser;
 use App\PromoCode;

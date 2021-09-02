@@ -20,15 +20,17 @@ class ProjectReportExportJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private $filter;
+    private $user;
 
     /**
      * Create a new job instance.
      *
      * @param $filter
      */
-    public function __construct($filter)
+    public function __construct($user, $filter)
     {
         $this->filter = $filter;
+        $this->user = $user;
     }
 
     /**
@@ -44,7 +46,7 @@ class ProjectReportExportJob implements ShouldQueue
         try {
             $panelId = PanelFile::query()
                 ->create([
-                    'user_id' => auth()->id(),
+                    'user_id' => $this->user->id,
                     'path' => $filename,
                     'description' => 'گزارش وضعیت پروژه - ' . str_replace('_', '/', $today),
                     'date_time' => now()->toDateTimeString(),
