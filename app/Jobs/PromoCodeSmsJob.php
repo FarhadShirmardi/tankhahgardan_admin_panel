@@ -42,7 +42,7 @@ class PromoCodeSmsJob implements ShouldQueue
     {
         $percent = Helpers::getPersianString($this->promoCode->discount_percent);
         $code = $this->promoCode->code;
-        $datetime = explode(' ', Helpers::convertDateTimeToJalali($this->promoCode->end_date))[0];
+        $datetime = explode(' ', Helpers::convertDateTimeToJalali($this->promoCode->expire_at))[0];
         $result = Kavenegar::VerifyLookup($this->phoneNumber, $percent, $code, $datetime, 'active-18Day', 'sms');
         if ($result) {
             $message = $result[0]->statustext;
