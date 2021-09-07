@@ -17,6 +17,7 @@ use App\Constants\UserStatusType;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendFirebaseNotificationJob;
+use App\Jobs\PromoCodeSmsJob;
 use App\PanelLogCenter;
 use App\PanelUser;
 use App\PromoCode;
@@ -401,6 +402,7 @@ class ManagementController extends Controller
 
         $isHidden = isset($request->is_hidden) and $request->is_hidden == 'on';
         $isUnlimited = isset($request->is_unlimited) and ($request->is_unlimited == 'on');
+        $useTemplate = isset($request->use_template) and ($request->use_template == 'on');
         $priceId = $request->price_id == 0 ? null : $request->price_id;
 
         $request->merge([
@@ -447,14 +449,8 @@ class ManagementController extends Controller
                 ]);
                 $promoCode = $campaign->promoCodes()->updateOrCreate(['id' => $id], $request->all());
 
-                if (!$id and isset($request->template) and $request->template != '') {
-                    $this->dispatch((new PromoCodeSmsJob($user->full_phone_number, $request->template, $code))->onQueue('activationSms'));
-                    SmsLog::query()->create([
-                        'user_id' => $user->id,
-                        'phone_number' => $user->full_phone_number,
-                        'type' => PromoCode::class,
-                        'text' => $request->template . ' - ' . $code,
-                    ]);
+                if (!$id and $useTemplate) {
+                    $this->dispatch((new PromoCodeSmsJob($user->phone_number, $promoCode))->onQueue('activationSms'));
                 }
                 if ($id == 0 and !$isHidden) {
                     dispatch(
