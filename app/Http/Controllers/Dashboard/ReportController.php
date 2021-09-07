@@ -221,7 +221,7 @@ class ReportController extends Controller
     {
         [$startDate, $endDate] = $this->normalizeDate($request, true);
         if (!$startDate) {
-            $startDate = UserReport::query()->selectRaw('min(Date(registered_at)) as date')->first()->date;
+            $startDate = User::query()->selectRaw('min(Date(created_at)) as date')->first()->date;
         }
 
         return [
