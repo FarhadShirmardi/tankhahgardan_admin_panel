@@ -10,7 +10,9 @@ use App\Constants\FeedbackStatus;
 use App\Constants\LogType;
 use App\Constants\Platform;
 use App\Constants\PremiumConstants;
+use App\Constants\PremiumDuration;
 use App\Constants\ProjectUserState;
+use App\Constants\PurchaseType;
 use App\Constants\UserPremiumState;
 use App\Device;
 use App\Feedback;
@@ -26,6 +28,7 @@ use App\Jobs\FeedbackResponseSms;
 use App\Jobs\ProjectReportExportJob;
 use App\Jobs\UserReportExportJob;
 use App\Note;
+use App\PanelFile;
 use App\PanelUser;
 use App\Payment;
 use App\Project;
@@ -37,6 +40,7 @@ use App\StepByStep;
 use App\User;
 use App\UserReport;
 use App\UserStatus;
+use App\UserStatusLog;
 use Carbon\Carbon;
 use DB;
 use Exception;
@@ -45,6 +49,7 @@ use GuzzleHttp\Client;
 use Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Kavenegar;
 use Maatwebsite\Excel\Facades\Excel;
 use Notification;
@@ -216,7 +221,7 @@ class ReportController extends Controller
     {
         [$startDate, $endDate] = $this->normalizeDate($request, true);
         if (!$startDate) {
-            $startDate = UserReport::query()->selectRaw('min(Date(registered_at)) as date')->first()->date;
+            $startDate = User::query()->selectRaw('min(Date(created_at)) as date')->first()->date;
         }
 
         return [
@@ -356,8 +361,18 @@ class ReportController extends Controller
     {
         $filter = $this->getAllUserActivityFilter($request);
 
-//        $users = $usersQuery->get();
-        $this->dispatch((new UserReportExportJob(auth()->user(), $filter))->onQueue('activationSms'));
+
+        $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
+        $filename = "export/allUserActivity - {$today} - " . Str::random('6') . '.xlsx';
+        $panelFile = PanelFile::query()
+            ->create([
+                'user_id' => auth()->id(),
+                'path' => $filename,
+                'description' => 'گزارش وضعیت کاربران - ' . str_replace('_', '/', $today),
+                'date_time' => now()->toDateTimeString(),
+            ]);
+
+        $this->dispatch((new UserReportExportJob($filter, $panelFile))->onQueue('activationSms'));
 
         return redirect()->route('dashboard.downloadCenter');
     }
@@ -366,7 +381,16 @@ class ReportController extends Controller
     {
         $filter = $this->getAllProjectActivityFilter($request);
 
-        $this->dispatch((new ProjectReportExportJob(auth()->user(), $filter))->onQueue('activationSms'));
+        $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
+        $filename = "export/allProjectActivity - {$today} - " . Str::random('6') . '.xlsx';
+        $panelFile = PanelFile::query()
+            ->create([
+                'user_id' => auth()->id(),
+                'path' => $filename,
+                'description' => 'گزارش وضعیت پروژه - ' . str_replace('_', '/', $today),
+                'date_time' => now()->toDateTimeString(),
+            ]);
+        $this->dispatch((new ProjectReportExportJob($filter, $panelFile))->onQueue('activationSms'));
 
         return redirect()->route('dashboard.downloadCenter');
     }
@@ -462,7 +486,8 @@ class ReportController extends Controller
         $imprestCountQuery =
             Imprest::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
         $fileCountQuery = File::query()->whereColumn('creator_user_id', 'users.id')->selectRaw('count(*)')->getQuery();
-        $imageCountQuery = Image::query()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
+        $imageCountQuery =
+            Image::query()->withoutTrashed()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
         $deviceCountQuery = Device::query()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
         $feedbackCountQuery = Feedback::query()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
 
@@ -476,7 +501,7 @@ class ReportController extends Controller
             Imprest::withoutTrashed()->whereColumn('creator_user_id', 'users.id')->selectRaw('MAX(created_at)')->toSql();
 
         $imageSizeQuery =
-            Image::whereColumn('user_id', 'users.id')->selectRaw('IFNULL(sum(size), 0) / 1024 / 1024')->getQuery();
+            Image::withoutTrashed()->whereColumn('user_id', 'users.id')->selectRaw('IFNULL(sum(size), 0) / 1024 / 1024')->getQuery();
 
         $projectCount =
             ProjectUser::withoutTrashed()->whereColumn('user_id', 'users.id')->selectRaw('count(*)')->getQuery();
@@ -542,7 +567,7 @@ class ReportController extends Controller
             ->selectRaw("CONCAT_WS(' ', IFNULL(users.name, ''), IFNULL(users.family, '')) as name")
             ->addSelect('users.id as id')
             ->addSelect('phone_number')
-            ->addSelect('users.created_at as registered_at')
+            ->addSelect('users.verification_time as registered_at')
             ->selectSub($paymentCountQuery, 'payment_count')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($noteCountQuery, 'note_count')
@@ -1296,7 +1321,7 @@ class ReportController extends Controller
             'date_time' => now()->toDateTimeString(),
             'description' => LogType::getDescription($type, $panelUser),
             'old_json' => $oldResponse,
-            'new_json' => $feedback->feedbackResponse()->first(),
+            'new_json' => $feedback->feedbackResponse()->first() ?? json_encode([]),
         ]);
 
         return redirect()->route('dashboard.viewFeedback', ['feedback_id' => $id])->with('success', 'با موفقیت انجام شد');
@@ -1509,5 +1534,74 @@ class ReportController extends Controller
         return redirect()
             ->route('dashboard.report.allUsersActivity', ['user_ids' => $userIds])
             ->with('success', 'با موفقیت انجام شد');
+    }
+
+    public function userExtendReport(Request $request)
+    {
+        $filter = [
+            'start_day' => $request->input('start_day', 5),
+            'end_day' => $request->input('end_day', 10),
+            'start_user' => $request->input('start_user', 0),
+            'end_user' => $request->input('end_user', 100),
+            'start_volume' => $request->input('start_volume', 0),
+            'end_volume' => $request->input('end_volume', 100000),
+        ];
+        $logs = UserStatusLog::query()
+            ->with('user')
+            ->whereIn('price_id', [PremiumDuration::YEAR, PremiumDuration::MONTH, PremiumDuration::SPECIAL])
+            ->where('status', 1)
+            ->orderBy('created_at')
+            ->get();
+        $logs = $logs->groupBy('user_id');
+        $results = collect();
+        $now = now()->toDateTimeString();
+        foreach ($logs as $items) {
+            $lastItem = $items->pop();
+            if ($lastItem->end_date < $now) {
+                /** @var User $user */
+                $user = $lastItem->user;
+                $userCount = $lastItem->user_count;
+                $volumeSize = $lastItem->volume_size;
+                $day = now()->diffInDays(Carbon::parse($lastItem->end_date));
+                if ($lastItem->type == PurchaseType::UPGRADE) {
+                    $preLast = $items->last();
+                    $userCount += $preLast->user_count;
+                    $volumeSize += $preLast->volume_size;
+                }
+                if ($day > $filter['end_day'] or $day < $filter['start_day']) {
+                    continue;
+                }
+                if ($userCount > $filter['end_user'] or $userCount < $filter['start_user']) {
+                    continue;
+                }
+                if ($volumeSize > $filter['end_volume'] or $volumeSize < $filter['start_volume']) {
+                    continue;
+                }
+                $results->push([
+                    'id' => $user->id,
+                    'phone_number' => $user->phone_number,
+                    'username' => ($user->name or $user->family) ? "$user->name $user->family" : '',
+                    'price' => PremiumDuration::getSecondTitle($lastItem->price_id),
+                    'user_count' => $userCount,
+                    'volume_size' => $volumeSize,
+                    'days' => $day,
+                    'end_date' => $lastItem->end_date,
+                ]);
+            }
+        }
+        $filter['start_user'] = $results->min('user_count');
+        $filter['end_user'] = $results->max('user_count');
+        $filter['start_volume'] = $results->min('volume_size');
+        $filter['end_volume'] = $results->max('volume_size');
+        $results = $results->sortBy('days')->values();
+        $users = Helpers::paginateCollection(
+            $results,
+            100
+        );
+//        return $results;
+        return view('dashboard.report.userExtend', [
+            'users' => $users,
+            'filter' => $filter,
+        ]);
     }
 }

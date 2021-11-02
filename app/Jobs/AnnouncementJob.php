@@ -2,18 +2,16 @@
 
 namespace App\Jobs;
 
+use App\Announcement;
+use App\Constants\NotificationType;
+use App\FirebaseToken;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Announcement;
-use App\FirebaseToken;
-use App\AnnouncementUser;
 use Kreait\Firebase\Messaging;
 use Kreait\Firebase\Messaging\CloudMessage;
-use Log;
-use App\Constants\NotificationType;
 
 class AnnouncementJob implements ShouldQueue
 {
@@ -50,8 +48,8 @@ class AnnouncementJob implements ShouldQueue
         dispatch(
             (new SendFirebaseNotificationJob([
                 'type' => NotificationType::ANNOUCEMENT,
-                'announcement_id' => $announcement->id
-            ]))->onQueue('activationSms')
+                'announcement_id' => $announcement->id,
+            ]))->onQueue('activationSms')->onConnection('sync')
         );
     }
 }

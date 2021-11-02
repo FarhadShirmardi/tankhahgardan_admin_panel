@@ -8,6 +8,8 @@
 
 namespace App\Constants;
 
+use ReflectionClass;
+
 class PremiumDuration
 {
     const MONTH = 1;
@@ -15,6 +17,14 @@ class PremiumDuration
     const ONE_WEEK = 3;
     const YEAR = 4;
     const SPECIAL = 5;
+
+
+    public static function toArray(): array
+    {
+        $oClass = new ReflectionClass(__CLASS__);
+        return $oClass->getConstants();
+    }
+
 
     public static function getTitle($enum)
     {

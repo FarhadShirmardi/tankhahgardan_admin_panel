@@ -58,7 +58,10 @@
                     }}" data-target="_self">
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $typeMappings[$call->type]['title'] }} (وضعیت {{ $call->type }})</td>
-                    <td>{{ $call->text }}</td>
+                    <td>@if($call['is_missed_call']) <img width="32px" src="{{ asset('dashboard/icons/missed-call.png')
+                     }}">
+                        @else {{ $call->text }}
+                        @endif</td>
                     <td class=" ltr text-right">{{ \App\Helpers\Helpers::convertDateTimeToJalali($call->call_time) }}</td>
                 </tr>
             @endforeach

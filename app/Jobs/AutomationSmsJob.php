@@ -74,7 +74,7 @@ class AutomationSmsJob implements ShouldQueue
                 'max_discount' => null,
                 'text' => 'هدیه اپلیکیشن',
                 'start_at' => now()->toDateTimeString(),
-                'end_date' => now()->addDays(5)->endOfDay()->toDateTimeString(),
+                'expire_at' => now()->addDays(5)->endOfDay()->toDateTimeString(),
                 'price_id' => $priceId,
             ]);
         }

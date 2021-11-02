@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\AutomationCall;
 use App\AutomationData;
 use App\AutomationMetric;
 use App\Constants\LogType;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
 use App\Jobs\AutomationMetricExportJob;
+use App\PanelFile;
 use App\PanelUser;
 use App\User;
 use Illuminate\Http\Request;
@@ -64,7 +66,7 @@ class AutomationController extends Controller
             'type' => 'none',
         ],
         6 => [
-            'title' => '9-18 روز از تاریخ ثبت‌نام گذشته و کاربر تراکنش ثبت نکرده است.',
+            'title' => '9-18 روز از تاریخ ثبت‌نام گذشته و کاربر کمتر از ۵ تراکنش ثبت کرده است.',
             'type' => 'sms',
         ],
         7 => [
@@ -225,7 +227,17 @@ class AutomationController extends Controller
     {
         $filter = $this->getMetricsFilter($request);
 
-        $this->dispatch((new AutomationMetricExportJob(auth()->user(), $filter))->onQueue('activationSms'));
+        $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
+        $filename = "export/automationMetric - {$today}" . '.xlsx';
+        $panelFile = PanelFile::query()
+            ->create([
+                'user_id' => auth()->id(),
+                'path' => $filename,
+                'description' => 'گزارش وضعیت اتوماسیون - ' . str_replace('_', '/', $today),
+                'date_time' => now()->toDateTimeString(),
+            ]);
+
+        $this->dispatch((new AutomationMetricExportJob($filter, $panelFile))->onQueue('activationSms'));
 
         return redirect()->route('dashboard.downloadCenter');
     }
@@ -263,8 +275,18 @@ class AutomationController extends Controller
 
     public function typeItem(Request $request, $type)
     {
+        $callQuery = AutomationCall::query()->whereColumn('user_id', 'automation_data.id')
+            ->selectRaw('count(*)');
+        $missedCallQuery = AutomationCall::query()->whereColumn('user_id', 'automation_data.id')
+            ->where('is_missed_call', true)
+            ->selectRaw('count(*)');
         $automationData = AutomationData::query()
+            ->selectSub($callQuery, 'total_count')
+            ->selectSub($missedCallQuery, 'missed_count')
+            ->addSelect('automation_data.*')
             ->where('automation_state', $type)
+            ->orderBy('total_count')
+            ->orderBy('missed_count', 'desc')
             ->orderBy('transaction_count', 'desc')
             ->paginate();
 
@@ -310,6 +332,7 @@ class AutomationController extends Controller
         $data = [
             'text' => $request->text,
             'type' => $user->automationData()->first()->automation_state,
+            'is_missed_call' => false,
         ];
         if (!$id) {
             $data['call_time'] = now()->toDateTimeString();
@@ -328,6 +351,31 @@ class AutomationController extends Controller
             'date_time' => now()->toDateTimeString(),
             'description' => LogType::getDescription($type, $panelUser),
             'old_json' => $oldCall,
+            'new_json' => $call,
+        ]);
+
+        return redirect()->route('dashboard.automation.callLogs', ['id' => $userId]);
+    }
+
+    public function missCall($userId)
+    {
+        $user = User::query()->findOrFail($userId);
+        $call = $user->automationCall()->create([
+            'text' => null,
+            'is_missed_call' => true,
+            'type' => $user->automationData()->first()->automation_state,
+            'call_time' => now()->toDateTimeString(),
+        ]);
+
+        /** @var PanelUser $panelUser */
+        $panelUser = auth()->user();
+        $type = LogType::NEW_AUTOMATION_MISS_CALL;
+        $panelUser->logs()->create([
+            'user_id' => $userId,
+            'type' => $type,
+            'date_time' => now()->toDateTimeString(),
+            'description' => LogType::getDescription($type, $panelUser),
+            'old_json' => null,
             'new_json' => $call,
         ]);
 

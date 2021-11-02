@@ -16,7 +16,6 @@
     </div>
 @endsection
 @section('filter')
-    @include('dashboard.layouts.link_message')
     <form id="filter" method="get" action="">
         {{ csrf_field() }}
         <input type="hidden" id="route" name="route"/>
