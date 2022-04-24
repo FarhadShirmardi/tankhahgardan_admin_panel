@@ -26,153 +26,154 @@ class PremiumConstants
     public const NEAR_END_THRESHOLD = 7;
     public const FREE_PROJECT_LIMIT = 3;
     public const FREE_USER_COUNT = 0;
-    public const FREE_VOLUME_SIZE = 200;
-    public const IMAGE_COUNT_LIMIT = 250;
+    public const FREE_VOLUME_SIZE = 100;
+    public const IMAGE_COUNT_LIMIT = 100;
     public const PDF_COUNT_LIMIT = 1;
+    public const IMPREST_COUNT_LIMIT = 5;
 
     public const USER_PRICE = [
         [
             'value' => 1,
-            'price' => 100000,
+            'price' => 150000,
             'active' => true,
         ],
         [
             'value' => 2,
-            'price' => 200000,
-            'active' => true,
-        ],
-        [
-            'value' => 3,
             'price' => 300000,
             'active' => true,
         ],
         [
+            'value' => 3,
+            'price' => 450000,
+            'active' => true,
+        ],
+        [
             'value' => 4,
-            'price' => 400000,
-            'active' => true,
-        ],
-        [
-            'value' => 5,
-            'price' => 500000,
-            'active' => true,
-        ],
-        [
-            'value' => 6,
             'price' => 600000,
             'active' => true,
         ],
         [
-            'value' => 7,
-            'price' => 700000,
+            'value' => 5,
+            'price' => 750000,
             'active' => true,
         ],
         [
-            'value' => 8,
-            'price' => 800000,
-            'active' => true,
-        ],
-        [
-            'value' => 9,
+            'value' => 6,
             'price' => 900000,
             'active' => true,
         ],
         [
-            'value' => 10,
-            'price' => 1000000,
+            'value' => 7,
+            'price' => 1050000,
             'active' => true,
         ],
         [
-            'value' => 12,
+            'value' => 8,
             'price' => 1200000,
             'active' => true,
         ],
         [
-            'value' => 15,
+            'value' => 9,
+            'price' => 1350000,
+            'active' => true,
+        ],
+        [
+            'value' => 10,
             'price' => 1500000,
             'active' => true,
         ],
         [
-            'value' => 20,
-            'price' => 2000000,
+            'value' => 12,
+            'price' => 1800000,
             'active' => true,
         ],
         [
-            'value' => 30,
+            'value' => 15,
+            'price' => 2250000,
+            'active' => true,
+        ],
+        [
+            'value' => 20,
             'price' => 3000000,
             'active' => true,
         ],
         [
+            'value' => 30,
+            'price' => 4500000,
+            'active' => true,
+        ],
+        [
             'value' => 40,
-            'price' => 4000000,
+            'price' => 6000000,
             'active' => true,
         ],
         [
             'value' => 50,
-            'price' => 5000000,
-            'active' => true,
-        ],
-        [
-            'value' => 75,
             'price' => 7500000,
             'active' => true,
         ],
         [
+            'value' => 75,
+            'price' => 11250000,
+            'active' => true,
+        ],
+        [
             'value' => 100,
-            'price' => 10000000,
+            'price' => 15000000,
             'active' => true,
         ],
     ];
     public const VOLUME_PRICE = [
         [
             'value' => 1000,
-            'price' => 20000,
-            'active' => true
+            'price' => 40000,
+            'active' => true,
         ],
         [
             'value' => 2000,
-            'price' => 40000,
-            'active' => true
+            'price' => 80000,
+            'active' => true,
         ],
         [
             'value' => 3000,
-            'price' => 60000,
-            'active' => true
+            'price' => 120000,
+            'active' => true,
         ],
         [
             'value' => 4000,
-            'price' => 80000,
-            'active' => true
-        ],
-        [
-            'value' => 5000,
-            'price' => 100000,
-            'active' => true
-        ],
-        [
-            'value' => 6000,
-            'price' => 120000,
-            'active' => true
-        ],
-        [
-            'value' => 7000,
-            'price' => 140000,
-            'active' => true
-        ],
-        [
-            'value' => 8000,
             'price' => 160000,
             'active' => true,
         ],
         [
+            'value' => 5000,
+            'price' => 200000,
+            'active' => true,
+        ],
+        [
+            'value' => 6000,
+            'price' => 240000,
+            'active' => true,
+        ],
+        [
+            'value' => 7000,
+            'price' => 280000,
+            'active' => true,
+        ],
+        [
+            'value' => 8000,
+            'price' => 320000,
+            'active' => true,
+        ],
+        [
             'value' => 9000,
-            'price' => 180000,
+            'price' => 360000,
             'active' => true,
         ],
         [
             'value' => 10000,
-            'price' => 200000,
+            'price' => 400000,
             'active' => true,
         ],
     ];
-    public const CONSTANT_PRICE = 0;
+    public const CONSTANT_PRICE = 70000;
 }

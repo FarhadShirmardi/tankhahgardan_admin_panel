@@ -30,7 +30,7 @@ class PremiumPrices
                 'day_count' => 7,
                 'discount_percent' => 0,
                 'active' => false,
-                'is_gift' => true
+                'is_gift' => true,
             ],
             [
                 'id' => PremiumDuration::HALF_MONTH,
@@ -60,8 +60,8 @@ class PremiumPrices
             ],
             [
                 'id' => PremiumDuration::YEAR,
-                'user_price' => self::filterPrice(PremiumConstants::USER_PRICE, PremiumConstants::YEARLY_COEFFICIENT, $minUserCount, $isUpgrade),
-                'volume_price' => self::filterPrice(PremiumConstants::VOLUME_PRICE, PremiumConstants::YEARLY_COEFFICIENT, $minVolume, $isUpgrade),
+                'user_price' => self::filterPrice(PremiumConstants::USER_PRICE, PremiumConstants::YEARLY_COEFFICIENT, $minUserCount, $isUpgrade, 12, 0.5, PremiumConstants::CONSTANT_PRICE * (12 - PremiumConstants::YEARLY_COEFFICIENT)),
+                'volume_price' => self::filterPrice(PremiumConstants::VOLUME_PRICE, PremiumConstants::YEARLY_COEFFICIENT, $minVolume, $isUpgrade, 12, 0.5),
                 'constant_price' => PremiumConstants::CONSTANT_PRICE * PremiumConstants::YEARLY_COEFFICIENT,
                 'title' => trans('names.plan_title', ['plan' => PremiumDuration::getTitle(PremiumDuration::YEAR)]),
                 'title2' => PremiumDuration::getSecondTitle(PremiumDuration::YEAR),
@@ -73,7 +73,7 @@ class PremiumPrices
             ],
             [
                 'id' => PremiumDuration::SPECIAL,
-                'user_price' => self::filterPrice(PremiumConstants::USER_PRICE, 1, $minUserCount, $isUpgrade),
+                'user_price' => self::filterPrice(PremiumConstants::USER_PRICE, 1, $minUserCount, $isUpgrade, 1, 1, PremiumConstants::CONSTANT_PRICE),
                 'volume_price' => self::filterPrice(PremiumConstants::VOLUME_PRICE, 1, $minVolume, $isUpgrade),
                 'constant_price' => PremiumConstants::CONSTANT_PRICE,
                 'title' => trans('names.plan_title', ['plan' => PremiumDuration::getTitle(PremiumDuration::SPECIAL)]),
@@ -81,25 +81,27 @@ class PremiumPrices
                 'month_count' => 1,
                 'day_count' => 31,
                 'discount_percent' => 0,
-                'active' => true,
+                'active' => false,
                 'is_gift' => false,
             ],
         ];
     }
 
-    public static function filterPrice(array $prices, $coef, $minValue, $isUpgrade)
+    private static function filterPrice(array $prices, $coef, $minValue, $isUpgrade, $coef2 = 1, $coef3 = 1, $constantPrice = 0): array
     {
         $prices = collect($prices);
         if ($isUpgrade and $minValue) {
             $minPrice = $prices->where('value', $minValue)->first()['price'];
             $prices = $prices->map(function ($item) use ($minValue, $minPrice) {
-                $item['value'] = $item['value'] - $minValue;
-                $item['price'] = $item['price'] - $minPrice;
+                $item['value'] -= $minValue;
+                $item['price'] -= $minPrice;
                 return $item;
             });
             $minValue = 0;
         }
-        $prices = $prices->map(function ($item) use ($coef) {
+        $prices = $prices->map(function ($item) use ($coef, $coef2, $coef3, $constantPrice) {
+            $item['real_price'] = $item['price'] * $coef2 + $constantPrice;
+            $item['first_buy_price'] = $item['real_price'] * $coef3;
             $item['price'] *= $coef;
             return $item;
         });
