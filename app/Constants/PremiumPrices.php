@@ -87,7 +87,7 @@ class PremiumPrices
         ];
     }
 
-    private static function filterPrice(array $prices, $coef, $minValue, $isUpgrade, $coef2 = 1, $coef3 = 1, $constantPrice = 0): array
+    public static function filterPrice(array $prices, $coef, $minValue, $isUpgrade, $coef2 = 1, $coef3 = 1, $constantPrice = 0): array
     {
         $prices = collect($prices);
         if ($isUpgrade and $minValue) {
