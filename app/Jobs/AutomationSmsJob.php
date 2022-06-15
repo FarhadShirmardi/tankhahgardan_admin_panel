@@ -63,7 +63,7 @@ class AutomationSmsJob implements ShouldQueue
             ]);
 
             $code = Helpers::generatePromoCode();
-            $discount = $pattern == 'active-discount-yearly' ? 50 : 30;
+            $discount = $pattern == 'active-discount-yearly' ? 15 : 10;
             $priceId = $pattern == 'active-discount-yearly' ? PremiumDuration::YEAR : null;
             $date = Helpers::gregorianDateStringToJalali(now()->addDays(5)->toDateString());
             $promoCode = $campaign->promoCodes()->create([
