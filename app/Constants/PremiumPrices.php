@@ -101,7 +101,7 @@ class PremiumPrices
         }
         $prices = $prices->map(function ($item) use ($coef, $coef2, $coef3, $constantPrice) {
             $item['real_price'] = $item['price'] * $coef2 + $constantPrice;
-            $item['first_buy_price'] = $item['real_price'] * $coef3;
+            $item['first_buy_price'] = ($item['real_price'] - $constantPrice) * $coef3 - 2 * $constantPrice;
             $item['price'] *= $coef;
             return $item;
         });

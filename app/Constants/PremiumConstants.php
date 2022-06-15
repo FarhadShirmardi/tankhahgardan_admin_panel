@@ -21,7 +21,7 @@ class PremiumConstants
     public const REFERENCE_PROMO_MAX_DISCOUNT = null;
     public const REFERENCE_CHARGE_AMOUNT = 30000;
 
-    public const YEARLY_COEFFICIENT = 10;
+    public const YEARLY_COEFFICIENT = 7.66;
     public const ADDED_VALUE_PERCENT = 0.09;
     public const NEAR_END_THRESHOLD = 7;
     public const FREE_PROJECT_LIMIT = 3;
