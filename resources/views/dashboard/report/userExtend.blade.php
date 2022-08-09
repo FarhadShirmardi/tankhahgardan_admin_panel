@@ -71,11 +71,7 @@
 @endsection
 @section('content')
     <div></div>
-    <div class="row">
-        <div class="col-md-4">{{ $users->appends(request()->input())->links() }}</div>
-        <div class="col-md-8 text-center">
-            <p>تعداد {{ $users->total() }} کاربر با شرایط فوق پیدا شد.</p></div>
-    </div>
+    {{ $users->appends(request()->input())->links() }}
     @include('dashboard.report.listUserExtend')
     {{ $users->appends(request()->input())->links() }}
 @endsection

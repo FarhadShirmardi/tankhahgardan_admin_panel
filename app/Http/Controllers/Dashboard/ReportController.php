@@ -1604,4 +1604,30 @@ class ReportController extends Controller
             'filter' => $filter,
         ]);
     }
+
+    public function unverifiedPaymentReport()
+    {
+        $http = new Client;
+        $response = $http->get(
+            env('TANKHAH_URL').'/panel/'.env('TANKHAH_TOKEN').'/payments/unverified/',
+            [
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+            ]
+        );
+        $response = json_decode($response->getBody());
+        $data = collect($response->data)->filter(fn ($item) => $item->user_id != null);
+        $users = User::query()->whereIn('id', $data->pluck('user_id'))->get();
+        $data = $data->map(function ($item) use ($users) {
+            /** @var User $user */
+            $user = $users->where('id', $item->user_id)->first();
+            $item->phone_number = $user->phone_number;
+            $item->username = $user->full_name;
+            $item->date = Helpers::convertDateTimeToJalali($item->date);
+            return $item;
+        });
+
+        return view('dashboard.report.userUnverified', compact('data'));
+    }
 }

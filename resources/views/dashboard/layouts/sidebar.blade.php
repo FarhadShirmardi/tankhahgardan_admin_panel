@@ -53,27 +53,28 @@
                 </li>
             @endif
             @if(auth()->user()->can('view_feedback'))
-                <li class="nav-item nav-dropdown">
-                    <a class="nav-link" href="{{ route('dashboard.feedbacks') }}"><i class="icon-user"></i>بازخوردها</a>
-                </li>
-            @endif
-            @if(auth()->user()->can('view_notification') or auth()->user()->can('view_banner'))
-                <li class="nav-item nav-dropdown">
-                    <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-menu"></i>اعلان و بنر</a>
-                    <ul class="nav-dropdown-items">
-                        @if(auth()->user()->can('view_notification'))
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('dashboard.announcements') }}"><i class="icon-bell"></i>اعلان‌ها</a>
-                            </li>
-                        @endif
-                        @if(auth()->user()->can('view_banner'))
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('dashboard.banners') }}"><i
-                                        class="icon-picture"></i>بنرها</a>
-                            </li>
-                        @endif
-                    </ul>
-                </li>
+                    <li class="nav-item nav-dropdown">
+                        <a class="nav-link" href="{{ route('dashboard.feedbacks') }}"><i class="icon-user"></i>بازخوردها</a>
+                    </li>
+                @endif
+                @if(auth()->user()->can('view_notification') or auth()->user()->can('view_banner'))
+                    <li class="nav-item nav-dropdown">
+                        <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-menu"></i>اعلان و بنر</a>
+                        <ul class="nav-dropdown-items">
+                            @if(auth()->user()->can('view_notification'))
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('dashboard.announcements') }}"><i
+                                            class="icon-bell"></i>اعلان‌ها</a>
+                                </li>
+                            @endif
+                            @if(auth()->user()->can('view_banner'))
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('dashboard.banners') }}"><i
+                                            class="icon-picture"></i>بنرها</a>
+                                </li>
+                            @endif
+                        </ul>
+                    </li>
             @endif
             @if(auth()->user()->can('edit_user_panels'))
                 <li class="nav-item nav-dropdown">
@@ -124,7 +125,9 @@
                     </ul>
                 </li>
                 @endif
-                @if(auth()->user()->can('view_premium_report') or auth()->user()->can('view_extend_user_report'))
+                @if(auth()->user()->can('view_premium_report') or
+                    auth()->user()->can('view_extend_user_report') or
+                    auth()->user()->can('view_unverified_user'))
                     <li class="nav-item nav-dropdown">
                         <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-wallet"></i>گزارش‌های پولی</a>
                         <ul class="nav-dropdown-items">
@@ -138,6 +141,13 @@
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ route('dashboard.report.userExtendReport') }}"><i
                                             class="icon-list"></i> گزارش کاربران تمدید نکرده</a>
+                                </li>
+                            @endif
+                            @if(auth()->user()->can('view_unverified_user'))
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                       href="{{ route('dashboard.report.unverifiedPaymentReport') }}"><i
+                                            class="icon-list"></i>گزارش کاربرانی که پول داده‌اند و طرحشان فعال نشده است</a>
                                 </li>
                             @endif
                         </ul>
