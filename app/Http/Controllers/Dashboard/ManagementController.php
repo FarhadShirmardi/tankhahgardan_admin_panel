@@ -16,8 +16,8 @@ use App\Constants\PurchaseType;
 use App\Constants\UserStatusType;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
-use App\Jobs\SendFirebaseNotificationJob;
 use App\Jobs\PromoCodeSmsJob;
+use App\Jobs\SendFirebaseNotificationJob;
 use App\PanelLogCenter;
 use App\PanelUser;
 use App\PromoCode;
@@ -264,9 +264,9 @@ class ManagementController extends Controller
         ]);
     }
 
-    public function fetchTransactions($filter)
+    public function fetchTransactions($filter, $paginate = false)
     {
-        $transactions = UserStatusLog::query()
+        $transactionsQuery = UserStatusLog::query()
             ->leftJoin('transactions', 'transactions.id', 'user_status_logs.transaction_id')
             ->join('users', 'users.id', 'user_status_logs.user_id')
             ->where(function ($query) use ($filter) {
@@ -334,20 +334,15 @@ class ManagementController extends Controller
                 'user_status_logs.total_amount',
                 'user_status_logs.discount_amount',
                 'user_status_logs.added_value_amount',
-            ])->get();
+            ]);
 
-        $transactions = $transactions->map(function ($item) {
-//            $item->full_name = ($item->user_name or $item->user_family) ?
-//                $item->user_name . ' ' . $item->user_family : ' - ';
-            $item->date = $item->date ? Helpers::convertDateTimeToJalali($item->date) : '-';
-            $item->start_date = Helpers::convertDateTimeToJalali($item->start_date);
-            $item->end_date = Helpers::convertDateTimeToJalali($item->end_date);
-            $item->state = UserStatusType::getEnum($item->state);
-            $item->bank = $item->bank ? PremiumBanks::getBank($item->bank)['name'] : '';
-            $item->type = PurchaseType::getEnum($item->type);
-
-            return $item;
-        });
+        if ($paginate) {
+            $transactions = $transactionsQuery->paginate(100);
+            $transactions->getCollection()->transform($this->transactionConvert());
+        } else {
+            $transactions = $transactionsQuery->get();
+            $transactions = $transactions->map($this->transactionConvert());
+        }
 
         return $transactions;
     }
@@ -502,9 +497,7 @@ class ManagementController extends Controller
             'phone_number' => Helpers::getEnglishString($request->input('phone_number', '')),
         ];
 
-        $transactions = $this->fetchTransactions($filter);
-
-        $transactions = Helpers::paginateCollection($transactions, 100);
+        $transactions = $this->fetchTransactions($filter, true);
 
         $banks = PremiumBanks::getBanks();
         foreach ($banks as $id => $bank) {
@@ -934,11 +927,27 @@ class ManagementController extends Controller
             ])->findOrFail($id);
 
         $log['username'] = $log['user_id'] ?
-            (!empty(trim($log['name'])) ? $log['name'] : $log['phone_number']) :
+            (! empty(trim($log['name'])) ? $log['name'] : $log['phone_number']) :
             'عمومی';
 
         return view('dashboard.management.logCenterItem', [
             'log' => $log,
         ]);
+    }
+
+    private function transactionConvert(): \Closure
+    {
+        return function ($item) {
+//            $item->full_name = ($item->user_name or $item->user_family) ?
+//                $item->user_name . ' ' . $item->user_family : ' - ';
+            $item->date = $item->date ? Helpers::convertDateTimeToJalali($item->date) : '-';
+            $item->start_date = Helpers::convertDateTimeToJalali($item->start_date);
+            $item->end_date = Helpers::convertDateTimeToJalali($item->end_date);
+            $item->state = UserStatusType::getEnum($item->state);
+            $item->bank = $item->bank ? PremiumBanks::getBank($item->bank)['name'] : '';
+            $item->type = PurchaseType::getEnum($item->type);
+
+            return $item;
+        };
     }
 }

@@ -904,21 +904,22 @@ class ReportController extends Controller
             return $item;
         });
 
-        $users = User::query()
-            ->join('feedback', 'feedback.user_id', '=', 'users.id')
-            ->distinct()
-            ->select([
-                'users.id',
-                'users.name',
-                'users.family',
-                'users.phone_number',
-                DB::raw("false as is_selected"),
-            ])
-            ->get();
-
-        if (isset($filter['user_id'])) {
-            $users->where('id', $filter['user_id'])->first()['is_selected'] = true;
-        }
+//        $users = User::query()
+//            ->without('userStatus')
+//            ->join('feedback', 'feedback.user_id', '=', 'users.id')
+//            ->distinct()
+//            ->select([
+//                'users.id',
+//                'users.name',
+//                'users.family',
+//                'users.phone_number',
+//                DB::raw("false as is_selected"),
+//            ])
+//            ->get();
+//
+//        if (isset($filter['user_id'])) {
+//            $users->where('id', $filter['user_id'])->first()['is_selected'] = true;
+//        }
 
         $panelUsers = PanelUser::query()->get(['id', 'name']);
 
@@ -983,7 +984,7 @@ class ReportController extends Controller
             'filter' => $filter,
             'source_type' => $sourceTypes,
             'titles' => $titles,
-            'users' => $users,
+            //            'users' => $users,
             'sortable_fields' => $sortableFields,
             'sortable_types' => $sortableTypes,
             'panel_users' => $panelUsers,
@@ -1603,5 +1604,31 @@ class ReportController extends Controller
             'users' => $users,
             'filter' => $filter,
         ]);
+    }
+
+    public function unverifiedPaymentReport()
+    {
+        $http = new Client;
+        $response = $http->get(
+            env('TANKHAH_URL').'/panel/'.env('TANKHAH_TOKEN').'/payments/unverified/',
+            [
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+            ]
+        );
+        $response = json_decode($response->getBody());
+        $data = collect($response->data)->filter(fn ($item) => $item->user_id != null);
+        $users = User::query()->whereIn('id', $data->pluck('user_id'))->get();
+        $data = $data->map(function ($item) use ($users) {
+            /** @var User $user */
+            $user = $users->where('id', $item->user_id)->first();
+            $item->phone_number = $user->phone_number;
+            $item->username = $user->full_name;
+            $item->date = Helpers::convertDateTimeToJalali($item->date);
+            return $item;
+        });
+
+        return view('dashboard.report.userUnverified', compact('data'));
     }
 }

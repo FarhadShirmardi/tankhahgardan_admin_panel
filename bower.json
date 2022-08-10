@@ -4,7 +4,6 @@
   "dependencies": {
     "bootstrap": "v4.0.0-beta",
     "popper.js": "^1.12.3",
-    "jquery": "^3.0.0",
     "fontawesome": "latest",
     "simple-line-icons": "latest",
     "pace": "latest",

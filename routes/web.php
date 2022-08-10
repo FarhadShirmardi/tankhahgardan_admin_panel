@@ -102,6 +102,10 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
             Route::middleware(['permission:view_extend_user_report'])
                 ->get('userExtendReport', 'Dashboard\ReportController@userExtendReport')
                 ->name('userExtendReport');
+
+            Route::middleware(['permission:view_unverified_user'])
+                ->get('unverifiedPaymentReport', 'Dashboard\ReportController@unverifiedPaymentReport')
+                ->name('unverifiedPaymentReport');
         });
 
         Route::post('extractUserIds', 'Dashboard\ReportController@extractUserIds')->name('extractUserIds');

@@ -13,23 +13,25 @@ class CreatePanelInvoicesTable extends Migration
      */
     public function up()
     {
-        Schema::create('invoices', function (Blueprint $table) {
-            $table->increments('id');
-            $table->unsignedInteger('user_id');
-            $table->dateTime('start_date');
-            $table->dateTime('end_date');
-            $table->integer('volume_size');
-            $table->integer('user_count');
-            $table->integer('wallet_amount')->default(0);
-            $table->integer('total_amount');
-            $table->integer('type');
-            $table->integer('price_id');
-            $table->integer('status')->default(2);
-            $table->integer('discount_amount')->default(0);
-            $table->integer('added_value_amount');
-            $table->unsignedInteger('user_status_log_id')->nullable();
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('invoices')) {
+            Schema::create('invoices', function (Blueprint $table) {
+                $table->increments('id');
+                $table->unsignedInteger('user_id');
+                $table->dateTime('start_date');
+                $table->dateTime('end_date');
+                $table->integer('volume_size');
+                $table->integer('user_count');
+                $table->integer('wallet_amount')->default(0);
+                $table->integer('total_amount');
+                $table->integer('type');
+                $table->integer('price_id');
+                $table->integer('status')->default(2);
+                $table->integer('discount_amount')->default(0);
+                $table->integer('added_value_amount');
+                $table->unsignedInteger('user_status_log_id')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**
@@ -39,6 +41,8 @@ class CreatePanelInvoicesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('invoices');
+        if (Schema::hasTable('invoices')) {
+            Schema::dropIfExists('invoices');
+        }
     }
 }

@@ -22,7 +22,7 @@
         <input type="hidden" id="user_ids" name="user_ids" value="{{ is_array($filter['user_ids']) ?
         (implode(',', $filter['user_ids']) ?? '') :
         $filter['user_ids'] }}">
-        <div class="row pb-5 pt-5 justify-content-center">
+        <div class="row pt-5 justify-content-center">
             <div class="col-md-3 col-sm-12">
                 <table class="table table-bordered table-responsive">
                     <tr class="text-center">
@@ -108,15 +108,9 @@
     </form>
 @endsection
 @section('content')
-    <div></div>
-    <div class="row">
-        <div class="col-md-4">{{ $users->appends(request()->input())->links() }}</div>
-        <div class="col-md-8 text-center">
-            <p>تعداد {{ $users->total() }} کاربر با شرایط فوق پیدا شد.</p></div>
-    </div>
+    {{ $users->withQueryString()->links() }}
     @include('dashboard.report.listUser', ['clickable' => true])
-    {{ $users->appends(request()->input())->links() }}
-    <hr>
+    {{ $users->withQueryString()->links() }}
     <div class="row">
         <div class="col-md-2">
             <input class="form-control btn btn-success" onclick="extractIds('dashboard.campaignUser');" value="افزودن کد تخفیف">
@@ -137,7 +131,7 @@
                     <div class="row">
                         <input class="col-md-8 form-control form-control-file"
                                type="file" name="users" accept=".xlsx, .xls" required>
-                        <input class="col-md-4 btn btn-primary" type="submit" value="تبدیل">
+                        <input class="col-md-4 bg-info btn" type="submit" value="تبدیل">
                     </div>
                 </form>
             </div>

@@ -39,12 +39,13 @@ class AdminController extends Controller
         ['edit_user_panels' => 'ویرایش کاربران پنل',],
 
         ['view_automation' => 'نمایش اطلاعات اتوماسیون',
-            'edit_automation' => 'ثبت زنگ و تغییر استیت کاربران',
-            'export_automation_metrics' => 'خروجی گزارش متریک‌ها'],
+         'edit_automation' => 'ثبت زنگ و تغییر استیت کاربران',
+         'export_automation_metrics' => 'خروجی گزارش متریک‌ها'],
 
         ['edit_premium' => 'افزایش کیف پول و ایجاد طرح',
-            'view_premium_report' => 'نمایش گزارش معیار سنجش پولی',
-            'view_extend_user_report' => 'نمایش گزارش کاربرانی که تمدید نکرده‌اند'],
+         'view_premium_report' => 'نمایش گزارش معیار سنجش پولی',
+         'view_extend_user_report' => 'نمایش گزارش کاربرانی که تمدید نکرده‌اند',
+         'view_unverified_user' => 'گزارش کاربرانی که پول داده‌اند و طرحشان فعال نشده است'],
         ['view_log_center' => 'نمایش مرکز لاگ'],
     ];
 
