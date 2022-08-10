@@ -32,16 +32,16 @@
                     </div>
                 </div>
                 <div class="col-md-4 row">
-                    <label class="col-md-5 col-form-label text-md-left">کاربر</label>
-                    <div class="ms-list col-md-7">
-                        <select name="user_id" id="user_id" style="width: 100%">
-                            <option></option>
-                            @foreach($users as $key => $user)
-                                <option @if($user['is_selected']) selected @endif
-                                value="{{$user->id}}">{{$user->full_name . ' - ' . $user->phone_number}}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                    {{--                    <label class="col-md-5 col-form-label text-md-left">کاربر</label>--}}
+                    {{--                    <div class="ms-list col-md-7">--}}
+                    {{--                        <select name="user_id" id="user_id" style="width: 100%">--}}
+                    {{--                            <option></option>--}}
+                    {{--                            @foreach($users as $key => $user)--}}
+                    {{--                                <option @if($user['is_selected']) selected @endif--}}
+                    {{--                                value="{{$user->id}}">{{$user->full_name . ' - ' . $user->phone_number}}</option>--}}
+                    {{--                            @endforeach--}}
+                    {{--                        </select>--}}
+                    {{--                    </div>--}}
                 </div>
             </div>
             <div class="row pt-3">

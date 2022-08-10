@@ -904,21 +904,22 @@ class ReportController extends Controller
             return $item;
         });
 
-        $users = User::query()
-            ->join('feedback', 'feedback.user_id', '=', 'users.id')
-            ->distinct()
-            ->select([
-                'users.id',
-                'users.name',
-                'users.family',
-                'users.phone_number',
-                DB::raw("false as is_selected"),
-            ])
-            ->get();
-
-        if (isset($filter['user_id'])) {
-            $users->where('id', $filter['user_id'])->first()['is_selected'] = true;
-        }
+//        $users = User::query()
+//            ->without('userStatus')
+//            ->join('feedback', 'feedback.user_id', '=', 'users.id')
+//            ->distinct()
+//            ->select([
+//                'users.id',
+//                'users.name',
+//                'users.family',
+//                'users.phone_number',
+//                DB::raw("false as is_selected"),
+//            ])
+//            ->get();
+//
+//        if (isset($filter['user_id'])) {
+//            $users->where('id', $filter['user_id'])->first()['is_selected'] = true;
+//        }
 
         $panelUsers = PanelUser::query()->get(['id', 'name']);
 
@@ -983,7 +984,7 @@ class ReportController extends Controller
             'filter' => $filter,
             'source_type' => $sourceTypes,
             'titles' => $titles,
-            'users' => $users,
+            //            'users' => $users,
             'sortable_fields' => $sortableFields,
             'sortable_types' => $sortableTypes,
             'panel_users' => $panelUsers,
