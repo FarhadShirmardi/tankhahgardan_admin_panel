@@ -657,9 +657,10 @@ class ReportController extends Controller
 
         $counts = collect();
         foreach ($user->projects->pluck('id') as $projectId) {
+            $projectDateCounts = $dateCounts->where('project_id', $projectId);
             $data = collect();
             foreach ($dates as $date) {
-                $data->push($dateCounts->where('date', $date)->where('project_id', $projectId)->sum('c'));
+                $data->push($projectDateCounts->where('date', $date)->sum('c'));
             }
             $counts->push([
                 'id' => $projectId,
