@@ -21,26 +21,26 @@
     $.gray = '#55595c';
     $.grayLight = '#818a91';
     $.grayLighter = '#d1d4d7';
-$.grayLightest = '#f8f9fa';
-$.ajaxLoadingIcon = 'fa fa-refresh fa-spin';
-$.ajaxLoadingFontawesomeResizeFactor = '0.50';
-'use strict';
-/****
- * MAIN NAVIGATION
- */
+    $.grayLightest = '#f8f9fa';
+    $.ajaxLoadingIcon = 'fa fa-refresh fa-spin';
+    $.ajaxLoadingFontawesomeResizeFactor = '0.50';
+    'use strict';
+    /****
+     * MAIN NAVIGATION
+     */
 
 
-$(document).ready(function ($) {
-  // Add class .active to current link
-  $.navigation.find('a').each(function () {
-    var cUrl = String(window.location).split('?')[0];
+    $(document).ready(function ($) {
+        // Add class .active to current link
+        $.navigation.find('a').each(function () {
+            var cUrl = String(window.location).split('?')[0];
 
-    if (cUrl.substr(cUrl.length - 1) == '#') {
-      cUrl = cUrl.slice(0, -1);
-    }
+            if (cUrl.substr(cUrl.length - 1) == '#') {
+                cUrl = cUrl.slice(0, -1);
+            }
 
-    if ($($(this))[0].href == cUrl) {
-      $(this).addClass('active');
+            if ($($(this))[0].href == cUrl) {
+                $(this).addClass('active');
       $(this).parents('ul').add(this).each(function () {
         $(this).parent().addClass('open');
       });
@@ -197,11 +197,11 @@ function init(url) {
   $.fn.onlyEnglish = function () {
     return this.each(function () {
       $(this).keypress(function (event) {
-        var ew = event.which;
+          var ew = event.which;
 
-        if (ew === 32) {
-          return true;
-        }
+          if (ew === 32) {
+              return true;
+          }
 
           if (48 <= ew && ew <= 57) {
               return true;
