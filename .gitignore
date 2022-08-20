@@ -16,3 +16,6 @@ yarn-error.log
 /composer.lock
 /bower_components/
 /.idea/
+rr
+.rr.yaml
+/storage/debugbar/

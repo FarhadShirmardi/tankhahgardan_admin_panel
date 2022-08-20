@@ -28,15 +28,29 @@
                                 <input name="password" type="password" required class="form-control"
                                        placeholder="رمز عبور">
                             </div>
+                            <div class="input-group mb-4" style="direction: ltr">
+                                <div class="captcha">
+                                    <span>{!! captcha_img() !!}</span>
+                                    <button type="button" class="btn btn-danger" class="reload" id="reload">
+                                        &#x21bb;
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="input-group mb-4">
+                                <span class="input-group-addon"><i class="icon-lock"></i>
+                                    </span>
+                                <input id="captcha" type="text" class="form-control" placeholder="کد کپچا"
+                                       name="captcha">
+                            </div>
                             <div class="row">
                                 <div class="col-6">
                                     <button dusk="submit" type="submit" class="btn btn-primary px-4">ورود</button>
                                 </div>
-{{--                                <div class="col-6 text-right">--}}
-{{--                                    <a href="{{ route('password.request') }}">--}}
-{{--                                        <button type="button" class="btn btn-link px-0">یادآوری رمز عبور</button>--}}
-{{--                                    </a>--}}
-{{--                                </div>--}}
+                                {{--                                <div class="col-6 text-right">--}}
+                                {{--                                    <a href="{{ route('password.request') }}">--}}
+                                {{--                                        <button type="button" class="btn btn-link px-0">یادآوری رمز عبور</button>--}}
+                                {{--                                    </a>--}}
+                                {{--                                </div>--}}
                             </div>
                         </form>
                     </div>
@@ -45,7 +59,17 @@
         </div>
     </div>
 </div>
-
+<script>
+    $('#reload').click(function () {
+        $.ajax({
+            type: 'GET',
+            url: 'reload-captcha',
+            success: function (data) {
+                $(".captcha span").html(data.captcha);
+            }
+        });
+    });
+</script>
 @include('dashboard.layouts.scripts')
 
 </body>

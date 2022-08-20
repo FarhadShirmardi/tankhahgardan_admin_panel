@@ -23,4 +23,5 @@
     <script src="{{ asset('js/dropzone.min.js') }}"></script>
 
     @yield('extra_css')
+    @livewireStyles
 </head>
