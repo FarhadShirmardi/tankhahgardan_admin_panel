@@ -14,7 +14,7 @@
             /***/
         }),
 
-/***/ "./node_modules/axios/lib/adapters/xhr.js":
+        /***/ "./node_modules/axios/lib/adapters/xhr.js":
         /*!************************************************!*\
   !*** ./node_modules/axios/lib/adapters/xhr.js ***!
   \************************************************/
@@ -133,41 +133,41 @@
                         reject(new AxiosError('Request aborted', AxiosError.ECONNABORTED, config, request));
 
                         // Clean up request
-      request = null;
-    };
+                        request = null;
+                    };
 
-    // Handle low level network errors
-    request.onerror = function handleError() {
-      // Real errors are hidden from us by the browser
-      // onerror should only fire if it's a network error
-        reject(new AxiosError('Network Error', AxiosError.ERR_NETWORK, config, request, request));
+                    // Handle low level network errors
+                    request.onerror = function handleError() {
+                        // Real errors are hidden from us by the browser
+                        // onerror should only fire if it's a network error
+                        reject(new AxiosError('Network Error', AxiosError.ERR_NETWORK, config, request, request));
 
-      // Clean up request
-      request = null;
-    };
+                        // Clean up request
+                        request = null;
+                    };
 
-    // Handle timeout
-    request.ontimeout = function handleTimeout() {
-        var timeoutErrorMessage = config.timeout ? 'timeout of ' + config.timeout + 'ms exceeded' : 'timeout exceeded';
-        var transitional = config.transitional || transitionalDefaults;
-        if (config.timeoutErrorMessage) {
-            timeoutErrorMessage = config.timeoutErrorMessage;
-        }
-        reject(new AxiosError(
-            timeoutErrorMessage,
-            transitional.clarifyTimeoutError ? AxiosError.ETIMEDOUT : AxiosError.ECONNABORTED,
-            config,
-            request));
+                    // Handle timeout
+                    request.ontimeout = function handleTimeout() {
+                        var timeoutErrorMessage = config.timeout ? 'timeout of ' + config.timeout + 'ms exceeded' : 'timeout exceeded';
+                        var transitional = config.transitional || transitionalDefaults;
+                        if (config.timeoutErrorMessage) {
+                            timeoutErrorMessage = config.timeoutErrorMessage;
+                        }
+                        reject(new AxiosError(
+                            timeoutErrorMessage,
+                            transitional.clarifyTimeoutError ? AxiosError.ETIMEDOUT : AxiosError.ECONNABORTED,
+                            config,
+                            request));
 
-        // Clean up request
-        request = null;
-    };
+                        // Clean up request
+                        request = null;
+                    };
 
-    // Add xsrf header
-    // This is only done if running in a standard browser environment.
-    // Specifically not if we're in a web worker, or react-native.
-    if (utils.isStandardBrowserEnv()) {
-      // Add xsrf header
+                    // Add xsrf header
+                    // This is only done if running in a standard browser environment.
+                    // Specifically not if we're in a web worker, or react-native.
+                    if (utils.isStandardBrowserEnv()) {
+                        // Add xsrf header
       var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
         cookies.read(config.xsrfCookieName) :
         undefined;
@@ -180,13 +180,13 @@
     // Add headers to the request
     if ('setRequestHeader' in request) {
       utils.forEach(requestHeaders, function setRequestHeader(val, key) {
-        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
-          // Remove Content-Type if data is undefined
-          delete requestHeaders[key];
-        } else {
-          // Otherwise add header to the request
-          request.setRequestHeader(key, val);
-        }
+          if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+              // Remove Content-Type if data is undefined
+              delete requestHeaders[key];
+          } else {
+              // Otherwise add header to the request
+              request.setRequestHeader(key, val);
+          }
       });
     }
 
@@ -208,7 +208,7 @@
                     // Not all browsers support upload events
                     if (typeof config.onUploadProgress === 'function' && request.upload) {
                         request.upload.addEventListener('progress', config.onUploadProgress);
-    }
+                    }
 
                     if (config.cancelToken || config.signal) {
                         // Handle cancellation
@@ -263,29 +263,29 @@
             var mergeConfig = __webpack_require__(/*! ./core/mergeConfig */ "./node_modules/axios/lib/core/mergeConfig.js");
             var defaults = __webpack_require__(/*! ./defaults */ "./node_modules/axios/lib/defaults/index.js");
 
-/**
- * Create an instance of Axios
- *
- * @param {Object} defaultConfig The default config for the instance
- * @return {Axios} A new instance of Axios
- */
-function createInstance(defaultConfig) {
-    var context = new Axios(defaultConfig);
-    var instance = bind(Axios.prototype.request, context);
+            /**
+             * Create an instance of Axios
+             *
+             * @param {Object} defaultConfig The default config for the instance
+             * @return {Axios} A new instance of Axios
+             */
+            function createInstance(defaultConfig) {
+                var context = new Axios(defaultConfig);
+                var instance = bind(Axios.prototype.request, context);
 
-    // Copy axios.prototype to instance
-    utils.extend(instance, Axios.prototype, context);
+                // Copy axios.prototype to instance
+                utils.extend(instance, Axios.prototype, context);
 
-    // Copy context to instance
-    utils.extend(instance, context);
+                // Copy context to instance
+                utils.extend(instance, context);
 
-    // Factory for creating new instances
-    instance.create = function create(instanceConfig) {
-        return createInstance(mergeConfig(defaultConfig, instanceConfig));
-    };
+                // Factory for creating new instances
+                instance.create = function create(instanceConfig) {
+                    return createInstance(mergeConfig(defaultConfig, instanceConfig));
+                };
 
-    return instance;
-}
+                return instance;
+            }
 
 // Create the default instance to be exported
             var axios = createInstance(defaults);
@@ -324,7 +324,7 @@ function createInstance(defaultConfig) {
             /***/
         }),
 
-/***/ "./node_modules/axios/lib/cancel/CancelToken.js":
+        /***/ "./node_modules/axios/lib/cancel/CancelToken.js":
         /*!******************************************************!*\
   !*** ./node_modules/axios/lib/cancel/CancelToken.js ***!
   \******************************************************/
@@ -339,12 +339,12 @@ function createInstance(defaultConfig) {
              * A `CancelToken` is an object that can be used to request cancellation of an operation.
              *
              * @class
- * @param {Function} executor The executor function.
- */
+             * @param {Function} executor The executor function.
+             */
 function CancelToken(executor) {
-  if (typeof executor !== 'function') {
-      throw new TypeError('executor must be a function.');
-  }
+                if (typeof executor !== 'function') {
+                    throw new TypeError('executor must be a function.');
+                }
 
                 var resolvePromise;
 
@@ -392,7 +392,7 @@ function CancelToken(executor) {
                     token.reason = new CanceledError(message);
                     resolvePromise(token.reason);
                 });
-}
+            }
 
             /**
              * Throws a `CanceledError` if cancellation has been requested.
@@ -506,7 +506,7 @@ function CancelToken(executor) {
             /***/
         }),
 
-/***/ "./node_modules/axios/lib/core/Axios.js":
+        /***/ "./node_modules/axios/lib/core/Axios.js":
         /*!**********************************************!*\
   !*** ./node_modules/axios/lib/core/Axios.js ***!
   \**********************************************/
@@ -533,106 +533,106 @@ function CancelToken(executor) {
             function Axios(instanceConfig) {
                 this.defaults = instanceConfig;
                 this.interceptors = {
-    request: new InterceptorManager(),
-    response: new InterceptorManager()
-  };
-}
+                    request: new InterceptorManager(),
+                    response: new InterceptorManager()
+                };
+            }
 
-/**
- * Dispatch a request
- *
- * @param {Object} config The config specific for this request (merged with this.defaults)
- */
-Axios.prototype.request = function request(configOrUrl, config) {
-    /*eslint no-param-reassign:0*/
-    // Allow for axios('example/url'[, config]) a la fetch API
-    if (typeof configOrUrl === 'string') {
-        config = config || {};
-        config.url = configOrUrl;
-    } else {
-        config = configOrUrl || {};
-    }
+            /**
+             * Dispatch a request
+             *
+             * @param {Object} config The config specific for this request (merged with this.defaults)
+             */
+            Axios.prototype.request = function request(configOrUrl, config) {
+                /*eslint no-param-reassign:0*/
+                // Allow for axios('example/url'[, config]) a la fetch API
+                if (typeof configOrUrl === 'string') {
+                    config = config || {};
+                    config.url = configOrUrl;
+                } else {
+                    config = configOrUrl || {};
+                }
 
-    config = mergeConfig(this.defaults, config);
+                config = mergeConfig(this.defaults, config);
 
-  // Set config.method
-    if (config.method) {
-        config.method = config.method.toLowerCase();
-    } else if (this.defaults.method) {
-        config.method = this.defaults.method.toLowerCase();
-    } else {
-        config.method = 'get';
-    }
+                // Set config.method
+                if (config.method) {
+                    config.method = config.method.toLowerCase();
+                } else if (this.defaults.method) {
+                    config.method = this.defaults.method.toLowerCase();
+                } else {
+                    config.method = 'get';
+                }
 
-    var transitional = config.transitional;
+                var transitional = config.transitional;
 
-    if (transitional !== undefined) {
-        validator.assertOptions(transitional, {
-            silentJSONParsing: validators.transitional(validators.boolean),
-            forcedJSONParsing: validators.transitional(validators.boolean),
-            clarifyTimeoutError: validators.transitional(validators.boolean)
-        }, false);
-    }
+                if (transitional !== undefined) {
+                    validator.assertOptions(transitional, {
+                        silentJSONParsing: validators.transitional(validators.boolean),
+                        forcedJSONParsing: validators.transitional(validators.boolean),
+                        clarifyTimeoutError: validators.transitional(validators.boolean)
+                    }, false);
+                }
 
-    // filter out skipped interceptors
-    var requestInterceptorChain = [];
-    var synchronousRequestInterceptors = true;
-    this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
-        if (typeof interceptor.runWhen === 'function' && interceptor.runWhen(config) === false) {
-            return;
-        }
+                // filter out skipped interceptors
+                var requestInterceptorChain = [];
+                var synchronousRequestInterceptors = true;
+                this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+                    if (typeof interceptor.runWhen === 'function' && interceptor.runWhen(config) === false) {
+                        return;
+                    }
 
-        synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
+                    synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
 
-        requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
-    });
+                    requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
+                });
 
-    var responseInterceptorChain = [];
-    this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
-        responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
-    });
+                var responseInterceptorChain = [];
+                this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+                    responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
+                });
 
-    var promise;
+                var promise;
 
-    if (!synchronousRequestInterceptors) {
-        var chain = [dispatchRequest, undefined];
+                if (!synchronousRequestInterceptors) {
+                    var chain = [dispatchRequest, undefined];
 
-        Array.prototype.unshift.apply(chain, requestInterceptorChain);
-        chain = chain.concat(responseInterceptorChain);
+                    Array.prototype.unshift.apply(chain, requestInterceptorChain);
+                    chain = chain.concat(responseInterceptorChain);
 
-        promise = Promise.resolve(config);
-        while (chain.length) {
-            promise = promise.then(chain.shift(), chain.shift());
-        }
+                    promise = Promise.resolve(config);
+                    while (chain.length) {
+                        promise = promise.then(chain.shift(), chain.shift());
+                    }
 
-        return promise;
-    }
+                    return promise;
+                }
 
 
-    var newConfig = config;
-    while (requestInterceptorChain.length) {
-        var onFulfilled = requestInterceptorChain.shift();
-        var onRejected = requestInterceptorChain.shift();
-        try {
-            newConfig = onFulfilled(newConfig);
-        } catch (error) {
-            onRejected(error);
-            break;
-        }
-    }
+                var newConfig = config;
+                while (requestInterceptorChain.length) {
+                    var onFulfilled = requestInterceptorChain.shift();
+                    var onRejected = requestInterceptorChain.shift();
+                    try {
+                        newConfig = onFulfilled(newConfig);
+                    } catch (error) {
+                        onRejected(error);
+                        break;
+                    }
+                }
 
-    try {
-        promise = dispatchRequest(newConfig);
-    } catch (error) {
-        return Promise.reject(error);
-    }
+                try {
+                    promise = dispatchRequest(newConfig);
+                } catch (error) {
+                    return Promise.reject(error);
+                }
 
-    while (responseInterceptorChain.length) {
-        promise = promise.then(responseInterceptorChain.shift(), responseInterceptorChain.shift());
-    }
+                while (responseInterceptorChain.length) {
+                    promise = promise.then(responseInterceptorChain.shift(), responseInterceptorChain.shift());
+                }
 
-    return promise;
-};
+                return promise;
+            };
 
 Axios.prototype.getUri = function getUri(config) {
     config = mergeConfig(this.defaults, config);
@@ -857,12 +857,12 @@ module.exports = InterceptorManager;
             /**
              * Creates a new URL by combining the baseURL with the requestedURL,
              * only when the requestedURL is not already an absolute URL.
- * If the requestURL is absolute, this function returns the requestedURL untouched.
- *
- * @param {string} baseURL The base URL
- * @param {string} requestedURL Absolute or relative URL to combine
- * @returns {string} The combined full path
- */
+             * If the requestURL is absolute, this function returns the requestedURL untouched.
+             *
+             * @param {string} baseURL The base URL
+             * @param {string} requestedURL Absolute or relative URL to combine
+             * @returns {string} The combined full path
+             */
 module.exports = function buildFullPath(baseURL, requestedURL) {
   if (baseURL && !isAbsoluteURL(requestedURL)) {
     return combineURLs(baseURL, requestedURL);
@@ -926,40 +926,40 @@ module.exports = function dispatchRequest(config) {
         config.headers.common || {},
         config.headers[config.method] || {},
         config.headers
-  );
+    );
 
-  utils.forEach(
-    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
-    function cleanHeaderConfig(method) {
-      delete config.headers[method];
-    }
-  );
+    utils.forEach(
+        ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+        function cleanHeaderConfig(method) {
+            delete config.headers[method];
+        }
+    );
 
-  var adapter = config.adapter || defaults.adapter;
+    var adapter = config.adapter || defaults.adapter;
 
-  return adapter(config).then(function onAdapterResolution(response) {
-      throwIfCancellationRequested(config);
+    return adapter(config).then(function onAdapterResolution(response) {
+        throwIfCancellationRequested(config);
 
-      // Transform response data
-      response.data = transformData.call(
-          config,
-          response.data,
-          response.headers,
-          config.transformResponse
-      );
+        // Transform response data
+        response.data = transformData.call(
+            config,
+            response.data,
+            response.headers,
+            config.transformResponse
+        );
 
-      return response;
-  }, function onAdapterRejection(reason) {
-    if (!isCancel(reason)) {
-      throwIfCancellationRequested(config);
+        return response;
+    }, function onAdapterRejection(reason) {
+        if (!isCancel(reason)) {
+            throwIfCancellationRequested(config);
 
-      // Transform response data
-      if (reason && reason.response) {
-          reason.response.data = transformData.call(
-              config,
-              reason.response.data,
-              reason.response.headers,
-              config.transformResponse
+            // Transform response data
+            if (reason && reason.response) {
+                reason.response.data = transformData.call(
+                    config,
+                    reason.response.data,
+                    reason.response.headers,
+                    config.transformResponse
           );
       }
     }
@@ -986,10 +986,10 @@ module.exports = function dispatchRequest(config) {
              * Config-specific merge-function which creates a new config-object
              * by merging two configuration objects together.
              *
- * @param {Object} config1
- * @param {Object} config2
- * @returns {Object} New object resulting from merging config2 to config1
- */
+             * @param {Object} config1
+             * @param {Object} config2
+             * @returns {Object} New object resulting from merging config2 to config1
+             */
 module.exports = function mergeConfig(config1, config2) {
     // eslint-disable-next-line no-param-reassign
     config2 = config2 || {};
@@ -1097,11 +1097,11 @@ module.exports = function mergeConfig(config1, config2) {
              * Resolve or reject a Promise based on response status.
              *
              * @param {Function} resolve A function that resolves the promise.
- * @param {Function} reject A function that rejects the promise.
- * @param {object} response The response.
- */
+             * @param {Function} reject A function that rejects the promise.
+             * @param {object} response The response.
+             */
 module.exports = function settle(resolve, reject, response) {
-  var validateStatus = response.config.validateStatus;
+    var validateStatus = response.config.validateStatus;
     if (!response.status || !validateStatus || validateStatus(response.status)) {
         resolve(response);
     } else {
@@ -1133,20 +1133,20 @@ module.exports = function settle(resolve, reject, response) {
             /**
              * Transform the data for a request or a response
              *
- * @param {Object|String} data The data to be transformed
- * @param {Array} headers The headers for the request or response
- * @param {Array|Function} fns A single function or Array of functions
- * @returns {*} The resulting transformed data
- */
-module.exports = function transformData(data, headers, fns) {
-    var context = this || defaults;
-  /*eslint no-param-reassign:0*/
-    utils.forEach(fns, function transform(fn) {
-        data = fn.call(context, data, headers);
-    });
+             * @param {Object|String} data The data to be transformed
+             * @param {Array} headers The headers for the request or response
+             * @param {Array|Function} fns A single function or Array of functions
+             * @returns {*} The resulting transformed data
+             */
+            module.exports = function transformData(data, headers, fns) {
+                var context = this || defaults;
+                /*eslint no-param-reassign:0*/
+                utils.forEach(fns, function transform(fn) {
+                    data = fn.call(context, data, headers);
+                });
 
-    return data;
-};
+                return data;
+            };
 
 
             /***/
@@ -1180,7 +1180,7 @@ module.exports = function transformData(data, headers, fns) {
             }
 
 function getDefaultAdapter() {
-  var adapter;
+    var adapter;
     if (typeof XMLHttpRequest !== 'undefined') {
         // For browsers use XHR adapter
         adapter = __webpack_require__(/*! ../adapters/xhr */ "./node_modules/axios/lib/adapters/xhr.js");
@@ -1219,9 +1219,9 @@ function getDefaultAdapter() {
                     if (utils.isFormData(data) ||
                         utils.isArrayBuffer(data) ||
                         utils.isBuffer(data) ||
-      utils.isStream(data) ||
-      utils.isFile(data) ||
-      utils.isBlob(data)
+                        utils.isStream(data) ||
+                        utils.isFile(data) ||
+                        utils.isBlob(data)
                     ) {
                         return data;
                     }
@@ -1249,27 +1249,27 @@ function getDefaultAdapter() {
                     return data;
                 }],
 
-  transformResponse: [function transformResponse(data) {
-      var transitional = this.transitional || defaults.transitional;
-      var silentJSONParsing = transitional && transitional.silentJSONParsing;
-      var forcedJSONParsing = transitional && transitional.forcedJSONParsing;
-      var strictJSONParsing = !silentJSONParsing && this.responseType === 'json';
+                transformResponse: [function transformResponse(data) {
+                    var transitional = this.transitional || defaults.transitional;
+                    var silentJSONParsing = transitional && transitional.silentJSONParsing;
+                    var forcedJSONParsing = transitional && transitional.forcedJSONParsing;
+                    var strictJSONParsing = !silentJSONParsing && this.responseType === 'json';
 
-      if (strictJSONParsing || (forcedJSONParsing && utils.isString(data) && data.length)) {
-          try {
-              return JSON.parse(data);
-          } catch (e) {
-              if (strictJSONParsing) {
-                  if (e.name === 'SyntaxError') {
-                      throw AxiosError.from(e, AxiosError.ERR_BAD_RESPONSE, this, null, this.response);
-                  }
-                  throw e;
-              }
-          }
-      }
+                    if (strictJSONParsing || (forcedJSONParsing && utils.isString(data) && data.length)) {
+                        try {
+                            return JSON.parse(data);
+                        } catch (e) {
+                            if (strictJSONParsing) {
+                                if (e.name === 'SyntaxError') {
+                                    throw AxiosError.from(e, AxiosError.ERR_BAD_RESPONSE, this, null, this.response);
+                                }
+                                throw e;
+                            }
+                        }
+                    }
 
-      return data;
-  }],
+                    return data;
+                }],
 
                 /**
                  * A timeout in milliseconds to abort a request. If set to 0 (default) a
@@ -1359,9 +1359,9 @@ function getDefaultAdapter() {
                     for (var i = 0; i < args.length; i++) {
                         args[i] = arguments[i];
                     }
-    return fn.apply(thisArg, args);
-  };
-};
+                    return fn.apply(thisArg, args);
+                };
+            };
 
 
 /***/ }),
@@ -1378,12 +1378,8 @@ function getDefaultAdapter() {
             var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
 
             function encode(val) {
-                return encodeURIComponent(val).replace(/%3A/gi, ':').replace(/%24/g, '$').
-    replace(/%2C/gi, ',').
-    replace(/%20/g, '+').
-    replace(/%5B/gi, '[').
-    replace(/%5D/gi, ']');
-}
+                return encodeURIComponent(val).replace(/%3A/gi, ':').replace(/%24/g, '$').replace(/%2C/gi, ',').replace(/%20/g, '+').replace(/%5B/gi, '[').replace(/%5D/gi, ']');
+            }
 
 /**
  * Build a URL by appending params to the end
@@ -1460,7 +1456,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
              * @param {string} baseURL The base URL
              * @param {string} relativeURL The relative URL
              * @returns {string} The combined URL
- */
+             */
 module.exports = function combineURLs(baseURL, relativeURL) {
   return relativeURL
     ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
@@ -1485,30 +1481,30 @@ module.exports = function combineURLs(baseURL, relativeURL) {
                 utils.isStandardBrowserEnv() ?
 
                     // Standard browser envs support document.cookie
-    (function standardBrowserEnv() {
-      return {
-        write: function write(name, value, expires, path, domain, secure) {
-          var cookie = [];
-          cookie.push(name + '=' + encodeURIComponent(value));
+                    (function standardBrowserEnv() {
+                        return {
+                            write: function write(name, value, expires, path, domain, secure) {
+                                var cookie = [];
+                                cookie.push(name + '=' + encodeURIComponent(value));
 
-          if (utils.isNumber(expires)) {
-            cookie.push('expires=' + new Date(expires).toGMTString());
-          }
+                                if (utils.isNumber(expires)) {
+                                    cookie.push('expires=' + new Date(expires).toGMTString());
+                                }
 
-          if (utils.isString(path)) {
-            cookie.push('path=' + path);
-          }
+                                if (utils.isString(path)) {
+                                    cookie.push('path=' + path);
+                                }
 
-          if (utils.isString(domain)) {
-            cookie.push('domain=' + domain);
-          }
+                                if (utils.isString(domain)) {
+                                    cookie.push('domain=' + domain);
+                                }
 
-          if (secure === true) {
-            cookie.push('secure');
-          }
+                                if (secure === true) {
+                                    cookie.push('secure');
+                                }
 
-          document.cookie = cookie.join('; ');
-        },
+                                document.cookie = cookie.join('; ');
+                            },
 
         read: function read(name) {
           var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
@@ -1600,34 +1596,34 @@ module.exports = function combineURLs(baseURL, relativeURL) {
                 utils.isStandardBrowserEnv() ?
 
                     // Standard browser envs have full support of the APIs needed to test
-  // whether the request URL is of the same origin as current location.
-    (function standardBrowserEnv() {
-      var msie = /(msie|trident)/i.test(navigator.userAgent);
-      var urlParsingNode = document.createElement('a');
-      var originURL;
+                    // whether the request URL is of the same origin as current location.
+                    (function standardBrowserEnv() {
+                        var msie = /(msie|trident)/i.test(navigator.userAgent);
+                        var urlParsingNode = document.createElement('a');
+                        var originURL;
 
-      /**
-    * Parse a URL to discover it's components
-    *
-    * @param {String} url The URL to be parsed
-    * @returns {Object}
-    */
-      function resolveURL(url) {
-        var href = url;
+                        /**
+                         * Parse a URL to discover it's components
+                         *
+                         * @param {String} url The URL to be parsed
+                         * @returns {Object}
+                         */
+                        function resolveURL(url) {
+                            var href = url;
 
-        if (msie) {
-        // IE needs attribute set twice to normalize properties
-          urlParsingNode.setAttribute('href', href);
-          href = urlParsingNode.href;
-        }
+                            if (msie) {
+                                // IE needs attribute set twice to normalize properties
+                                urlParsingNode.setAttribute('href', href);
+                                href = urlParsingNode.href;
+                            }
 
-        urlParsingNode.setAttribute('href', href);
+                            urlParsingNode.setAttribute('href', href);
 
-        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
-        return {
-          href: urlParsingNode.href,
-          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
-          host: urlParsingNode.host,
+                            // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+                            return {
+                                href: urlParsingNode.href,
+                                protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+                                host: urlParsingNode.host,
           search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
           hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
           hostname: urlParsingNode.hostname,
@@ -1716,10 +1712,10 @@ module.exports = function combineURLs(baseURL, relativeURL) {
 // c.f. https://nodejs.org/api/http.html#http_message_headers
             var ignoreDuplicateOf = [
                 'age', 'authorization', 'content-length', 'content-type', 'etag',
-  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
-  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
-  'referer', 'retry-after', 'user-agent'
-];
+                'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+                'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+                'referer', 'retry-after', 'user-agent'
+            ];
 
 /**
  * Parse headers into an object
@@ -1799,17 +1795,17 @@ module.exports = function parseHeaders(headers) {
              * Common use case would be to use `Function.prototype.apply`.
              *
              *  ```js
- *  function f(x, y, z) {}
- *  var args = [1, 2, 3];
- *  f.apply(null, args);
- *  ```
- *
- * With `spread` this example can be re-written.
- *
- *  ```js
- *  spread(function(x, y, z) {})([1, 2, 3]);
- *  ```
- *
+             *  function f(x, y, z) {}
+             *  var args = [1, 2, 3];
+             *  f.apply(null, args);
+             *  ```
+             *
+             * With `spread` this example can be re-written.
+             *
+             *  ```js
+             *  spread(function(x, y, z) {})([1, 2, 3]);
+             *  ```
+             *
              * @param {Function} callback
              * @returns {Function}
              */
@@ -4635,46 +4631,46 @@ function extend(a, b, thisArg) {
             ;(function () {
 
                 /** Used as a safe reference for `undefined` in pre-ES5 environments. */
-  var undefined;
+                var undefined;
 
                 /** Used as the semantic version number. */
                 var VERSION = '4.17.21';
 
-  /** Used as the size to enable large array optimizations. */
-  var LARGE_ARRAY_SIZE = 200;
+                /** Used as the size to enable large array optimizations. */
+                var LARGE_ARRAY_SIZE = 200;
 
                 /** Error message constants. */
                 var CORE_ERROR_TEXT = 'Unsupported core-js use. Try https://npms.io/search?q=ponyfill.',
                     FUNC_ERROR_TEXT = 'Expected a function',
                     INVALID_TEMPL_VAR_ERROR_TEXT = 'Invalid `variable` option passed into `_.template`';
 
-  /** Used to stand-in for `undefined` hash values. */
-  var HASH_UNDEFINED = '__lodash_hash_undefined__';
+                /** Used to stand-in for `undefined` hash values. */
+                var HASH_UNDEFINED = '__lodash_hash_undefined__';
 
-  /** Used as the maximum memoize cache size. */
-  var MAX_MEMOIZE_SIZE = 500;
+                /** Used as the maximum memoize cache size. */
+                var MAX_MEMOIZE_SIZE = 500;
 
-  /** Used as the internal argument placeholder. */
-  var PLACEHOLDER = '__lodash_placeholder__';
+                /** Used as the internal argument placeholder. */
+                var PLACEHOLDER = '__lodash_placeholder__';
 
-  /** Used to compose bitmasks for cloning. */
-  var CLONE_DEEP_FLAG = 1,
-      CLONE_FLAT_FLAG = 2,
-      CLONE_SYMBOLS_FLAG = 4;
+                /** Used to compose bitmasks for cloning. */
+                var CLONE_DEEP_FLAG = 1,
+                    CLONE_FLAT_FLAG = 2,
+                    CLONE_SYMBOLS_FLAG = 4;
 
-  /** Used to compose bitmasks for value comparisons. */
-  var COMPARE_PARTIAL_FLAG = 1,
-      COMPARE_UNORDERED_FLAG = 2;
+                /** Used to compose bitmasks for value comparisons. */
+                var COMPARE_PARTIAL_FLAG = 1,
+                    COMPARE_UNORDERED_FLAG = 2;
 
-  /** Used to compose bitmasks for function metadata. */
-  var WRAP_BIND_FLAG = 1,
-      WRAP_BIND_KEY_FLAG = 2,
-      WRAP_CURRY_BOUND_FLAG = 4,
-      WRAP_CURRY_FLAG = 8,
-      WRAP_CURRY_RIGHT_FLAG = 16,
-      WRAP_PARTIAL_FLAG = 32,
-      WRAP_PARTIAL_RIGHT_FLAG = 64,
-      WRAP_ARY_FLAG = 128,
+                /** Used to compose bitmasks for function metadata. */
+                var WRAP_BIND_FLAG = 1,
+                    WRAP_BIND_KEY_FLAG = 2,
+                    WRAP_CURRY_BOUND_FLAG = 4,
+                    WRAP_CURRY_FLAG = 8,
+                    WRAP_CURRY_RIGHT_FLAG = 16,
+                    WRAP_PARTIAL_FLAG = 32,
+                    WRAP_PARTIAL_RIGHT_FLAG = 64,
+                    WRAP_ARY_FLAG = 128,
       WRAP_REARG_FLAG = 256,
       WRAP_FLIP_FLAG = 512;
 
@@ -4751,26 +4747,26 @@ function extend(a, b, thisArg) {
       uint16Tag = '[object Uint16Array]',
       uint32Tag = '[object Uint32Array]';
 
-  /** Used to match empty string literals in compiled template source. */
-  var reEmptyStringLeading = /\b__p \+= '';/g,
-      reEmptyStringMiddle = /\b(__p \+=) '' \+/g,
-      reEmptyStringTrailing = /(__e\(.*?\)|\b__t\)) \+\n'';/g;
+                /** Used to match empty string literals in compiled template source. */
+                var reEmptyStringLeading = /\b__p \+= '';/g,
+                    reEmptyStringMiddle = /\b(__p \+=) '' \+/g,
+                    reEmptyStringTrailing = /(__e\(.*?\)|\b__t\)) \+\n'';/g;
 
-  /** Used to match HTML entities and HTML characters. */
-  var reEscapedHtml = /&(?:amp|lt|gt|quot|#39);/g,
-      reUnescapedHtml = /[&<>"']/g,
-      reHasEscapedHtml = RegExp(reEscapedHtml.source),
-      reHasUnescapedHtml = RegExp(reUnescapedHtml.source);
+                /** Used to match HTML entities and HTML characters. */
+                var reEscapedHtml = /&(?:amp|lt|gt|quot|#39);/g,
+                    reUnescapedHtml = /[&<>"']/g,
+                    reHasEscapedHtml = RegExp(reEscapedHtml.source),
+                    reHasUnescapedHtml = RegExp(reUnescapedHtml.source);
 
-  /** Used to match template delimiters. */
-  var reEscape = /<%-([\s\S]+?)%>/g,
-      reEvaluate = /<%([\s\S]+?)%>/g,
-      reInterpolate = /<%=([\s\S]+?)%>/g;
+                /** Used to match template delimiters. */
+                var reEscape = /<%-([\s\S]+?)%>/g,
+                    reEvaluate = /<%([\s\S]+?)%>/g,
+                    reInterpolate = /<%=([\s\S]+?)%>/g;
 
-  /** Used to match property names within property paths. */
-  var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
-      reIsPlainProp = /^\w*$/,
-      rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
+                /** Used to match property names within property paths. */
+                var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
+                    reIsPlainProp = /^\w*$/,
+                    rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
 
                 /**
                  * Used to match `RegExp`
@@ -4814,32 +4810,32 @@ function extend(a, b, thisArg) {
                  */
                 var reEsTemplate = /\$\{([^\\}]*(?:\\.[^\\}]*)*)\}/g;
 
-  /** Used to match `RegExp` flags from their coerced string values. */
-  var reFlags = /\w*$/;
+                /** Used to match `RegExp` flags from their coerced string values. */
+                var reFlags = /\w*$/;
 
-  /** Used to detect bad signed hexadecimal string values. */
-  var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
+                /** Used to detect bad signed hexadecimal string values. */
+                var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
 
-  /** Used to detect binary string values. */
-  var reIsBinary = /^0b[01]+$/i;
+                /** Used to detect binary string values. */
+                var reIsBinary = /^0b[01]+$/i;
 
-  /** Used to detect host constructors (Safari). */
-  var reIsHostCtor = /^\[object .+?Constructor\]$/;
+                /** Used to detect host constructors (Safari). */
+                var reIsHostCtor = /^\[object .+?Constructor\]$/;
 
-  /** Used to detect octal string values. */
-  var reIsOctal = /^0o[0-7]+$/i;
+                /** Used to detect octal string values. */
+                var reIsOctal = /^0o[0-7]+$/i;
 
-  /** Used to detect unsigned integer values. */
-  var reIsUint = /^(?:0|[1-9]\d*)$/;
+                /** Used to detect unsigned integer values. */
+                var reIsUint = /^(?:0|[1-9]\d*)$/;
 
-  /** Used to match Latin Unicode letters (excluding mathematical operators). */
-  var reLatin = /[\xc0-\xd6\xd8-\xf6\xf8-\xff\u0100-\u017f]/g;
+                /** Used to match Latin Unicode letters (excluding mathematical operators). */
+                var reLatin = /[\xc0-\xd6\xd8-\xf6\xf8-\xff\u0100-\u017f]/g;
 
-  /** Used to ensure capturing order of template delimiters. */
-  var reNoMatch = /($^)/;
+                /** Used to ensure capturing order of template delimiters. */
+                var reNoMatch = /($^)/;
 
-  /** Used to match unescaped characters in compiled string literals. */
-  var reUnescapedString = /['\n\r\u2028\u2029\\]/g;
+                /** Used to match unescaped characters in compiled string literals. */
+                var reUnescapedString = /['\n\r\u2028\u2029\\]/g;
 
   /** Used to compose unicode character classes. */
   var rsAstralRange = '\\ud800-\\udfff',
@@ -5029,63 +5025,64 @@ function extend(a, b, thisArg) {
     "'": '&#39;'
   };
 
-  /** Used to map HTML entities to characters. */
-  var htmlUnescapes = {
-    '&amp;': '&',
-    '&lt;': '<',
-    '&gt;': '>',
-    '&quot;': '"',
-    '&#39;': "'"
-  };
+                /** Used to map HTML entities to characters. */
+                var htmlUnescapes = {
+                    '&amp;': '&',
+                    '&lt;': '<',
+                    '&gt;': '>',
+                    '&quot;': '"',
+                    '&#39;': "'"
+                };
 
-  /** Used to escape characters for inclusion in compiled string literals. */
-  var stringEscapes = {
-    '\\': '\\',
-    "'": "'",
-    '\n': 'n',
-    '\r': 'r',
-    '\u2028': 'u2028',
-    '\u2029': 'u2029'
-  };
+                /** Used to escape characters for inclusion in compiled string literals. */
+                var stringEscapes = {
+                    '\\': '\\',
+                    "'": "'",
+                    '\n': 'n',
+                    '\r': 'r',
+                    '\u2028': 'u2028',
+                    '\u2029': 'u2029'
+                };
 
-  /** Built-in method references without a dependency on `root`. */
-  var freeParseFloat = parseFloat,
-      freeParseInt = parseInt;
+                /** Built-in method references without a dependency on `root`. */
+                var freeParseFloat = parseFloat,
+                    freeParseInt = parseInt;
 
                 /** Detect free variable `global` from Node.js. */
                 var freeGlobal = typeof __webpack_require__.g == 'object' && __webpack_require__.g && __webpack_require__.g.Object === Object && __webpack_require__.g;
 
-  /** Detect free variable `self`. */
-  var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+                /** Detect free variable `self`. */
+                var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
-  /** Used as a reference to the global object. */
-  var root = freeGlobal || freeSelf || Function('return this')();
+                /** Used as a reference to the global object. */
+                var root = freeGlobal || freeSelf || Function('return this')();
 
-  /** Detect free variable `exports`. */
-  var freeExports =  true && exports && !exports.nodeType && exports;
+                /** Detect free variable `exports`. */
+                var freeExports = true && exports && !exports.nodeType && exports;
 
                 /** Detect free variable `module`. */
                 var freeModule = freeExports && "object" == 'object' && module && !module.nodeType && module;
 
-  /** Detect the popular CommonJS extension `module.exports`. */
-  var moduleExports = freeModule && freeModule.exports === freeExports;
+                /** Detect the popular CommonJS extension `module.exports`. */
+                var moduleExports = freeModule && freeModule.exports === freeExports;
 
-  /** Detect free variable `process` from Node.js. */
-  var freeProcess = moduleExports && freeGlobal.process;
+                /** Detect free variable `process` from Node.js. */
+                var freeProcess = moduleExports && freeGlobal.process;
 
-  /** Used to access faster Node.js helpers. */
-  var nodeUtil = (function() {
-    try {
-      // Use `util.types` for Node.js 10+.
-      var types = freeModule && freeModule.require && freeModule.require('util').types;
+                /** Used to access faster Node.js helpers. */
+                var nodeUtil = (function () {
+                    try {
+                        // Use `util.types` for Node.js 10+.
+                        var types = freeModule && freeModule.require && freeModule.require('util').types;
 
-      if (types) {
-        return types;
-      }
+                        if (types) {
+                            return types;
+                        }
 
-      // Legacy `process.binding('util')` for Node.js < 10.
-      return freeProcess && freeProcess.binding && freeProcess.binding('util');
-    } catch (e) {}
+                        // Legacy `process.binding('util')` for Node.js < 10.
+                        return freeProcess && freeProcess.binding && freeProcess.binding('util');
+                    } catch (e) {
+                    }
   }());
 
   /* Node.js helper references. */
@@ -5655,25 +5652,25 @@ function extend(a, b, thisArg) {
                  */
                 function baseUnary(func) {
                     return function (value) {
-      return func(value);
-    };
-  }
+                        return func(value);
+                    };
+                }
 
-  /**
-   * The base implementation of `_.values` and `_.valuesIn` which creates an
-   * array of `object` property values corresponding to the property names
-   * of `props`.
-   *
-   * @private
-   * @param {Object} object The object to query.
-   * @param {Array} props The property names to get values for.
-   * @returns {Object} Returns the array of property values.
-   */
-  function baseValues(object, props) {
-    return arrayMap(props, function(key) {
-      return object[key];
-    });
-  }
+                /**
+                 * The base implementation of `_.values` and `_.valuesIn` which creates an
+                 * array of `object` property values corresponding to the property names
+                 * of `props`.
+                 *
+                 * @private
+                 * @param {Object} object The object to query.
+                 * @param {Array} props The property names to get values for.
+                 * @returns {Object} Returns the array of property values.
+                 */
+                function baseValues(object, props) {
+                    return arrayMap(props, function (key) {
+                        return object[key];
+                    });
+                }
 
   /**
    * Checks if a `cache` value for `key` exists.
@@ -6004,35 +6001,35 @@ function extend(a, b, thisArg) {
                  */
                 var unescapeHtmlChar = basePropertyOf(htmlUnescapes);
 
-  /**
-   * Gets the size of a Unicode `string`.
-   *
-   * @private
-   * @param {string} string The string inspect.
-   * @returns {number} Returns the string size.
-   */
-  function unicodeSize(string) {
-    var result = reUnicode.lastIndex = 0;
-    while (reUnicode.test(string)) {
-      ++result;
-    }
-    return result;
-  }
+                /**
+                 * Gets the size of a Unicode `string`.
+                 *
+                 * @private
+                 * @param {string} string The string inspect.
+                 * @returns {number} Returns the string size.
+                 */
+                function unicodeSize(string) {
+                    var result = reUnicode.lastIndex = 0;
+                    while (reUnicode.test(string)) {
+                        ++result;
+                    }
+                    return result;
+                }
 
-  /**
-   * Converts a Unicode `string` to an array.
-   *
-   * @private
-   * @param {string} string The string to convert.
-   * @returns {Array} Returns the converted array.
-   */
-  function unicodeToArray(string) {
-    return string.match(reUnicode) || [];
-  }
+                /**
+                 * Converts a Unicode `string` to an array.
+                 *
+                 * @private
+                 * @param {string} string The string to convert.
+                 * @returns {Array} Returns the converted array.
+                 */
+                function unicodeToArray(string) {
+                    return string.match(reUnicode) || [];
+                }
 
-  /**
-   * Splits a Unicode `string` into an array of its words.
-   *
+                /**
+                 * Splits a Unicode `string` into an array of its words.
+                 *
    * @private
    * @param {string} The string to inspect.
    * @returns {Array} Returns the words of `string`.
@@ -8411,9 +8408,9 @@ function extend(a, b, thisArg) {
             return {'criteria': criteria, 'index': ++index, 'value': value};
         });
 
-      return baseSortBy(result, function(object, other) {
-        return compareMultiple(object, other, orders);
-      });
+        return baseSortBy(result, function (object, other) {
+            return compareMultiple(object, other, orders);
+        });
     }
 
     /**
@@ -8672,8 +8669,8 @@ function extend(a, b, thisArg) {
                       : (isIndex(path[index + 1]) ? [] : {});
               }
           }
-        assignValue(nested, key, newValue);
-        nested = nested[key];
+          assignValue(nested, key, newValue);
+          nested = nested[key];
       }
       return object;
     }
@@ -8833,27 +8830,27 @@ function extend(a, b, thisArg) {
                 othIsDefined = computed !== undefined,
                 othIsNull = computed === null,
                 othIsReflexive = computed === computed,
-            othIsSymbol = isSymbol(computed);
+                othIsSymbol = isSymbol(computed);
 
-        if (valIsNaN) {
-          var setLow = retHighest || othIsReflexive;
-        } else if (valIsUndefined) {
-          setLow = othIsReflexive && (retHighest || othIsDefined);
-        } else if (valIsNull) {
-          setLow = othIsReflexive && othIsDefined && (retHighest || !othIsNull);
-        } else if (valIsSymbol) {
-          setLow = othIsReflexive && othIsDefined && !othIsNull && (retHighest || !othIsSymbol);
-        } else if (othIsNull || othIsSymbol) {
-          setLow = false;
-        } else {
-          setLow = retHighest ? (computed <= value) : (computed < value);
+            if (valIsNaN) {
+                var setLow = retHighest || othIsReflexive;
+            } else if (valIsUndefined) {
+                setLow = othIsReflexive && (retHighest || othIsDefined);
+            } else if (valIsNull) {
+                setLow = othIsReflexive && othIsDefined && (retHighest || !othIsNull);
+            } else if (valIsSymbol) {
+                setLow = othIsReflexive && othIsDefined && !othIsNull && (retHighest || !othIsSymbol);
+            } else if (othIsNull || othIsSymbol) {
+                setLow = false;
+            } else {
+                setLow = retHighest ? (computed <= value) : (computed < value);
+            }
+            if (setLow) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
         }
-        if (setLow) {
-          low = mid + 1;
-        } else {
-          high = mid;
-        }
-      }
       return nativeMin(high, MAX_ARRAY_INDEX);
     }
 
@@ -10322,34 +10319,34 @@ function extend(a, b, thisArg) {
 
         // Ignore non-index properties.
         while (++index < arrLength) {
-        var arrValue = array[index],
-            othValue = other[index];
+            var arrValue = array[index],
+                othValue = other[index];
 
-        if (customizer) {
-          var compared = isPartial
-            ? customizer(othValue, arrValue, index, other, array, stack)
-            : customizer(arrValue, othValue, index, array, other, stack);
-        }
-        if (compared !== undefined) {
-          if (compared) {
-            continue;
-          }
-          result = false;
-          break;
-        }
-        // Recursively compare arrays (susceptible to call stack limits).
-        if (seen) {
-          if (!arraySome(other, function(othValue, othIndex) {
-                if (!cacheHas(seen, othIndex) &&
-                    (arrValue === othValue || equalFunc(arrValue, othValue, bitmask, customizer, stack))) {
-                  return seen.push(othIndex);
+            if (customizer) {
+                var compared = isPartial
+                    ? customizer(othValue, arrValue, index, other, array, stack)
+                    : customizer(arrValue, othValue, index, array, other, stack);
+            }
+            if (compared !== undefined) {
+                if (compared) {
+                    continue;
                 }
-              })) {
-            result = false;
-            break;
-          }
-        } else if (!(
-              arrValue === othValue ||
+                result = false;
+                break;
+            }
+            // Recursively compare arrays (susceptible to call stack limits).
+            if (seen) {
+                if (!arraySome(other, function (othValue, othIndex) {
+                    if (!cacheHas(seen, othIndex) &&
+                        (arrValue === othValue || equalFunc(arrValue, othValue, bitmask, customizer, stack))) {
+                        return seen.push(othIndex);
+                    }
+                })) {
+                    result = false;
+                    break;
+                }
+            } else if (!(
+                arrValue === othValue ||
                 equalFunc(arrValue, othValue, bitmask, customizer, stack)
             )) {
           result = false;
@@ -10457,11 +10454,11 @@ function extend(a, b, thisArg) {
      * @returns {boolean} Returns `true` if the objects are equivalent, else `false`.
      */
     function equalObjects(object, other, bitmask, customizer, equalFunc, stack) {
-      var isPartial = bitmask & COMPARE_PARTIAL_FLAG,
-          objProps = getAllKeys(object),
-          objLength = objProps.length,
-          othProps = getAllKeys(other),
-          othLength = othProps.length;
+        var isPartial = bitmask & COMPARE_PARTIAL_FLAG,
+            objProps = getAllKeys(object),
+            objLength = objProps.length,
+            othProps = getAllKeys(other),
+            othLength = othProps.length;
 
         if (objLength != othLength && !isPartial) {
             return false;
@@ -10489,21 +10486,21 @@ function extend(a, b, thisArg) {
             var objValue = object[key],
                 othValue = other[key];
 
-        if (customizer) {
-          var compared = isPartial
-            ? customizer(othValue, objValue, key, other, object, stack)
-            : customizer(objValue, othValue, key, object, other, stack);
-        }
-        // Recursively compare objects (susceptible to call stack limits).
-        if (!(compared === undefined
-              ? (objValue === othValue || equalFunc(objValue, othValue, bitmask, customizer, stack))
-              : compared
+            if (customizer) {
+                var compared = isPartial
+                    ? customizer(othValue, objValue, key, other, object, stack)
+                    : customizer(objValue, othValue, key, object, other, stack);
+            }
+            // Recursively compare objects (susceptible to call stack limits).
+            if (!(compared === undefined
+                    ? (objValue === othValue || equalFunc(objValue, othValue, bitmask, customizer, stack))
+                    : compared
             )) {
-          result = false;
-          break;
+                result = false;
+                break;
+            }
+            skipCtor || (skipCtor = key == 'constructor');
         }
-        skipCtor || (skipCtor = key == 'constructor');
-      }
       if (result && !skipCtor) {
         var objCtor = object.constructor,
             othCtor = other.constructor;
@@ -19463,26 +19460,26 @@ function extend(a, b, thisArg) {
      * ');
      */
     function template(string, options, guard) {
-      // Based on John Resig's `tmpl` implementation
-      // (http://ejohn.org/blog/javascript-micro-templating/)
-      // and Laura Doktorova's doT.js (https://github.com/olado/doT).
-      var settings = lodash.templateSettings;
+        // Based on John Resig's `tmpl` implementation
+        // (http://ejohn.org/blog/javascript-micro-templating/)
+        // and Laura Doktorova's doT.js (https://github.com/olado/doT).
+        var settings = lodash.templateSettings;
 
-      if (guard && isIterateeCall(string, options, guard)) {
-        options = undefined;
-      }
-      string = toString(string);
-      options = assignInWith({}, options, settings, customDefaultsAssignIn);
+        if (guard && isIterateeCall(string, options, guard)) {
+            options = undefined;
+        }
+        string = toString(string);
+        options = assignInWith({}, options, settings, customDefaultsAssignIn);
 
-      var imports = assignInWith({}, options.imports, settings.imports, customDefaultsAssignIn),
-          importsKeys = keys(imports),
-          importsValues = baseValues(imports, importsKeys);
+        var imports = assignInWith({}, options.imports, settings.imports, customDefaultsAssignIn),
+            importsKeys = keys(imports),
+            importsValues = baseValues(imports, importsKeys);
 
-      var isEscaping,
-          isEvaluating,
-          index = 0,
-          interpolate = options.interpolate || reNoMatch,
-          source = "__p += '";
+        var isEscaping,
+            isEvaluating,
+            index = 0,
+            interpolate = options.interpolate || reNoMatch,
+            source = "__p += '";
 
         // Compile the regexp to match each delimiter.
         var reDelimiters = RegExp(
@@ -19506,25 +19503,25 @@ function extend(a, b, thisArg) {
             interpolateValue || (interpolateValue = esTemplateValue);
 
             // Escape characters that can't be included in string literals.
-        source += string.slice(index, offset).replace(reUnescapedString, escapeStringChar);
+            source += string.slice(index, offset).replace(reUnescapedString, escapeStringChar);
 
-        // Replace delimiters with snippets.
-        if (escapeValue) {
-          isEscaping = true;
-          source += "' +\n__e(" + escapeValue + ") +\n'";
-        }
-        if (evaluateValue) {
-          isEvaluating = true;
-          source += "';\n" + evaluateValue + ";\n__p += '";
-        }
-        if (interpolateValue) {
-          source += "' +\n((__t = (" + interpolateValue + ")) == null ? '' : __t) +\n'";
-        }
-        index = offset + match.length;
+            // Replace delimiters with snippets.
+            if (escapeValue) {
+                isEscaping = true;
+                source += "' +\n__e(" + escapeValue + ") +\n'";
+            }
+            if (evaluateValue) {
+                isEvaluating = true;
+                source += "';\n" + evaluateValue + ";\n__p += '";
+            }
+            if (interpolateValue) {
+                source += "' +\n((__t = (" + interpolateValue + ")) == null ? '' : __t) +\n'";
+            }
+            index = offset + match.length;
 
-        // The JS engine embedded in Adobe products needs `match` returned in
-        // order to produce the correct `offset` value.
-        return match;
+            // The JS engine embedded in Adobe products needs `match` returned in
+            // order to produce the correct `offset` value.
+            return match;
         });
 
         source += "';\n";
@@ -19550,33 +19547,33 @@ function extend(a, b, thisArg) {
         source = 'function(' + (variable || 'obj') + ') {\n' +
             (variable
                     ? ''
-          : 'obj || (obj = {});\n'
-        ) +
-        "var __t, __p = ''" +
-        (isEscaping
-           ? ', __e = _.escape'
-           : ''
-        ) +
-        (isEvaluating
-          ? ', __j = Array.prototype.join;\n' +
-            "function print() { __p += __j.call(arguments, '') }\n"
-          : ';\n'
-        ) +
-        source +
-        'return __p\n}';
+                    : 'obj || (obj = {});\n'
+            ) +
+            "var __t, __p = ''" +
+            (isEscaping
+                    ? ', __e = _.escape'
+                    : ''
+            ) +
+            (isEvaluating
+                    ? ', __j = Array.prototype.join;\n' +
+                    "function print() { __p += __j.call(arguments, '') }\n"
+                    : ';\n'
+            ) +
+            source +
+            'return __p\n}';
 
-      var result = attempt(function() {
-        return Function(importsKeys, sourceURL + 'return ' + source)
-          .apply(undefined, importsValues);
-      });
+        var result = attempt(function () {
+            return Function(importsKeys, sourceURL + 'return ' + source)
+                .apply(undefined, importsValues);
+        });
 
-      // Provide the compiled function's source by its `toString` method or
-      // the `source` property as a convenience for inlining compiled templates.
-      result.source = source;
-      if (isError(result)) {
-        throw result;
-      }
-      return result;
+        // Provide the compiled function's source by its `toString` method or
+        // the `source` property as a convenience for inlining compiled templates.
+        result.source = source;
+        if (isError(result)) {
+            throw result;
+        }
+        return result;
     }
 
     /**
@@ -20267,7 +20264,7 @@ function extend(a, b, thisArg) {
      * // => [{ 'a': 1, 'b': 2, 'c': 3 }, { 'a': 4, 'b': 5, 'c': 6 }]
      */
     function matches(source) {
-      return baseMatches(baseClone(source, CLONE_DEEP_FLAG));
+        return baseMatches(baseClone(source, CLONE_DEEP_FLAG));
     }
 
       /**
@@ -20303,34 +20300,34 @@ function extend(a, b, thisArg) {
        * _.filter(objects, _.overSome([_.matchesProperty('a', 1), _.matchesProperty('a', 4)]));
        * // => [{ 'a': 1, 'b': 2, 'c': 3 }, { 'a': 4, 'b': 5, 'c': 6 }]
        */
-    function matchesProperty(path, srcValue) {
-      return baseMatchesProperty(path, baseClone(srcValue, CLONE_DEEP_FLAG));
-    }
+      function matchesProperty(path, srcValue) {
+          return baseMatchesProperty(path, baseClone(srcValue, CLONE_DEEP_FLAG));
+      }
 
-    /**
-     * Creates a function that invokes the method at `path` of a given object.
-     * Any additional arguments are provided to the invoked method.
-     *
-     * @static
-     * @memberOf _
-     * @since 3.7.0
-     * @category Util
-     * @param {Array|string} path The path of the method to invoke.
-     * @param {...*} [args] The arguments to invoke the method with.
-     * @returns {Function} Returns the new invoker function.
-     * @example
-     *
-     * var objects = [
-     *   { 'a': { 'b': _.constant(2) } },
-     *   { 'a': { 'b': _.constant(1) } }
-     * ];
-     *
-     * _.map(objects, _.method('a.b'));
-     * // => [2, 1]
-     *
-     * _.map(objects, _.method(['a', 'b']));
-     * // => [2, 1]
-     */
+      /**
+       * Creates a function that invokes the method at `path` of a given object.
+       * Any additional arguments are provided to the invoked method.
+       *
+       * @static
+       * @memberOf _
+       * @since 3.7.0
+       * @category Util
+       * @param {Array|string} path The path of the method to invoke.
+       * @param {...*} [args] The arguments to invoke the method with.
+       * @returns {Function} Returns the new invoker function.
+       * @example
+       *
+       * var objects = [
+       *   { 'a': { 'b': _.constant(2) } },
+       *   { 'a': { 'b': _.constant(1) } }
+       * ];
+       *
+       * _.map(objects, _.method('a.b'));
+       * // => [2, 1]
+       *
+       * _.map(objects, _.method(['a', 'b']));
+       * // => [2, 1]
+       */
     var method = baseRest(function(path, args) {
       return function(object) {
         return baseInvoke(object, path, args);
@@ -20539,17 +20536,17 @@ function extend(a, b, thisArg) {
        * @example
        *
        * var func = _.overEvery([Boolean, isFinite]);
-     *
-     * func('1');
-     * // => true
-     *
-     * func(null);
-     * // => false
-     *
-     * func(NaN);
-     * // => false
-     */
-    var overEvery = createOver(arrayEvery);
+       *
+       * func('1');
+       * // => true
+       *
+       * func(null);
+       * // => false
+       *
+       * func(NaN);
+       * // => false
+       */
+      var overEvery = createOver(arrayEvery);
 
       /**
        * Creates a function that checks if **any** of the `predicates` return
@@ -20582,30 +20579,30 @@ function extend(a, b, thisArg) {
        * var matchesFunc = _.overSome([{ 'a': 1 }, { 'a': 2 }])
        * var matchesPropertyFunc = _.overSome([['a', 1], ['a', 2]])
        */
-    var overSome = createOver(arraySome);
+      var overSome = createOver(arraySome);
 
-    /**
-     * Creates a function that returns the value at `path` of a given object.
-     *
-     * @static
-     * @memberOf _
-     * @since 2.4.0
-     * @category Util
-     * @param {Array|string} path The path of the property to get.
-     * @returns {Function} Returns the new accessor function.
-     * @example
-     *
-     * var objects = [
-     *   { 'a': { 'b': 2 } },
-     *   { 'a': { 'b': 1 } }
-     * ];
-     *
-     * _.map(objects, _.property('a.b'));
-     * // => [2, 1]
-     *
-     * _.map(_.sortBy(objects, _.property(['a', 'b'])), 'a.b');
-     * // => [1, 2]
-     */
+      /**
+       * Creates a function that returns the value at `path` of a given object.
+       *
+       * @static
+       * @memberOf _
+       * @since 2.4.0
+       * @category Util
+       * @param {Array|string} path The path of the property to get.
+       * @returns {Function} Returns the new accessor function.
+       * @example
+       *
+       * var objects = [
+       *   { 'a': { 'b': 2 } },
+       *   { 'a': { 'b': 1 } }
+       * ];
+       *
+       * _.map(objects, _.property('a.b'));
+       * // => [2, 1]
+       *
+       * _.map(_.sortBy(objects, _.property(['a', 'b'])), 'a.b');
+       * // => [1, 2]
+       */
     function property(path) {
       return isKey(path) ? baseProperty(toKey(path)) : basePropertyDeep(path);
     }
@@ -21810,13 +21807,13 @@ function extend(a, b, thisArg) {
 
   // Some AMD build optimizers, like r.js, check for condition patterns like:
   if (true) {
-    // Expose Lodash on the global object to prevent errors when Lodash is
-    // loaded by a script tag in the presence of an AMD loader.
-    // See http://requirejs.org/docs/errors.html#mismatch for more details.
-    // Use `_.noConflict` to remove Lodash from the global object.
-    root._ = _;
+      // Expose Lodash on the global object to prevent errors when Lodash is
+      // loaded by a script tag in the presence of an AMD loader.
+      // See http://requirejs.org/docs/errors.html#mismatch for more details.
+      // Use `_.noConflict` to remove Lodash from the global object.
+      root._ = _;
 
-    // Define as an anonymous module so, through path mapping, it can be
+      // Define as an anonymous module so, through path mapping, it can be
       // referenced as the "underscore" module.
       !(__WEBPACK_AMD_DEFINE_RESULT__ = (function () {
           return _;
@@ -21889,27 +21886,29 @@ function extend(a, b, thisArg) {
 // function because try/catches deoptimize in certain engines.
 
             var cachedSetTimeout;
-var cachedClearTimeout;
+            var cachedClearTimeout;
 
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
+            function defaultSetTimout() {
+                throw new Error('setTimeout has not been defined');
+            }
+
+            function defaultClearTimeout() {
+                throw new Error('clearTimeout has not been defined');
+            }
+
+            (function () {
+                try {
+                    if (typeof setTimeout === 'function') {
+                        cachedSetTimeout = setTimeout;
+                    } else {
+                        cachedSetTimeout = defaultSetTimout;
+                    }
+                } catch (e) {
+                    cachedSetTimeout = defaultSetTimout;
+                }
+                try {
+                    if (typeof clearTimeout === 'function') {
+                        cachedClearTimeout = clearTimeout;
         } else {
             cachedClearTimeout = defaultClearTimeout;
         }
@@ -22031,33 +22030,37 @@ function Item(fun, array) {
     this.fun = fun;
     this.array = array;
 }
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
 
-function noop() {}
+            Item.prototype.run = function () {
+                this.fun.apply(null, this.array);
+            };
+            process.title = 'browser';
+            process.browser = true;
+            process.env = {};
+            process.argv = [];
+            process.version = ''; // empty string to avoid regexp issues
+            process.versions = {};
 
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
+            function noop() {
+            }
 
-process.listeners = function (name) { return [] }
+            process.on = noop;
+            process.addListener = noop;
+            process.once = noop;
+            process.off = noop;
+            process.removeListener = noop;
+            process.removeAllListeners = noop;
+            process.emit = noop;
+            process.prependListener = noop;
+            process.prependOnceListener = noop;
 
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
+            process.listeners = function (name) {
+                return []
+            }
+
+            process.binding = function (name) {
+                throw new Error('process.binding is not supported');
+            };
 
             process.cwd = function () {
                 return '/'
