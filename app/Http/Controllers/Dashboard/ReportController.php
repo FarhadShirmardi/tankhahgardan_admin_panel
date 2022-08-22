@@ -664,7 +664,7 @@ class ReportController extends Controller
             }
             $counts->push([
                 'id' => $projectId,
-                'name' => $user->projects->find($projectId)->name,
+                'name' => str_replace("\n", "", $user->projects->find($projectId)->name),
                 'data' => $data->toJson(),
             ]);
         }
