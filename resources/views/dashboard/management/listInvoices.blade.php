@@ -96,7 +96,7 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="row">
-                                    <a id="paymentLink" onclick="copyClipboard('{{ env('TANKHAH_URL')  .
+                                    <a id="paymentLink" onclick="copyClipboard('{{ config('app.tankhah_url')  .
                                     '/api/v2/invoice/' . $invoice['id'] . '/preview' }}')" href="#">
                                         <i class="fa fa-copy"></i>
                                         لینک پرداخت

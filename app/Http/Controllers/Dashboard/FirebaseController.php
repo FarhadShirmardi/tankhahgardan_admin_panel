@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Announcement;
-use App\AnnouncementUser;
 use App\Constants\AnnouncementStatus;
 use App\Constants\AnnouncementType;
 use App\Constants\LogType;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
 use App\Jobs\AnnouncementJob;
-use App\PanelUser;
-use App\User;
+use App\Models\Announcement;
+use App\Models\AnnouncementUser;
+use App\Models\PanelUser;
+use App\Models\User;
 use Carbon\Carbon;
 use DB;
 use Exception;
@@ -226,7 +226,7 @@ class FirebaseController extends Controller
             if (!$isNull) {
                 $http = new Client;
                 $response = $http->post(
-                    env('TANKHAH_URL') . '/panel/' . env('TANKHAH_TOKEN') . '/announcement/' . $announcement->id . '/image',
+                    config('app.tankhah_url').'/panel/'.config('app.tankhah_token').'/announcement/'.$announcement->id.'/image',
                     [
                         'headers' => [
                             'Accept' => 'application/json',

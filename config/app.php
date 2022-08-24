@@ -237,4 +237,6 @@ return [
         'Captcha' => Mews\Captcha\Facades\Captcha::class,
     ],
 
+    'tankhah_url' => env('TANKHAH_URL'),
+    'tankhah_token' => env('TANKHAH_TOKEN'),
 ];

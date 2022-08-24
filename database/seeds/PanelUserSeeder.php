@@ -1,7 +1,7 @@
 <?php
 
 use App\Constants\PanelUserType;
-use App\PanelUser;
+use App\Models\PanelUser;
 use Illuminate\Database\Seeder;
 
 class PanelUserSeeder extends Seeder

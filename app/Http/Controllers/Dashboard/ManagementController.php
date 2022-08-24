@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Banner;
-use App\Campaign;
 use App\Constants\BannerStatus;
 use App\Constants\BannerType;
 use App\Constants\LogType;
@@ -18,13 +16,15 @@ use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
 use App\Jobs\PromoCodeSmsJob;
 use App\Jobs\SendFirebaseNotificationJob;
-use App\PanelLogCenter;
-use App\PanelUser;
-use App\PromoCode;
+use App\Models\Banner;
+use App\Models\Campaign;
+use App\Models\PanelLogCenter;
+use App\Models\PanelUser;
+use App\Models\PromoCode;
+use App\Models\Transaction;
+use App\Models\User;
+use App\Models\UserStatusLog;
 use App\SmsLog;
-use App\Transaction;
-use App\User;
-use App\UserStatusLog;
 use Artisan;
 use Exception;
 use GuzzleHttp\Client;
@@ -720,7 +720,7 @@ class ManagementController extends Controller
                 $image->storeAs('/', $path = 'Banner_image' . '.' . $image->getClientOriginalExtension());
                 $http = new Client;
                 $response = $http->post(
-                    env('TANKHAH_URL') . '/panel/' . env('TANKHAH_TOKEN') . '/banner/' . $banner->id . '/image',
+                    config('app.tankhah_url').'/panel/'.config('app.tankhah_token').'/banner/'.$banner->id.'/image',
                     [
                         'headers' => [
                             'Accept' => 'application/json',
@@ -729,7 +729,7 @@ class ManagementController extends Controller
                             [
                                 'name' => 'image',
                                 'filename' => $image->getClientOriginalName(),
-                                'contents' => file_get_contents(storage_path() . '/app/' . $path),
+                                'contents' => file_get_contents(storage_path().'/app/'.$path),
                             ],
                         ],
                     ]

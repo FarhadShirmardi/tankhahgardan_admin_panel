@@ -2,18 +2,15 @@
 
 namespace App\Jobs;
 
+use App\FirebaseToken;
+use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Announcement;
-use App\FirebaseToken;
-use App\AnnouncementUser;
 use Kreait\Firebase\Messaging;
 use Kreait\Firebase\Messaging\CloudMessage;
-use Log;
-use GuzzleHttp\Client;
 
 class SendFirebaseNotificationJob implements ShouldQueue
 {
@@ -39,12 +36,12 @@ class SendFirebaseNotificationJob implements ShouldQueue
     {
         $http = new Client;
         $response = $http->post(
-            env('TANKHAH_URL') . '/panel/' . env('TANKHAH_TOKEN') . '/notification',
+            config('app.tankhah_url').'/panel/'.config('app.tankhah_token').'/notification',
             [
                 'headers' => [
                     'Accept' => 'application/json',
                 ],
-                'form_params' => $this->data
+                'form_params' => $this->data,
             ]
         );
     }

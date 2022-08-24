@@ -18,7 +18,7 @@ use App\Exports\Monthly\MonthlyRegisterExport;
 use App\Exports\Monthly\MonthlyUserAssessmentExport;
 use App\Exports\Monthly\MonthlyUserReturnExport;
 use App\Helpers\Helpers;
-use App\MonthlyReport;
+use App\Models\MonthlyReport;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 

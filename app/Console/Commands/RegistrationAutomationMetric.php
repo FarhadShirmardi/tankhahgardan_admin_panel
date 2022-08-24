@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\AutomationData;
-use App\AutomationMetric;
 use App\Constants\UserPremiumState;
-use App\User;
+use App\Models\AutomationData;
+use App\Models\AutomationMetric;
+use App\Models\User;
 use Illuminate\Console\Command;
 
 class RegistrationAutomationMetric extends Command

@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Campaign;
 use App\Exports\ReleaseSmsExport;
 use App\Helpers\Helpers;
-use App\User;
+use App\Models\Campaign;
+use App\Models\User;
 use Illuminate\Console\Command;
 use Maatwebsite\Excel\Facades\Excel;
 

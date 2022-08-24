@@ -10,13 +10,16 @@ use App\Constants\PurchaseType;
 use App\Constants\UserStatusType;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
-use App\PanelInvoice;
-use App\PanelUser;
-use App\User;
-use App\UserStatusLog;
+use App\Models\PanelInvoice;
+use App\Models\PanelUser;
+use App\Models\User;
+use App\Models\UserStatus;
+use App\Models\UserStatusLog;
 use Carbon\Carbon;
+use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use UnexpectedValueException;
 use Validator;
 
 class PremiumController extends Controller
@@ -70,20 +73,20 @@ class PremiumController extends Controller
     public function purchase($userId, $type, $id)
     {
         $user = User::query()->findOrFail($userId);
-        $userStates = $this->getUserStates($user);
+        $userStates = $this->getUserStatuses($user);
         $selectedPlan = $userStates->where('id', $id)->first();
         $openInvoices = $user->invoices()->where('status', UserStatusType::PENDING)->exists();
 
         try {
             if ($openInvoices) {
-                throw new \UnexpectedValueException('برای ایجاد پیش فاکتور جدید ابتدا تمام پیش فاکتورهای قبل را ببندید.');
+                throw new UnexpectedValueException('برای ایجاد پیش فاکتور جدید ابتدا تمام پیش فاکتورهای قبل را ببندید.');
             }
             $this->validateType($type, $userStates, $selectedPlan);
-        } catch (\UnexpectedValueException $exception) {
+        } catch (UnexpectedValueException $exception) {
             $validator = Validator::make([], []);
             $validator->errors()->add('error', $exception->getMessage());
             return redirect()->back()->withErrors($validator);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             dd($exception);
         }
 
@@ -108,10 +111,12 @@ class PremiumController extends Controller
         ]);
     }
 
-    public function getUserStates(User $user)
+    public function getUserStatuses(User $user)
     {
-        $userStates = $user->userStatus()->orderBy('end_date', 'desc')->get();
-        $userStates->transform(function ($item) use ($user) {
+        $userStatuses = $user->userStatus()
+            ->with('premiumPlan')
+            ->orderBy('end_date', 'desc')->get();
+        $userStatuses->transform(function (UserStatus $item) use ($user) {
             $item['is_active'] =
                 (now()->toDateTimeString() > $item['start_date'] and now()->toDateTimeString() < $item['end_date']);
             $item['is_last_item'] = false;
@@ -122,7 +127,7 @@ class PremiumController extends Controller
                 ->get();
 
             $amount = 0;
-            $price = PremiumPrices::getPrice($item['price_id']);
+            $price = PremiumPrices::getPrice($item['duration_id']);
             if ($item['is_active'] and !$price['is_gift']) {
                 /** @var UserStatusLog $userStatusLog */
                 foreach ($userStatusLogs as $userStatusLog) {
@@ -131,33 +136,33 @@ class PremiumController extends Controller
                 }
             }
 
-            $item['payable_amount'] = 10 * (int)(round($amount) / 10);
+            $item['payable_amount'] = 10 * (int) (round($amount) / 10);
             $item['start_date'] = Helpers::convertDateTimeToJalali($item['start_date']);
             $item['end_date'] = Helpers::convertDateTimeToJalali($item['end_date']);
             return $item;
         });
-        $userStates->first()['is_last_item'] = true;
+        $userStatuses->first()['is_last_item'] = true;
 
-        return $userStates;
+        return $userStatuses;
     }
 
     private function validateType($type, $userStates, $selectedPlan)
     {
         if ($type == PurchaseType::UPGRADE) {
             if (!$selectedPlan->is_active) {
-                throw new \UnexpectedValueException('برای ارتقا طرح باید فعال باشد.');
+                throw new UnexpectedValueException('برای ارتقا طرح باید فعال باشد.');
             }
         } elseif ($type == PurchaseType::EXTEND) {
             if (!$selectedPlan->is_last_item or !$selectedPlan->is_active) {
-                throw new \UnexpectedValueException('تنها آخرین طرح را می‌توانید تمدید کنید');
+                throw new UnexpectedValueException('تنها آخرین طرح را می‌توانید تمدید کنید');
             }
         } elseif ($type == PurchaseType::NEW) {
             $activePlan = $userStates->where('is_active', true)->first();
             if ($activePlan) {
-                throw new \UnexpectedValueException('برای خرید نباید طرح فعالی داشته باشید.');
+                throw new UnexpectedValueException('برای خرید نباید طرح فعالی داشته باشید.');
             }
         } else {
-            throw new \UnexpectedValueException('نوع طرح صحیح نیست.');
+            throw new UnexpectedValueException('نوع طرح صحیح نیست.');
         }
     }
 
@@ -165,11 +170,11 @@ class PremiumController extends Controller
     {
         try {
             return $this->validatePurchase($request, $type, $userId, $id);
-        } catch (\UnexpectedValueException $exception) {
+        } catch (UnexpectedValueException $exception) {
             $validator = Validator::make([], []);
             $validator->errors()->add('error', $exception->getMessage());
             return redirect()->back()->withErrors($validator);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             dd($exception);
         }
     }
@@ -177,7 +182,7 @@ class PremiumController extends Controller
     private function validatePurchase(Request $request, $type, $userId, $id)
     {
         $user = User::query()->findOrFail($userId);
-        $userStates = $this->getUserStates($user);
+        $userStates = $this->getUserStatuses($user);
         $selectedPlan = $userStates->where('id', $id)->first();
         $this->validateType($type, $userStates, $selectedPlan);
 
@@ -185,14 +190,13 @@ class PremiumController extends Controller
         $priceId = $request->price_id;
         if ($type == PurchaseType::UPGRADE) {
             if ($request->user_count == 0 and $request->volume_size == 0) {
-                throw new \UnexpectedValueException('هر ۲ فیلد حجم و کاربر نمی‌توانند صفر باشند.');
+                throw new UnexpectedValueException('هر ۲ فیلد حجم و کاربر نمی‌توانند صفر باشند.');
             }
             $priceId = $selectedPlan->price_id;
             $price = PremiumPrices::getPrice($priceId, $selectedPlan->user_count, $selectedPlan->volume_size, true);
         } else {
             $price = PremiumPrices::getPrice($priceId);
         }
-        $data = [];
         $activePlan = $user->userStatus()->orderBy('end_date', 'desc')->first();
         if ($type == PurchaseType::NEW) {
             $startDate = now()->toDateTimeString();
@@ -201,7 +205,7 @@ class PremiumController extends Controller
                 $startDate = $carbon->parse($request->start_date);
                 $endDate = $carbon->parse($request->end_date);
                 if ($endDate->lt($startDate)) {
-                    throw new \UnexpectedValueException('تاریخ شروع نمیتواند بزرگتر از تاریخ پایان باشد.');
+                    throw new UnexpectedValueException('تاریخ شروع نمیتواند بزرگتر از تاریخ پایان باشد.');
                 }
             } elseif ($priceId == PremiumDuration::MONTH) {
                 $endDate = now()->addDays(31)->endOfDay()->toDateTimeString();
@@ -218,7 +222,7 @@ class PremiumController extends Controller
                 $carbon = new Carbon();
                 $endDate = $carbon->parse($request->end_date);
                 if ($endDate->lt($startDate)) {
-                    throw new \UnexpectedValueException('تاریخ شروع نمیتواند بزرگتر از تاریخ پایان باشد.');
+                    throw new UnexpectedValueException('تاریخ شروع نمیتواند بزرگتر از تاریخ پایان باشد.');
                 }
             } elseif ($priceId == PremiumDuration::MONTH) {
                 $endDate = $startDate->copy()->addDays(31)->endOfDay()->toDateTimeString();
@@ -280,7 +284,7 @@ class PremiumController extends Controller
                 'start_date' => str_replace('/', '-', Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->start_date))),
                 'end_date' => str_replace('/', '-', Helpers::convertDateTimeToGregorian(Helpers::getEnglishString($request->end_date))),
             ]);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
 
         }
         return $request;
@@ -325,8 +329,8 @@ class PremiumController extends Controller
         \DB::transaction(function () use ($invoice) {
             $http = new Client;
             $response = $http->get(
-                env('TANKHAH_URL') . '/panel/' .
-                env('TANKHAH_TOKEN') . '/invoice/' . $invoice['id'] . '/pay',
+                config('app.tankhah_url').'/panel/'.
+                config('app.tankhah_token').'/invoice/'.$invoice['id'].'/pay',
                 [
                     'headers' => [
                         'Accept' => 'application/json',
@@ -334,7 +338,7 @@ class PremiumController extends Controller
                 ]
             );
             if ($response->getStatusCode() != 200) {
-                throw new \Exception($response->getBody());
+                throw new Exception($response->getBody());
             }
             /** @var PanelUser $panelUser */
             $panelUser = auth()->user();
@@ -354,13 +358,11 @@ class PremiumController extends Controller
     {
         $type = $request->type;
         $user = User::findOrFail($userId);
-        $userStatus = $this->getUserStates($user)->where('id', $id)->first();
+        $userStatus = $this->getUserStatuses($user)->where('id', $id)->first();
         $userStatus['close_type'] = $type;
         if ($type == 'wallet') {
             $user->wallet += $userStatus->payable_amount;
             $user->save();
-        } elseif ($type == 'card') {
-
         }
         $user->userStatus()->where('id', $id)->update([
             'end_date' => now(),

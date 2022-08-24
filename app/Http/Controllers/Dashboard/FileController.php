@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\PanelFile;
-use App\PanelUser;
+use App\Models\PanelFile;
+use App\Models\PanelUser;
 use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller

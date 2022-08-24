@@ -12,19 +12,17 @@ use App\Constants\PremiumConstants;
 use App\Constants\PremiumDuration;
 use App\Constants\ProjectUserState;
 use App\Constants\PurchaseType;
-use App\Constants\UserActivationConstant;
 use App\Constants\UserPremiumState;
-use App\File;
-use App\Image;
 use App\Jobs\UserActivationSmsJob;
-use App\Project;
-use App\ProjectUser;
-use App\PromoCode;
-use App\SentImage;
-use App\User;
-use App\UserActivationState;
-use App\UserStatus;
-use App\UserStatusLog;
+use App\Models\File;
+use App\Models\Image;
+use App\Models\Project;
+use App\Models\ProjectUser;
+use App\Models\PromoCode;
+use App\Models\SentImage;
+use App\Models\User;
+use App\Models\UserStatus;
+use App\Models\UserStatusLog;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -501,98 +499,6 @@ class Helpers
             return '(' . number_format($number * -1) . ')';
         }
         return number_format($number);
-    }
-
-    public static function setUserStatus(&$userStates, $state, $addHours = null, $sendSms = false, $smsText = null)
-    {
-        if ($sendSms == true and $smsText == null) {
-            throw new Exception('Sms text can not be null!');
-        }
-
-        foreach ($userStates as $userState) {
-            $user = User::findOrFail($userState->user_id);
-            $projects = $user->projects()->get();
-
-            $dataCounter = 0;
-
-            /** @var Project $project */
-            foreach ($projects as $project) {
-
-                if ($addHours === null) {
-                    $time = $userState->updated_at->toDateTimeString();
-                } else {
-                    $time = $userState->updated_at->addHours($addHours)->toDateString();
-                }
-
-                $dataCounter += $project->notes()->where(
-                    'notes.created_at',
-                    '>',
-                    $time
-                )->count();
-                $dataCounter += $project->payments()
-                    ->where(
-                        'payments.created_at',
-                        '>',
-                        $time
-                    )->count();
-                $dataCounter += $project->receives()
-                    ->where(
-                        'receives.created_at',
-                        '>',
-                        $time
-                    )->count();
-            }
-
-            if ($dataCounter == 0) {
-                //Update user activation state
-                $userActivationState = UserActivationState::where(
-                    'user_id',
-                    $user->id
-                )->first();
-                $userActivationState->state = $state;
-                $userActivationState->save();
-
-                if ($sendSms == true) {
-                    if (app()->environment() != 'production') {
-                        $delayTime = now();
-                    } else {
-                        $delayTime = now()->addHours(12);
-                    }
-
-                    dispatch(new UserActivationSmsJob(
-                        $user,
-                        $smsText,
-                        $state
-                    ))->onQueue('activationSms')->delay($delayTime);
-                }
-            } else {
-                if ($state == UserActivationConstant::STATE_NPS_SMS or
-                    $state == UserActivationConstant::STATE_REFERRAL_SMS) {
-                    //Update user activation state
-                    $userActivationState = UserActivationState::where(
-                        'user_id',
-                        $user->id
-                    )->first();
-                    $userActivationState->state = $state;
-                    $userActivationState->save();
-
-                    if ($sendSms == true) {
-                        if (app()->environment() != 'production') {
-                            $delayTime = now();
-                        } else {
-                            $delayTime = now()->addHours(12);
-                        }
-
-                        dispatch(new UserActivationSmsJob(
-                            $user,
-                            $smsText,
-                            $state
-                        ))->onQueue('activationSms')->delay($delayTime);
-                    }
-
-                }
-            }
-        }
     }
 
     public static function getPremiumCounts(User &$user, Project &$project)

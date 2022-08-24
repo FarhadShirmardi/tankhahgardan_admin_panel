@@ -49,7 +49,7 @@
                         عکس
                         <img src="{{
                             $banner['image_path'] ?
-                            env('TANKHAH_URL') . '/storage/' .  $banner['image_path'] :
+                            config('app.tankhah_url') . '/storage/' .  $banner['image_path'] :
                             asset('img/no-img.png') }}" alt="" class="col-md-5"/>
                     </label>
                     <input type="file" accept="image/*" name="image" class="form-control col-md-7"

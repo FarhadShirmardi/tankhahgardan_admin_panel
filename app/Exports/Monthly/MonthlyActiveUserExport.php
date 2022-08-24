@@ -2,7 +2,7 @@
 
 namespace App\Exports\Monthly;
 
-use App\MonthlyReport;
+use App\Models\MonthlyReport;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithTitle;

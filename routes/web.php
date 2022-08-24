@@ -138,11 +138,6 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
             Route::get('sendSms', 'Dashboard\ReportController@sendSms')->name('sendSms');
         });
 
-        Route::group(['middleware' => ['permission:view_feedback']], function () {
-            Route::get('notifications', 'Dashboard\ReportController@notifications')->name('notifications');
-            Route::get('notification/new/{id?}', 'Dashboard\ReportController@notificationView')->name('notificationView');
-        });
-
         Route::group(['middleware' => ['permission:view_notification']], function () {
             Route::get('announcements', 'Dashboard\FirebaseController@announcements')->name('announcements');
             Route::get('announcements/{id}', 'Dashboard\FirebaseController@announcementItem')->name('announcementItem');

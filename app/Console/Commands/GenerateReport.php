@@ -2,13 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use DB;
-use App\UserReport;
 use App\Http\Controllers\Dashboard\ReportController;
-use App\User;
-use App\ProjectReport;
-use App\Project;
+use App\Models\ProjectReport;
+use App\Models\UserReport;
+use DB;
+use Illuminate\Console\Command;
 
 class GenerateReport extends Command
 {

@@ -2,7 +2,7 @@
 
 use App\Constants\PanelUserType;
 use App\Http\Controllers\Dashboard\AdminController;
-use App\PanelUser;
+use App\Models\PanelUser;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 

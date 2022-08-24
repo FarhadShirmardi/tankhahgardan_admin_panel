@@ -3,8 +3,6 @@
 namespace App\Constants;
 
 use App\Http\Controllers\Api\V2\Constants\NotificationExpireTime;
-use App\Project;
-use App\User;
 
 class NotificationType
 {

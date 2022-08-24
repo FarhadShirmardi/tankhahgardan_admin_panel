@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\AutomationData;
 use App\Jobs\AutomationSmsJob;
-use App\User;
+use App\Models\AutomationData;
+use App\Models\User;
 use Illuminate\Console\Command;
 
 class RegistrationAutomationSms extends Command

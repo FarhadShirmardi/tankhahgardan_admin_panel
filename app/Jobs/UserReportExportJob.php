@@ -4,8 +4,8 @@ namespace App\Jobs;
 
 use App\Exports\AllUserExport;
 use App\Http\Controllers\Dashboard\ReportController;
-use App\PanelFile;
-use App\UserReport;
+use App\Models\PanelFile;
+use App\Models\UserReport;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
