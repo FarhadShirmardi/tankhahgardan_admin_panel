@@ -19,6 +19,9 @@ class AuthController extends Controller
 
     public function authenticate(Request $request)
     {
+        $request->merge([
+            'captcha' => englishString($request->captcha),
+        ]);
         $request->validate([
             'captcha' => 'required|captcha',
         ]);

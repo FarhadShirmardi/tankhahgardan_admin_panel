@@ -18,9 +18,11 @@
     <link rel="stylesheet" href="{{ asset('dashboard/css/jquery.toast.min.css') }}"/>
 
     <!-- Main styles for this application -->
-    <link href="{{ asset('dashboard/css/style.css') }}" rel="stylesheet">
     <script src="{{ asset("js/jquery.min.js") }}"></script>
+    <script src="{{ asset('js/bootstrap.min.js') }}"></script>
     <script src="{{ asset('js/dropzone.min.js') }}"></script>
+
+    @vite('resources/sass/dashboard/style.scss')
 
     @yield('extra_css')
     @livewireStyles

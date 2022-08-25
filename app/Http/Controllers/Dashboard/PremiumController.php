@@ -14,7 +14,6 @@ use App\Models\PanelInvoice;
 use App\Models\PanelUser;
 use App\Models\User;
 use App\Models\UserStatus;
-use App\Models\UserStatusLog;
 use Carbon\Carbon;
 use Exception;
 use GuzzleHttp\Client;
@@ -70,18 +69,15 @@ class PremiumController extends Controller
         return redirect()->route('dashboard.report.userActivity', ['id' => $userId])->with('success', 'با موفقیت انجام شد.');
     }
 
-    public function purchase($userId, $type, $id)
+    public function purchase(int $userId, int $type)
     {
         $user = User::query()->findOrFail($userId);
-        $userStates = $this->getUserStatuses($user);
-        $selectedPlan = $userStates->where('id', $id)->first();
-        $openInvoices = $user->invoices()->where('status', UserStatusType::PENDING)->exists();
 
         try {
+            $openInvoices = $user->invoices()->where('status', UserStatusType::PENDING)->exists();
             if ($openInvoices) {
                 throw new UnexpectedValueException('برای ایجاد پیش فاکتور جدید ابتدا تمام پیش فاکتورهای قبل را ببندید.');
             }
-            $this->validateType($type, $userStates, $selectedPlan);
         } catch (UnexpectedValueException $exception) {
             $validator = Validator::make([], []);
             $validator->errors()->add('error', $exception->getMessage());
@@ -90,24 +86,9 @@ class PremiumController extends Controller
             dd($exception);
         }
 
-        $prices = [
-            PremiumDuration::MONTH,
-            PremiumDuration::YEAR,
-            PremiumDuration::SPECIAL,
-        ];
-
-        $currentPlan = PurchaseType::UPGRADE ? $userStates->where('is_active', true)->first() : null;
-
-        $userCounts = Helpers::getUserCounts($user);
-        $userCountMin = max($userCounts['user_count_limit'] - $userCounts['user_count_remain'], 1);
-
         return view('dashboard.premium.purchase', [
             'user' => $user,
             'type' => $type,
-            'selected_plan' => $selectedPlan,
-            'prices' => $prices,
-            'current_plan' => $currentPlan,
-            'user_count_min' => $userCountMin,
         ]);
     }
 
@@ -120,23 +101,6 @@ class PremiumController extends Controller
             $item['is_active'] =
                 (now()->toDateTimeString() > $item['start_date'] and now()->toDateTimeString() < $item['end_date']);
             $item['is_last_item'] = false;
-
-            $userStatusLogs = $user->userStatusLogNull()->where('status', true)
-                ->where('start_date', '>=', $item['start_date'])
-                ->where('end_date', '<=', $item['end_date'])
-                ->get();
-
-            $amount = 0;
-            $price = PremiumPrices::getPrice($item['duration_id']);
-            if ($item['is_active'] and !$price['is_gift']) {
-                /** @var UserStatusLog $userStatusLog */
-                foreach ($userStatusLogs as $userStatusLog) {
-                    $percent = Helpers::calculatePercent($userStatusLog, PurchaseType::UPGRADE);
-                    $amount += $percent * Helpers::getPayableAmount($userStatusLog->total_amount, $userStatusLog->added_value_amount, $userStatusLog->discount_amount, 0);
-                }
-            }
-
-            $item['payable_amount'] = 10 * (int) (round($amount) / 10);
             $item['start_date'] = Helpers::convertDateTimeToJalali($item['start_date']);
             $item['end_date'] = Helpers::convertDateTimeToJalali($item['end_date']);
             return $item;
@@ -354,16 +318,10 @@ class PremiumController extends Controller
         return redirect()->back()->with('success', 'با موفقیت انجام شد.');
     }
 
-    public function closePlan(Request $request, $userId, $id)
+    public function closePlan($userId, $id)
     {
-        $type = $request->type;
         $user = User::findOrFail($userId);
         $userStatus = $this->getUserStatuses($user)->where('id', $id)->first();
-        $userStatus['close_type'] = $type;
-        if ($type == 'wallet') {
-            $user->wallet += $userStatus->payable_amount;
-            $user->save();
-        }
         $user->userStatus()->where('id', $id)->update([
             'end_date' => now(),
         ]);

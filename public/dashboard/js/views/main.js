@@ -63,7 +63,7 @@ $(function () {
         }
     };
     var ctx = $('#card-chart1');
-    var cardChart1 = new Chart(ctx, {
+    var cardChart1 = new Highcharts.charts(ctx, {
         type: 'line',
         data: data,
         options: options
@@ -119,7 +119,7 @@ $(function () {
         }
     };
     var ctx = $('#card-chart2');
-    var cardChart2 = new Chart(ctx, {
+    var cardChart2 = new Highcharts.charts(ctx, {
         type: 'line',
         data: data,
         options: options
@@ -161,7 +161,7 @@ $(function () {
         ]
     };
     var ctx = $('#card-chart3');
-    var cardChart3 = new Chart(ctx, {
+    var cardChart3 = new Highcharts.charts(ctx, {
         type: 'line',
         data: data,
         options: options
@@ -208,7 +208,7 @@ $(function () {
         ]
     };
     var ctx = $('#card-chart4');
-    var cardChart4 = new Chart(ctx, {
+    var cardChart4 = new Highcharts.charts(ctx, {
         type: 'bar',
         data: data,
         options: options
@@ -287,7 +287,7 @@ $(function () {
         },
     };
     var ctx = $('#main-chart');
-    var mainChart = new Chart(ctx, {
+    var mainChart = new Highcharts.charts(ctx, {
         type: 'line',
         data: data,
         options: options
