@@ -20,8 +20,10 @@ class PremiumPurchase extends Component
     public function load()
     {
         $this->current_plan = $this->user->userStatuses
-            ->
-            $this->durations = PremiumDuration::asCustomArray();
+            ->where('start_date', '<=', now()->toDateTimeString())
+            ->where('end_date', '>=', now()->toDateTimeString())
+            ->first();
+        $this->durations = PremiumDuration::asCustomArray();
 
         $this->readyToLoad = true;
     }

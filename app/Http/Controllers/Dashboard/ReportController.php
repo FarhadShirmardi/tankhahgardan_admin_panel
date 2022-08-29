@@ -514,7 +514,8 @@ class ReportController extends Controller
         $maxTimeQuery = User::query()
             ->where(function ($query) use ($userId) {
                 if ($userId) {
-                    $query->where('id', $userId);
+                    $userIds = is_array($userId) ? $userId : [$userId];
+                    $query->whereIn('id', $userIds);
                 }
             })
             ->selectRaw(
@@ -559,7 +560,8 @@ class ReportController extends Controller
         return User::query()
             ->where(function ($query) use ($userId) {
                 if ($userId) {
-                    $query->where('id', $userId);
+                    $userIds = is_array($userId) ? $userId : [$userId];
+                    $query->whereIn('id', $userIds);
                 }
             })
             ->joinSub($maxTimeQuery, 'MaxTime', 'MaxTime.user_id', '=', 'users.id')

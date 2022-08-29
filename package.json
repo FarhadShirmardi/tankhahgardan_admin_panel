@@ -20,6 +20,7 @@
         "vue-template-compiler": "^2.6.11"
     },
     "dependencies": {
+        "alpinejs": "^3.10.3",
         "chokidar": "^3.5.3",
         "cropper": "^4.0.0",
         "cropperjs": "^1.5.5",
