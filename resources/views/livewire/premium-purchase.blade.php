@@ -7,6 +7,13 @@
                     <label class="col-md-5 form-control-label text-md-left" for="user_count">
                         طرح
                     </label>
+                    <select name="plan" id="plan_id" class="form-control col-md-7"
+                            wire:model="selected_plan">
+                        @foreach($plan_data as $plan)
+                            <option
+                                value="{{$plan['id']}}">{{ $plan['title'] }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="col-md-4 row">
                     <label class="col-md-5 form-control-label text-md-left" for="volume_size">
@@ -72,7 +79,6 @@
                 </div>
             </div>
         </form>
-
     @else
         @include('dashboard.layouts.loading')
     @endif

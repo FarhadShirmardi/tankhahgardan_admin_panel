@@ -215,12 +215,12 @@ class FirebaseController extends Controller
                 if (!$image) {
                     continue;
                 }
-                $image->storeAs('/', 'Announcement_' . $key . '.' . $image->getClientOriginalExtension());
-                array_push($imageRequest, [
+                $image->storeAs('/', 'Announcement_'.$key.'.'.$image->getClientOriginalExtension());
+                $imageRequest[] = [
                     'name' => $key,
                     'filename' => $image->getClientOriginalName(),
-                    'contents' => file_get_contents(storage_path() . '/app/' . 'Announcement_' . $key . '.' . $image->getClientOriginalExtension())
-                ]);
+                    'contents' => file_get_contents(storage_path().'/app/'.'Announcement_'.$key.'.'.$image->getClientOriginalExtension()),
+                ];
                 $isNull = false;
             }
             if (!$isNull) {

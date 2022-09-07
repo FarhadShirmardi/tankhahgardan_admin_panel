@@ -12,15 +12,6 @@
 @endsection
 @section('scripts')
     <script>
-        function changePrice(selectedObject) {
-            var value = selectedObject.value;
-            var x = document.getElementById('custom_price')
-            if (value === '{{ \App\Constants\PremiumDuration::SPECIAL }}') {
-                x.style.display = "flex";
-            } else {
-                x.style.display = "none";
-            }
-        }
 
         $(document).ready(function () {
             $('#start_date').pDatepicker({

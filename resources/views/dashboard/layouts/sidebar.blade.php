@@ -33,7 +33,7 @@
                 </li>
             @endif
             @if(auth()->user()->can('view_users_report'))
-                <li x-data="{dropdownMenu: false}">
+                <li x-data="{dropdownMenu: true}">
                     <div class="row nav-clickable">
                         <span class="nav-link dropdown-toggle" @click="dropdownMenu = ! dropdownMenu">
                             <i class="icon-chart"></i>
