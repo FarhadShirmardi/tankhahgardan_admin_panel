@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Campaign;
 use App\Constants\PremiumConstants;
 use App\Constants\PremiumDuration;
 use App\Constants\PremiumPrices;
@@ -11,11 +10,12 @@ use App\Constants\PurchaseType;
 use App\Constants\UserStatusType;
 use App\Exports\ReleaseSmsExport;
 use App\Helpers\Helpers;
-use App\ProjectReport;
+use App\Models\Campaign;
+use App\Models\ProjectReport;
+use App\Models\ProjectUser;
+use App\Models\User;
+use App\Models\UserReport;
 use App\ProjectStatus;
-use App\ProjectUser;
-use App\User;
-use App\UserReport;
 use DB;
 use Exception;
 use Illuminate\Console\Command;

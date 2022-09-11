@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Constants\UserPremiumState;
-use App\User;
-use App\UserStatus;
+use App\Models\User;
+use App\Models\UserStatus;
 use Illuminate\Console\Command;
 use Kavenegar;
 use Log;

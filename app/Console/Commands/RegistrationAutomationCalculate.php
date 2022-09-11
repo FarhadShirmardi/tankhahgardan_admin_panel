@@ -2,13 +2,13 @@
 
 namespace App\Console\Commands;
 
-use App\AutomationData;
 use App\Constants\PremiumConstants;
 use App\Constants\UserPremiumState;
-use App\Payment;
-use App\Receive;
-use App\User;
-use App\UserStatus;
+use App\Models\AutomationData;
+use App\Models\Payment;
+use App\Models\Receive;
+use App\Models\User;
+use App\Models\UserStatus;
 use Illuminate\Console\Command;
 
 class RegistrationAutomationCalculate extends Command

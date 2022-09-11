@@ -2,9 +2,6 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Advertisement;
-use App\City;
-use App\Comment;
 use App\Constants\FeedbackSource;
 use App\Constants\FeedbackStatus;
 use App\Constants\LogType;
@@ -14,45 +11,47 @@ use App\Constants\PremiumDuration;
 use App\Constants\ProjectUserState;
 use App\Constants\PurchaseType;
 use App\Constants\UserPremiumState;
-use App\Device;
-use App\Feedback;
-use App\FeedbackResponse;
-use App\FeedbackTitle;
-use App\File;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
-use App\Image;
 use App\Imports\ConvertToUser;
-use App\Imprest;
 use App\Jobs\FeedbackResponseSms;
 use App\Jobs\ProjectReportExportJob;
 use App\Jobs\UserReportExportJob;
-use App\Note;
-use App\PanelFile;
-use App\PanelUser;
-use App\Payment;
-use App\Project;
-use App\ProjectReport;
-use App\ProjectUser;
-use App\Receive;
-use App\State;
-use App\StepByStep;
-use App\User;
-use App\UserReport;
-use App\UserStatus;
-use App\UserStatusLog;
+use App\Models\City;
+use App\Models\Comment;
+use App\Models\Device;
+use App\Models\Feedback;
+use App\Models\FeedbackResponse;
+use App\Models\FeedbackTitle;
+use App\Models\File;
+use App\Models\Image;
+use App\Models\Imprest;
+use App\Models\Note;
+use App\Models\PanelFile;
+use App\Models\PanelUser;
+use App\Models\Payment;
+use App\Models\Project;
+use App\Models\ProjectReport;
+use App\Models\ProjectUser;
+use App\Models\Receive;
+use App\Models\State;
+use App\Models\StepByStep;
+use App\Models\User;
+use App\Models\UserReport;
+use App\Models\UserStatus;
+use App\Models\UserStatusLog;
 use Carbon\Carbon;
 use DB;
 use Exception;
-use Faker\Provider\Uuid;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Hash;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Kavenegar;
 use Maatwebsite\Excel\Facades\Excel;
-use Notification;
+use ReflectionException;
 use Storage;
 use Validator;
 
@@ -80,13 +79,13 @@ class ReportController extends Controller
 
     public function normalizeDate(Request $request, $setNull = false)
     {
-        $startDate = $request->input('start_date', null);
+        $startDate = $request->input('start_date');
         if ($startDate) {
             $startDate = Helpers::jalaliDateStringToGregorian(Helpers::getEnglishString($startDate));
         } elseif (!$setNull) {
             $startDate = now()->subDays(6)->toDateString();
         }
-        $endDate = $request->input('end_date', null);
+        $endDate = $request->input('end_date');
         if ($endDate) {
             $endDate = Helpers::jalaliDateStringToGregorian(Helpers::getEnglishString($endDate));
         } elseif (!$setNull) {
@@ -225,7 +224,7 @@ class ReportController extends Controller
         }
 
         return [
-            'user_type' => $request->input('user_type', null),
+            'user_type' => $request->input('user_type'),
             'sort_field' => $request->input('sort_field', 'registered_at'),
             'sort_type' => $request->input('sort_type', 'DESC'),
             'phone_number' => Helpers::getEnglishString($request->input('phone_number', '')),
@@ -363,12 +362,12 @@ class ReportController extends Controller
 
 
         $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
-        $filename = "export/allUserActivity - {$today} - " . Str::random('6') . '.xlsx';
+        $filename = "export/allUserActivity - $today - ".Str::random('6').'.xlsx';
         $panelFile = PanelFile::query()
             ->create([
                 'user_id' => auth()->id(),
                 'path' => $filename,
-                'description' => 'گزارش وضعیت کاربران - ' . str_replace('_', '/', $today),
+                'description' => 'گزارش وضعیت کاربران - '.str_replace('_', '/', $today),
                 'date_time' => now()->toDateTimeString(),
             ]);
 
@@ -382,12 +381,12 @@ class ReportController extends Controller
         $filter = $this->getAllProjectActivityFilter($request);
 
         $today = str_replace('/', '_', Helpers::gregorianDateStringToJalali(now()->toDateString()));
-        $filename = "export/allProjectActivity - {$today} - " . Str::random('6') . '.xlsx';
+        $filename = "export/allProjectActivity - $today - ".Str::random('6').'.xlsx';
         $panelFile = PanelFile::query()
             ->create([
                 'user_id' => auth()->id(),
                 'path' => $filename,
-                'description' => 'گزارش وضعیت پروژه - ' . str_replace('_', '/', $today),
+                'description' => 'گزارش وضعیت پروژه - '.str_replace('_', '/', $today),
                 'date_time' => now()->toDateTimeString(),
             ]);
         $this->dispatch((new ProjectReportExportJob($filter, $panelFile))->onQueue('activationSms'));
@@ -470,8 +469,8 @@ class ReportController extends Controller
         return [
             1 => ['>=', now()->subDays(7)->toDateTimeString(), 1],
             2 => ['>=', now()->subDays(14)->toDateTimeString(), 2],
-            3 => ['>=', now()->subMonths(1)->toDateTimeString(), 3],
-            4 => ['<', now()->subMonths(1)->toDateTimeString(), 4],
+            3 => ['>=', now()->subMonths()->toDateTimeString(), 3],
+            4 => ['<', now()->subMonths()->toDateTimeString(), 4],
         ];
     }
 
@@ -515,7 +514,8 @@ class ReportController extends Controller
         $maxTimeQuery = User::query()
             ->where(function ($query) use ($userId) {
                 if ($userId) {
-                    $query->where('id', $userId);
+                    $userIds = is_array($userId) ? $userId : [$userId];
+                    $query->whereIn('id', $userIds);
                 }
             })
             ->selectRaw(
@@ -560,7 +560,8 @@ class ReportController extends Controller
         return User::query()
             ->where(function ($query) use ($userId) {
                 if ($userId) {
-                    $query->where('id', $userId);
+                    $userIds = is_array($userId) ? $userId : [$userId];
+                    $query->whereIn('id', $userIds);
                 }
             })
             ->joinSub($maxTimeQuery, 'MaxTime', 'MaxTime.user_id', '=', 'users.id')
@@ -581,11 +582,14 @@ class ReportController extends Controller
             ->selectSub($projectCount, 'project_count')
             ->selectSub($ownProjectCount, 'own_project_count')
             ->selectSub($notOwnProjectCount, 'not_own_project_count')
-            ->selectRaw("IFNULL( (" . $userStateQuery->toSql() . " ), " . UserPremiumState::FREE . ") as user_state")
+            ->selectRaw("IFNULL( (".$userStateQuery->toSql()." ), ".UserPremiumState::FREE.") as user_state")
             ->selectRaw('MaxTime.max_time as max_time')
             ->selectRaw($userTypeQuery);
     }
 
+    /**
+     * @throws BindingResolutionException
+     */
     public function userActivity($id, PremiumController $premiumController)
     {
         /** @var User $user */
@@ -664,7 +668,7 @@ class ReportController extends Controller
             }
             $counts->push([
                 'id' => $projectId,
-                'name' => $user->projects->find($projectId)->name,
+                'name' => str_replace("\n", "", $user->projects->find($projectId)->name),
                 'data' => $data->toJson(),
             ]);
         }
@@ -678,11 +682,11 @@ class ReportController extends Controller
         $userItem = $this->getUserQuery($id)->get();
         $userItem = Helpers::paginateCollection($userItem);
 
-        $userStates = $premiumController->getUserStates($user);
+        $userStatuses = $premiumController->getUserStatuses($user);
         $invoices = $user->invoices()->get();
 
         $automationState = $user->automationData()->first();
-        $automationController = app()->make(AutomationController::class);
+        $automationController = app(AutomationController::class);
 
         return view('dashboard.report.userActivity', [
             'user' => $user,
@@ -692,7 +696,6 @@ class ReportController extends Controller
             'date_counts' => $dateCounts,
             'dates' => $dates,
             'devices' => $devices,
-            'user_statuses' => $userStates,
             'invoices' => $invoices,
             'automationState' => $automationState,
             'type_mappings' => $automationController->typeMapping,
@@ -727,10 +730,10 @@ class ReportController extends Controller
         ]);
     }
 
-    private function getAllProjectActivityFilter(Request &$request)
+    private function getAllProjectActivityFilter(Request $request)
     {
         return [
-            'project_type' => $request->input('project_type', null),
+            'project_type' => $request->input('project_type'),
             'sort_field' => $request->input('sort_field', 'created_at'),
             'sort_type' => $request->input('sort_type', 'DESC'),
             'state_id' => $request->input('state_id', 0),
@@ -820,7 +823,7 @@ class ReportController extends Controller
         return [$sortableFields, $sortableTypes];
     }
 
-    public function projectActivity(Request $request, $projectId)
+    public function projectActivity($projectId)
     {
         $project = Project::findOrFail($projectId);
 
@@ -830,8 +833,11 @@ class ReportController extends Controller
             ->withoutTrashed()->selectRaw('count(*)')->getQuery();
         $noteCountQuery = Note::whereColumn('creator_user_id', 'users.id')->where('project_id', $projectId)
             ->withoutTrashed()->selectRaw('count(*)')->getQuery();
-        $imprestCountQuery = Imprest::whereColumn('creator_user_id', 'users.id')->where('project_id', $projectId)
-            ->withoutTrashed()->selectRaw('count(*)')->getQuery();
+        $imprestCountQuery = Imprest::query()
+            ->withoutTrashed()
+            ->whereColumn('creator_user_id', 'users.id')
+            ->where('project_id', $projectId)
+            ->selectRaw('count(*)')->getQuery();
         $imageCountQuery = Image::whereColumn('user_id', 'users.id')->where('project_id', $projectId)
             ->withoutTrashed()->selectRaw('count(*)')->getQuery();
         $imageSizeQuery = Image::whereColumn('user_id', 'users.id')->where('project_id', $projectId)
@@ -864,17 +870,20 @@ class ReportController extends Controller
         ]);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function viewFeedback(Request $request)
     {
         [$startDate, $endDate] = $this->normalizeDate($request, true);
-        if (!$startDate) {
+        if (! $startDate) {
             $startDate = Feedback::query()->selectRaw('min(Date(created_at)) as date')->first()->date;
         }
 
         $filter = [
             'source_type' => $request->input('source_type', []),
             'titles' => $request->input('titles', []),
-            'user_id' => $request->input('user_id', null),
+            'user_id' => $request->input('user_id'),
             'panel_user_ids' => $request->input('panel_user_ids', []),
             'sort_field_1' => $request->input('sort_field_1', 'state'),
             'sort_type_1' => $request->input('sort_type_1', 'ASC'),
@@ -1097,9 +1106,9 @@ class ReportController extends Controller
             ->orderBy($filter['sort_field_2'], $filter['sort_type_2'])
             ->get();
 
-        $feedbacks = $feedbacks->map(function ($item) {
+        return $feedbacks->map(function ($item) {
             $item->full_name = ($item->user_name or $item->user_family) ?
-                $item->user_name . ' ' . $item->user_family : ' - ';
+                $item->user_name.' '.$item->user_family : ' - ';
             $item->date = Helpers::convertDateTimeToJalali($item->date);
             $item->source = FeedbackSource::getEnum($item->source);
             $item->response_text_update_time =
@@ -1110,15 +1119,16 @@ class ReportController extends Controller
             $item->platform = Platform::getEnum($item->platform);
             return $item;
         });
-
-        return $feedbacks;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function commentView(Request $request, $id = null)
     {
         $filter = [
-            'phone_number' => Helpers::getEnglishString($request->input('phone_number', null)),
-            'user_id' => $request->input('user_id', null),
+            'phone_number' => Helpers::getEnglishString($request->input('phone_number')),
+            'user_id' => $request->input('user_id'),
             'sort_field_1' => $request->input('sort_field_1', 'date'),
             'sort_type_1' => $request->input('sort_type_1', 'desc'),
             'sort_field_2' => $request->input('sort_field_2', 'date'),
@@ -1254,13 +1264,16 @@ class ReportController extends Controller
         ]);
     }
 
+    /**
+     * @throws GuzzleException
+     */
     public function responseFeedback($id, Request $request)
     {
         $feedback = Feedback::query()->findOrFail($id);
         $responseText = $request->input('response', '');
         $oldResponse = $feedback->feedbackResponse()->first();
         $isSpam = $request->state == FeedbackStatus::SPAM;
-        if (trim($responseText) == '' and !$isSpam) {
+        if (trim($responseText) == '' and ! $isSpam) {
             return redirect()->back()->withErrors('پاسخ بازخورد نباید خالی باشد.');
         }
         $smsFlag = true;
@@ -1287,8 +1300,8 @@ class ReportController extends Controller
                 foreach ($request->file('response_images') as $image) {
                     $image->storeAs('/', $image->getClientOriginalName());
                     $http = new Client;
-                    $response = $http->post(
-                        env('TANKHAH_URL') . '/panel/' . env('TANKHAH_TOKEN') . '/feedback/' . $id . '/image',
+                    $http->post(
+                        config('app.tankhah_url').'/panel/'.config('app.tankhah_token').'/feedback/'.$id.'/image',
                         [
                             'headers' => [
                                 'Accept' => 'application/json',
@@ -1297,7 +1310,7 @@ class ReportController extends Controller
                                 [
                                     'name' => 'image',
                                     'filename' => $image->getClientOriginalName(),
-                                    'contents' => file_get_contents(storage_path() . '/app/' . $image->getClientOriginalName()),
+                                    'contents' => file_get_contents(storage_path().'/app/'.$image->getClientOriginalName()),
                                 ],
                             ],
                         ]
@@ -1310,6 +1323,7 @@ class ReportController extends Controller
         $feedback->save();
 
         if ($smsFlag) {
+            /** @var User $user */
             $user = $feedback->user()->first();
             $this->dispatch((new FeedbackResponseSms($user))->onQueue('activationSms'));
         }
@@ -1327,112 +1341,6 @@ class ReportController extends Controller
         ]);
 
         return redirect()->route('dashboard.viewFeedback', ['feedback_id' => $id])->with('success', 'با موفقیت انجام شد');
-    }
-
-    public function viewNotification()
-    {
-        $advertisements = Advertisement::join('panel_users', 'panel_user_id', '=', 'panel_users.id')->get([
-            'panel_users.name as full_name',
-            'advertisements.*',
-        ]);
-        $advertisements->map(function ($item) {
-            $item['date'] = Helpers::convertDateTimeToJalali($item['created_at']);
-            $item['expire_time'] = Helpers::convertDateTimeToJalali($item['expire_time']);
-        });
-
-        return view('admin.notifications', compact('advertisements'));
-    }
-
-    public function notificationView($id = null)
-    {
-        $advertisement = collect([
-            'id' => $id,
-            'title' => null,
-            'text' => null,
-            'link' => null,
-            'expire_time' => null,
-        ]);
-        if ($id) {
-            $advertisement = Advertisement::findOrFail($id);
-            $advertisement['expire_time'] = Helpers::convertDateTimeToJalali($advertisement->expire_time);
-        }
-        $today = Helpers::convertDateTimeToJalali(now()->toDateTimeString());
-        return view('admin.notification', compact('advertisement', 'today'));
-    }
-
-    /**
-     * @param Request $request
-     * @return RedirectResponse
-     */
-    public function postNotification(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'expire_date' => 'date_format:Y/m/d H:i:s',
-            'link' => 'url',
-        ]);
-        if ($validator->fails()) {
-            return redirect()
-                ->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-        $expiredDate = Carbon::parse($request->expire_date);
-        $expiredDate = Carbon::parse(
-            Helpers::jalaliDateStringToGregorian($expiredDate->toDateString(), '-') .
-            ' ' .
-            $expiredDate->toTimeString()
-        );
-        $users = User::all();
-        /** @var Advertisement $advertisement */
-        $advertisement = Advertisement::updateOrCreate([
-            'id' => (int)$request->advertisement_id,
-        ], [
-            'title' => $request->title,
-            'text' => $request->text,
-            'link' => $request->link,
-            'expire_time' => $expiredDate,
-            'panel_user_id' => auth()->id(),
-        ]);
-        foreach ($users as $user) {
-            if ($request->advertisement_id) {
-                /** @var User $user */
-                $user->notifications()->where('data->advertisement_id', $advertisement->id)->update([
-                    'data->title' => $advertisement->title,
-                    'data->message' => $advertisement->text,
-                    'data->link' => $advertisement->link,
-                    'data->expired_at' => $advertisement->expire_time,
-                    'expired_at' => $advertisement->expire_time,
-                ]);
-            } else {
-                Notification::send(
-                    $user,
-                    new AdvertisementNotification(
-                        $advertisement->title,
-                        $advertisement->text,
-                        $advertisement->link,
-                        $advertisement->expire_time,
-                        $advertisement->id
-                    )
-                );
-            }
-        }
-        return redirect()->intended('panel/notifications')->with('success', trans('message.success'));
-    }
-
-    public function deleteNotification($id)
-    {
-        $expiredDate = now();
-        $users = User::all();
-        foreach ($users as $user) {
-            $user->notifications()->where('data->advertisement_id', (int)$id)->update([
-                'data->expired_at' => $expiredDate,
-                'expired_at' => $expiredDate,
-            ]);
-        }
-        Advertisement::where('id', $id)->update([
-            'expire_time' => $expiredDate,
-        ]);
-        return redirect()->intended('panel/notifications')->with('success', trans('message.success'));
     }
 
     public function changePasswordView()
@@ -1467,48 +1375,12 @@ class ReportController extends Controller
         return redirect()->route('dashboard.home')->with('success', trans('message.password_changed_successfully'));
     }
 
-    public function exportAllUserActivity(Request $request)
-    {
-        $loggedInUser = auth()->user();
-        if (!$loggedInUser->hasPermissionTo('all_user_activity_full')) {
-            return redirect()->back();
-        }
-        $cacheID = 'panel_all_user_activity';
-        if (cache()->has($cacheID)) {
-            $users = cache()->get($cacheID);
-            $sort = null;
-            $users = $users['users'];
-            $this->filterAndSort($users, $sort, $request);
-            $uuid = Uuid::uuid();
-            (new PanelUserExport($users, true))->store('exports/' . $uuid . '.xlsx', 'public');
-            return redirect()->to(url('storage/exports/' . $uuid . '.xlsx'));
-        } else {
-            return redirect()->back();
-        }
-    }
-
-    private function filterAndSort(&$collection, &$sort, Request &$request)
-    {
-        $activationType = $request->input('activation_type', null);
-        if ($activationType) {
-            $collection = $collection->where('activationType', $activationType);
-        }
-        $sort = [$request->input('sort_field', 'registered_at'), $request->input('sort_type', 'DESC')];
-        if ($sort[0] == 'name') {
-            $collection = $collection->sortBy('name', SORT_REGULAR, $sort[1] == 'DESC')
-                ->sortBy('family', SORT_REGULAR, $sort[1] == 'DESC');
-        } else {
-            $collection = $collection->sortBy($sort[0], SORT_REGULAR, $sort[1] == 'DESC');
-        }
-        $sort[1] = $sort[1] == 'DESC' ? 'ASC' : 'DESC';
-    }
-
     public function sendSms(Request $request)
     {
         $phoneNumber = Helpers::formatPhoneNumber(Helpers::getEnglishString($request->phone_number));
         $text = $request->text;
         try {
-            $result = Kavenegar::Send('10005000000550', $phoneNumber, $text);
+            Kavenegar::Send('10005000000550', $phoneNumber, $text);
             return redirect()->back()->with('success', 'با موفقیت ارسال شد');
         } catch (Exception $exception) {
             return redirect()->back()->withInput($request->all())->withException($exception);
@@ -1528,7 +1400,7 @@ class ReportController extends Controller
         if ($errors != []) {
             $validator = Validator::make([], []);
             foreach ($errors as $error) {
-                $validator->errors()->add('error', "مشکل در شماره {$error}");
+                $validator->errors()->add('error', "مشکل در شماره $error");
             }
             return redirect()->back()->withErrors($validator);
         }
@@ -1607,11 +1479,14 @@ class ReportController extends Controller
         ]);
     }
 
+    /**
+     * @throws GuzzleException
+     */
     public function unverifiedPaymentReport()
     {
         $http = new Client;
         $response = $http->get(
-            env('TANKHAH_URL').'/panel/'.env('TANKHAH_TOKEN').'/payments/unverified/',
+            config('app.tankhah_url').'/panel/'.config('app.tankhah_token').'/payments/unverified/',
             [
                 'headers' => [
                     'Accept' => 'application/json',

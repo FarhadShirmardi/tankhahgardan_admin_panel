@@ -3,10 +3,11 @@ import {defineConfig} from 'vite'
 
 export default defineConfig({
     plugins: [
-        laravel([
-            'resources/css/app.css',
-            'resources/sass/**/*.scss',
-            'resources/js/app.js',
-        ]),
+        laravel({
+            input: [
+                'resources/sass/dashboard/style.scss',
+                'resources/js/app.js',
+            ]
+        }),
     ],
 });

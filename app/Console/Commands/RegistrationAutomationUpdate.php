@@ -2,15 +2,15 @@
 
 namespace App\Console\Commands;
 
-use App\AutomationData;
-use App\AutomationDate;
 use App\Constants\PremiumDuration;
 use App\Constants\UserPremiumState;
-use App\Payment;
-use App\ProjectUser;
-use App\Receive;
-use App\User;
-use App\UserStatusLog;
+use App\Models\AutomationData;
+use App\Models\AutomationDate;
+use App\Models\Payment;
+use App\Models\ProjectUser;
+use App\Models\Receive;
+use App\Models\User;
+use App\Models\UserStatusLog;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Console\Command;

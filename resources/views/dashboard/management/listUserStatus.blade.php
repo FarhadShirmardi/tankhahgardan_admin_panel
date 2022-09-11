@@ -1,4 +1,4 @@
-<div id="ajax-table" style="overflow-x: auto;">
+<div id="ajax-table">
     <table class="table table-striped">
         <thead>
         <tr style="cursor: pointer;">
@@ -43,28 +43,22 @@
                                                 <div class="modal-content modal-dialog-centered">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title" id="exampleModalLabel">اتمام طرح</h5>
-                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <button type="button" class="close" data-dismiss="modal"
+                                                                aria-label="Close">
                                                             <span aria-hidden="true">&times;</span>
                                                         </button>
                                                     </div>
                                                     <div class="modal-body">
-                                                        {{--                                                    @dd($userStatus)--}}
-                                                        با لغو طرح مبلغ {{ \App\Helpers\Helpers::formatNumber
-                                                    ($userStatus->payable_amount) }} ریال به کاربر برگشت داده می‌شود.
-                                                        <div class="row pt-4">
-                                                            <label class="col-md-5 form-control-label text-md-left" for="text">
-                                                                نوع برگشت
-                                                            </label>
-                                                            <select name="type" class="col-md-5 form-control">
-                                                                <option value="wallet">برگشت به کیف پول</option>
-                                                                <option value="card">کارت به کارت</option>
-                                                            </select>
-                                                        </div>
+                                                        <span style="color: indianred">
+                                                            با لغو طرح هیچ مبلغی به کاربر برگشت داده نمی‌شود و صرفا این طرح به پایان می‌رسد!
+                                                        </span>
                                                         <div class="row pl-2 pt-2 pr-2">
-                                                            <label class="col-md-5 form-control-label text-md-left" for="text">
+                                                            <label class="col-md-5 form-control-label text-md-left"
+                                                                   for="text">
                                                                 توضیحات
                                                             </label>
-                                                            <textarea required name="text" id="text" class="form-control col-md-7"></textarea>
+                                                            <textarea required name="text" id="text"
+                                                                      class="form-control col-md-7"></textarea>
                                                         </div>
 
                                                     </div>

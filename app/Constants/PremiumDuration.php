@@ -1,62 +1,101 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: farhad
- * Date: 10/6/18
- * Time: 5:25 PM
- */
 
 namespace App\Constants;
 
-use ReflectionClass;
+use BenSampo\Enum\Enum;
 
-class PremiumDuration
+class PremiumDuration extends Enum
 {
-    const MONTH = 1;
-    const HALF_MONTH = 2;
-    const ONE_WEEK = 3;
-    const YEAR = 4;
-    const SPECIAL = 5;
+    public const MONTH = 1;
 
+    public const HALF_MONTH = 2;
 
-    public static function toArray(): array
+    public const ONE_WEEK = 3;
+
+    public const YEAR = 4;
+
+    public const SPECIAL = 5;
+
+    public static function getTitle(int $enum): string
     {
-        $oClass = new ReflectionClass(__CLASS__);
-        return $oClass->getConstants();
+        return match ($enum) {
+            self::ONE_WEEK => trans('names.one_week'),
+            self::MONTH => trans('names.one_month'),
+            self::YEAR => trans('names.one_year'),
+            self::HALF_MONTH => trans('names.half_month'),
+            self::SPECIAL => 'ویژه',
+            default => ' - ',
+        };
     }
 
-
-    public static function getTitle($enum)
+    public static function getSecondTitle(int $enum): string
     {
-        switch ($enum) {
-            case self::ONE_WEEK:
-                return trans('names.one_week');
-            case self::MONTH:
-                return trans('names.one_month');
-            case self::YEAR:
-                return trans('names.one_year');
-            case self::HALF_MONTH:
-                return trans('names.half_month');
-            case self::SPECIAL:
-                return 'ویژه';
-            default:
-                return ' - ';
-        }
+        return match ($enum) {
+            self::ONE_WEEK => trans('names.one_week_2'),
+            self::MONTH => trans('names.one_month_2'),
+            self::YEAR => trans('names.one_year_2'),
+            self::HALF_MONTH => trans('names.half_month_2'),
+            self::SPECIAL => 'ویژه',
+            default => ' - ',
+        };
     }
 
-    public static function getSecondTitle($enum)
+    public static function asCustomArray(int $basePrice = 0, float $yearlyDiscountPercent = 0, bool $firstBuyFlag = true): array
     {
-        switch ($enum) {
-            case self::ONE_WEEK:
-                return trans('names.one_week_2');
-            case self::MONTH:
-                return trans('names.one_month_2');
-            case self::YEAR:
-                return trans('names.one_year_2');
-            case self::HALF_MONTH:
-                return trans('names.half_month_2');
-            default:
-                return ' - ';
+        $items = collect([
+            [
+                'id' => self::HALF_MONTH,
+                'title' => self::getSecondTitle(self::HALF_MONTH),
+                'description' => self::getDescriptionValue(self::HALF_MONTH),
+                'day_count' => 15,
+                'month_count' => 0.5,
+                'is_gift' => true,
+                'real_price' => 0,
+                'price' => 0,
+            ],
+            [
+                'id' => self::MONTH,
+                'title' => self::getSecondTitle(self::MONTH),
+                'description' => self::getDescriptionValue(self::MONTH),
+                'day_count' => 31,
+                'month_count' => 1,
+                'is_gift' => false,
+                'real_price' => $basePrice,
+                'price' => $basePrice,
+            ],
+            [
+                'id' => self::YEAR,
+                'title' => self::getSecondTitle(self::YEAR),
+                'description' => self::getDescriptionValue(self::YEAR),
+                'day_count' => 365,
+                'month_count' => 12,
+                'is_gift' => false,
+                'real_price' => $basePrice * 12,
+                'price' => roundDown(
+                    $basePrice * 12 * (1 - $yearlyDiscountPercent),
+                    0
+                ),
+            ],
+        ]);
+        if (! $firstBuyFlag) {
+            $items = $items->where('is_gift', false);
         }
+
+        return $items->values()->toArray();
+    }
+
+    public static function getItem(int $id, int $basePrice = 0, float $yearlyDiscountPercent = 0)
+    {
+        $items = collect(self::asCustomArray($basePrice, $yearlyDiscountPercent));
+
+        return $items->firstWhere('id', $id);
+    }
+
+    public static function getDescriptionValue(int $enum): ?string
+    {
+        return match ($enum) {
+            self::HALF_MONTH => '۱۵ روز رایگان تجربه کنید!',
+            default => null
+        };
     }
 }

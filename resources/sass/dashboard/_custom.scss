@@ -158,10 +158,22 @@ input, button, select, optgroup, textarea {
 
 .table-row-clickable {
     cursor: pointer;
+
     &:hover {
         background-color: #1b4b72 !important;
         color: white;
     }
+}
+
+.nav-clickable {
+    cursor: pointer;
+    margin-right: 0;
+
+    &:hover {
+        background-color: #20a8d8;
+        color: white;
+    }
+;
 }
 
 .dropzone {

@@ -8,6 +8,9 @@
             <a class="nav-link" href="{{ route('dashboard.home') }}">میزکار</a>
         </li>
     </ul>
+    <ul class="nav mx-auto col-md-6">
+        <livewire:search-user/>
+    </ul>
     <ul class="nav navbar-nav ml-auto">
         <li class="nav-item dropdown pl-2">
             <a class="nav-link dropdown-toggle nav-link" data-toggle="dropdown" href="#" role="button"

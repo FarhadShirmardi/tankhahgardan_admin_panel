@@ -2,16 +2,16 @@
 
 namespace App\Jobs;
 
+use App\FirebaseToken;
+use App\Helpers\Helpers;
+use App\Models\PromoCode;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\FirebaseToken;
 use Kavenegar;
 use Log;
-use App\PromoCode;
-use App\Helpers\Helpers;
 
 class PromoCodeSmsJob implements ShouldQueue
 {

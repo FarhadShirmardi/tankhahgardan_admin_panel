@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\AutomationCall;
-use App\AutomationData;
-use App\AutomationMetric;
 use App\Constants\LogType;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
 use App\Jobs\AutomationMetricExportJob;
-use App\PanelFile;
-use App\PanelUser;
-use App\User;
+use App\Models\AutomationCall;
+use App\Models\AutomationData;
+use App\Models\AutomationMetric;
+use App\Models\PanelFile;
+use App\Models\PanelUser;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AutomationController extends Controller
 {
-    public $typeMapping = [
+    public array $typeMapping = [
         -1 => [
             'title' => 'قبل از اتوماسیون',
             'type' => 'none',
@@ -159,7 +159,6 @@ class AutomationController extends Controller
         ],
     ];
 
-
     private function convertSelectedDates($dates)
     {
         $result = [];
@@ -186,12 +185,11 @@ class AutomationController extends Controller
         if (!$startDate) {
             $startDate = AutomationMetric::query()->min('date');
         }
-        $filter = [
+        return [
             'start_date' => $startDate,
             'end_date' => $endDate,
             'selected_dates' => $this->convertSelectedDates($request->input('selected_dates', [])),
         ];
-        return $filter;
     }
 
     public function getMetricsItems($filter)
@@ -216,11 +214,10 @@ class AutomationController extends Controller
             ->orderBy('date', 'desc')
             ->get();
 
-        $metrics = $metrics->map(function ($item) {
+        return $metrics->map(function ($item) {
             $item['date'] = Helpers::gregorianDateStringToJalali($item['date']);
             return $item;
         });
-        return $metrics;
     }
 
     public function exportMetrics(Request $request)
@@ -251,7 +248,7 @@ class AutomationController extends Controller
 
         $metricKeys = [];
         if ($metrics->count()) {
-            $metricKeys = array_keys($metrics[0]['metric']);
+            $metricKeys = array_keys($metrics->first()['metric']);
         }
         return view('dashboard.automation.metrics', [
             'metrics' => $metrics,

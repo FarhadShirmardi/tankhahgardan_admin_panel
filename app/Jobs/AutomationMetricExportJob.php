@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Exports\MetricsExport;
 use App\Http\Controllers\Dashboard\AutomationController;
-use App\PanelFile;
+use App\Models\PanelFile;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

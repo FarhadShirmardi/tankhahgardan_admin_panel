@@ -2,7 +2,7 @@
 
 namespace App\Constants;
 
-use App\PanelUser;
+use App\Models\PanelUser;
 use ReflectionClass;
 use ReflectionException;
 

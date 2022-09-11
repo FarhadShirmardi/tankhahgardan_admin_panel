@@ -5,21 +5,21 @@ namespace App\Http\Controllers\Dashboard;
 use App\Constants\PanelUserType;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
-use App\PanelUser;
+use App\Models\PanelUser;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    public $permissions = [
+    public array $permissions = [
         ['view_registration' => 'گزارش ثبت‌نام'],
 
         ['view_users_report' => 'نمایش گزارش کاربران',
-            'export_users_report' => 'فایل خروجی گزارش کاربران',
-            'refresh_users_report' => 'ساخت گزارش خروجی کاربران(رفرش)',],
+         'export_users_report' => 'فایل خروجی گزارش کاربران',
+         'refresh_users_report' => 'ساخت گزارش خروجی کاربران(رفرش)',],
 
         ['view_projects_report' => 'نمایش گزارش پروژه‌ها',
-            'export_projects_report' => 'فایل خروجی گزارش پروژه‌ها',
-            'refresh_projects_report' => 'ساخت گزارش خروجی پروژه‌ها(رفرش)',],
+         'export_projects_report' => 'فایل خروجی گزارش پروژه‌ها',
+         'refresh_projects_report' => 'ساخت گزارش خروجی پروژه‌ها(رفرش)',],
 
         ['view_feedback' => 'نمایش بازخورد',
             'response_feedback' => 'پاسخ دادن بازخورد',

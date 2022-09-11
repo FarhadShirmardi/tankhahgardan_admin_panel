@@ -2,13 +2,13 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use DB;
-use App\UserReport;
 use App\Http\Controllers\Dashboard\ReportController;
-use App\User;
-use App\ProjectReport;
-use App\Project;
+use App\Models\ProjectReport;
+use App\Models\User;
+use App\Models\UserReport;
+use DB;
+use Illuminate\Console\Command;
+use Illuminate\Contracts\Container\BindingResolutionException;
 
 class GenerateReport extends Command
 {
@@ -39,9 +39,10 @@ class GenerateReport extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return void
+     * @throws BindingResolutionException
      */
-    public function handle()
+    public function handle(): void
     {
         \Log::debug('start generate report');
         $start = now();
@@ -50,8 +51,16 @@ class GenerateReport extends Command
         if ($this->option('user')) {
             UserReport::query()->truncate();
             $columnList = \Schema::getColumnListing('user_reports');
-            $selectQuery = DB::query()->fromSub($reportController->getUserQuery()->getQuery(), 'users_query')->select($columnList);
-            DB::table('user_reports')->insertUsing($columnList, $selectQuery);
+            $bar = $this->output->createProgressBar(User::query()->count());
+            User::query()
+                ->withoutEagerLoads()
+                ->select(['id'])
+                ->chunk(1000, function ($ids) use ($bar, $reportController, $columnList) {
+                    $ids = $ids->pluck('id')->toArray();
+                    $selectQuery = DB::query()->fromSub($reportController->getUserQuery($ids)->getQuery(), 'users_query')->select($columnList);
+                    DB::table('user_reports')->insertUsing($columnList, $selectQuery);
+                    $bar->advance(count($ids));
+                });
         } elseif ($this->option('project')) {
             ProjectReport::query()->truncate();
             $columnList = \Schema::getColumnListing('project_reports');

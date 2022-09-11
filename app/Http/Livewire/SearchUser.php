@@ -2,7 +2,7 @@
 
 namespace App\Http\Livewire;
 
-use App\User;
+use App\Models\User;
 use Livewire\Component;
 
 class SearchUser extends Component
@@ -55,10 +55,11 @@ class SearchUser extends Component
             $this->users = collect();
             return;
         }
+        $searchString = englishString($this->query);
         $this->users = User::query()
-            ->where('name', 'like', '%'.$this->query.'%')
-            ->orWhere('family', 'like', '%'.$this->query.'%')
-            ->orWhere('phone_number', 'like', '%'.$this->query.'%')
+            ->where('name', 'like', '%'.$searchString.'%')
+            ->orWhere('family', 'like', '%'.$searchString.'%')
+            ->orWhere('phone_number', 'like', '%'.formatPhoneNumber($searchString).'%')
             ->limit(5)
             ->get();
     }

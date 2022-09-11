@@ -141,26 +141,7 @@
     <h5 class="text-center pb-3">پیش فاکتورهای کاربر</h5>
     @include('dashboard.management.listInvoices')
     <hr class="pt-4 pb-2">
-    <div class="row">
-        @if(auth()->user()->can('edit_premium'))
-            <div class="col-md-2">
-                <a class="form-control btn btn-info"
-                   href="{{ route('dashboard.premium.wallet', ['user_id' => $user->id]) }}">کیف پول</a>
-            </div>
-            @if($user_statuses->where('is_active', true)->count() == 0)
-                <div class="col-md-2">
-                    <a class="form-control btn btn-success"
-                       href="{{ route('dashboard.premium.purchase', ['user_id' => $user->id, 'type' =>
-                                \App\Constants\PurchaseType::NEW, 'id' => 0]) }}">ایجاد طرح</a>
-                </div>
-            @endif
-        @else
-            <div class="col-md-4"></div>
-        @endif
-        <div class="col-md-4"><h5 class="text-center pb-3">طرح‌های کاربر</h5></div>
-        <div class="col-md-2"></div>
-    </div>
-    @include('dashboard.management.listUserStatus')
+    <livewire:user-statuses :user="$user"/>
     <hr class="pt-4 pb-2">
     <h5 class="text-center pb-3">دستگاه‌های کاربر</h5>
     @include('dashboard.report.listDevices')

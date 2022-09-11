@@ -53,9 +53,9 @@
                     <div class="row">
                         @foreach($feedback_item->images as $image)
                             <div class="col-md-3 clickableRow table-row-clickable"
-                                 data-href="{{ env('TANKHAH_URL') . '/panel/' .  env('TANKHAH_TOKEN') . '/images?path=' . $image['path'] }}">
+                                 data-href="{{ config('app.tankhah_url') . '/panel/' .  config('app.tankhah_token') . '/images?path=' . $image['path'] }}">
                                 <img style="width: 100%; height: 100%"
-                                     src="{{ env('TANKHAH_URL') . '/panel/' .  env('TANKHAH_TOKEN') . '/images?path=' . $image['path'] }}"
+                                     src="{{ config('app.tankhah_url') . '/panel/' .  config('app.tankhah_token') . '/images?path=' . $image['path'] }}"
                                      alt="">
                             </div>
                         @endforeach
@@ -78,9 +78,9 @@
                     <div class="row pt-2">
                         @foreach($feedback_item->responseImages as $image)
                             <div class="col-md-3 clickableRow table-row-clickable"
-                                 data-href="{{ env('TANKHAH_URL') . '/panel/' .  env('TANKHAH_TOKEN') . '/images?path=' . $image['path'] }}">
+                                 data-href="{{ config('app.tankhah_url') . '/panel/' .  config('app.tankhah_token') . '/images?path=' . $image['path'] }}">
                                 <img style="width: 100%; height: 100%"
-                                     src="{{ env('TANKHAH_URL') . '/panel/' .  env('TANKHAH_TOKEN') . '/images?path=' . $image['path'] }}"
+                                     src="{{ config('app.tankhah_url') . '/panel/' .  config('app.tankhah_token') . '/images?path=' . $image['path'] }}"
                                      alt="">
                             </div>
                         @endforeach

@@ -2,9 +2,9 @@
 
 namespace App\Jobs;
 
-use App\Announcement;
 use App\Constants\NotificationType;
 use App\FirebaseToken;
+use App\Models\Announcement;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

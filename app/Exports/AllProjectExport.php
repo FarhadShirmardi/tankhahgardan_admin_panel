@@ -2,9 +2,9 @@
 
 namespace App\Exports;
 
-use App\City;
 use App\Constants\ProjectTypes;
-use App\State;
+use App\Models\City;
+use App\Models\State;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
