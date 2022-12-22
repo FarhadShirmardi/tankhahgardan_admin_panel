@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class PanelUser extends Model
+class PanelUser extends Authenticatable
 {
-    protected $connection = 'mysql';
 }
