@@ -11,6 +11,8 @@ use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Model;
 
 class TicketResource extends Resource
 {
@@ -46,20 +48,29 @@ class TicketResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.username')
+                TextColumn::make('ردیف')
+                    ->rowIndex(),
+                TextColumn::make('username')
+                    ->label('نام کاربری')
+                    ->getStateUsing(fn (Ticket $record) => reformatPhoneNumber($record->user->username))
                     ->copyable(),
-                Tables\Columns\TextColumn::make('title'),
-                Tables\Columns\TextColumn::make('state'),
+                TextColumn::make('title')
+                    ->words(4)
+                    ->tooltip(fn (Ticket $record) => $record->title),
+                TextColumn::make('state'),
                 JalaliDateTimeColumn::make('lastTicketMessage.created_at')
+                    ->extraAttributes([
+                        'class' => 'ltr-col'
+                    ])
                     ->sortable()
                     ->dateTime(),
             ])
             ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-            ]);
+        //
+    ])
+        ->actions([
+            Tables\Actions\ViewAction::make(),
+        ]);
     }
 
     public static function getRelations(): array
