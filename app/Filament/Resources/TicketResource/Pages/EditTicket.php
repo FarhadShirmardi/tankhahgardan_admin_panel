@@ -3,10 +3,9 @@
 namespace App\Filament\Resources\TicketResource\Pages;
 
 use App\Filament\Resources\TicketResource;
-use Filament\Pages\Actions;
-use Filament\Resources\Pages\ViewRecord;
+use Filament\Resources\Pages\EditRecord;
 
-class ViewTicket extends ViewRecord
+class EditTicket extends EditRecord
 {
     protected static string $resource = TicketResource::class;
 

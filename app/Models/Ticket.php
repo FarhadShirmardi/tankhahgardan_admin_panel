@@ -10,6 +10,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Ticket extends Model
 {
+    protected $fillable = [
+        'title',
+        'state',
+    ];
+
     protected $casts = [
         'state' => TicketStateEnum::class,
     ];
