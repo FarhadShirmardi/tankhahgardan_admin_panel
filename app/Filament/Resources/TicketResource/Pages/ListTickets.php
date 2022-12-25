@@ -10,6 +10,11 @@ class ListTickets extends ListRecords
 {
     protected static string $resource = TicketResource::class;
 
+    protected function getTableFiltersFormColumns(): int
+    {
+        return 3;
+    }
+
     protected function getTableBulkActions(): array
     {
         return [];

@@ -34,10 +34,19 @@ class User extends Authenticatable
     ];
 
     /** @return Attribute<string, never> */
+    protected function fullName(): Attribute
+    {
+        $fullName = trim("$this->name $this->family");
+        return Attribute::make(
+            get: fn () => $fullName == "" ? " - " : $fullName
+        );
+    }
+
+    /** @return Attribute<string, never> */
     protected function username(): Attribute
     {
         return Attribute::make(
-            get: fn () => trim((($this->name or $this->family) ? $this->full_name : $this->phone_number) ?? '')
+            get: fn () => trim((($this->name or $this->family) ? $this->full_name : reformatPhoneNumber($this->phone_number)) ?? '')
         );
     }
 }

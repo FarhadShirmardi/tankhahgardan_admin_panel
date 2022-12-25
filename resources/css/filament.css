@@ -1,6 +1,6 @@
 @import '../../vendor/filament/filament/resources/css/app.css';
 
-* {
+.filament-app-layout {
     font-family: Number, IRANSans, sans-serif !important;
 }
 
