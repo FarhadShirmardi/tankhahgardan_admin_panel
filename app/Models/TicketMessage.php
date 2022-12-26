@@ -8,6 +8,20 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class TicketMessage extends Model
 {
+    protected $fillable = [
+        'text',
+        'panel_user_id'
+    ];
+
+    public function images(): MorphMany
+    {
+        return $this->morphMany(
+            Image::class,
+            'hasImage',
+            'model_type',
+            'model_id'
+        );
+    }
 
     public function ticket(): BelongsTo
     {

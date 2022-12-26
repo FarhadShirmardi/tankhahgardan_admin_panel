@@ -2,13 +2,18 @@
 
 namespace App\Filament\Resources\TicketResource\RelationManagers;
 
+use App\Filament\Resources\TicketResource;
+use App\Filament\Resources\TicketResource\Pages\CreateTicketMessage;
+use App\Models\TicketMessage;
+use Ariaieboy\FilamentJalaliDatetime\JalaliDateTimeColumn;
 use Filament\Forms;
 use Filament\Resources\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Resources\Table;
 use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Contracts\HasRelationshipTable;
+use Illuminate\Database\Eloquent\Model;
 
 class TicketMessagesRelationManager extends RelationManager
 {
@@ -31,6 +36,14 @@ class TicketMessagesRelationManager extends RelationManager
                 Forms\Components\TextInput::make('text')
                     ->required()
                     ->maxLength(255),
+
+                Forms\Components\SpatieMediaLibraryFileUpload::make('images')
+                    ->label('Image')
+                    ->image()
+                    ->multiple()
+                    ->saveUploadedFileUsing(function (Model $record) {
+                        dd($record);
+                    }),
             ]);
     }
 
@@ -38,19 +51,40 @@ class TicketMessagesRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('text'),
+                TextColumn::make(__('names.table.row index'))
+                    ->rowIndex(),
+
+                Tables\Columns\TextColumn::make('user_text')
+                    ->label('متن کاربر')
+                    ->getStateUsing(fn (TicketMessage $record) => ($record->panel_user_id == null ? $record->text : ' - ')),
+
+                Tables\Columns\TextColumn::make('panel_text')
+                    ->label('متن پشتیبان')
+                    ->getStateUsing(fn (TicketMessage $record) => $record->panel_user_id != null ? $record->text : ' - '),
+
+                JalaliDateTimeColumn::make('created_at')
+                    ->label('تاریخ و ساعت')
+                    ->extraAttributes([
+                        'class' => 'ltr-col',
+                    ])
+                    ->sortable()
+                    ->dateTime(),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+
+                Tables\Actions\CreateAction::make()
+                    ->url(function (RelationManager $livewire) {
+                        return TicketResource::getUrl('messageCreate', ['record' => $livewire->ownerRecord->id]);
+                    })
+                    ->openUrlInNewTab()
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 }

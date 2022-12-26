@@ -17,7 +17,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
-use Morilog\Jalali\Jalalian;
+use Illuminate\Database\Eloquent\Model;
 
 class TicketResource extends Resource
 {
@@ -108,13 +108,16 @@ class TicketResource extends Resource
                         ->label(__('names.state'))
                         ->multiple()
                         ->options(self::getStateOptions())
-                        ->default([TicketStateEnum::PENDING->value])
+                        ->default([
+                            TicketStateEnum::PENDING->value,
+                            TicketStateEnum::OPENED->value,
+                        ])
                         ->query(fn (Builder $query, array $state) => $query->when(filled($state['values']), fn ($q) => $q->whereIn('state', $state['values']))),
                 ],
                 layout: Tables\Filters\Layout::AboveContent
             )
             ->actions([
-                Tables\Actions\EditAction::make(),
+                //Tables\Actions\EditAction::make(),
             ]);
     }
 
@@ -131,6 +134,7 @@ class TicketResource extends Resource
             'index' => Pages\ListTickets::route('/'),
             'create' => Pages\CreateTicket::route('/create'),
             'edit' => Pages\EditTicket::route('/{record}/edit'),
+            'messageCreate' => Pages\CreateTicketMessage::route('/{record}/ticketMessage')
         ];
     }
 

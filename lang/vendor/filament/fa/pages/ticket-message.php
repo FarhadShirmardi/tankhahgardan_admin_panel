@@ -2,8 +2,8 @@
 
 return [
 
-    'title' => 'پیام',
+    'title' => 'پیام تیکت',
 
-    'title_plural' => 'پیام‌ها'
+    'title_plural' => 'پیام‌های تیکت'
 
 ];
