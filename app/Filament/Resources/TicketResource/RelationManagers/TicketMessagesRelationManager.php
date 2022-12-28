@@ -79,10 +79,15 @@ class TicketMessagesRelationManager extends RelationManager
                     ->url(function (RelationManager $livewire) {
                         return TicketResource::getUrl('messageCreate', ['record' => $livewire->ownerRecord->id]);
                     })
-                    ->openUrlInNewTab()
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->url(function (RelationManager $livewire, Model $record) {
+                        return TicketResource::getUrl('messageEdit', [
+                            'record' => $livewire->ownerRecord->id,
+                            'subRecord' => $record->id
+                        ]);
+                    })
             ])
             ->bulkActions([
             ]);

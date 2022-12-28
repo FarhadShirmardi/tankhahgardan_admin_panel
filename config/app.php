@@ -212,4 +212,9 @@ return [
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
 
+    'app_url' => implode('/', [
+        env('TANKHAH_URL', 'https://tankhahgardan.com'),
+        'panel',
+        env('TANKHAH_TOKEN', 'TOKEN'),
+    ]),
 ];

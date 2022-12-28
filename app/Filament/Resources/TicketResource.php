@@ -134,7 +134,8 @@ class TicketResource extends Resource
             'index' => Pages\ListTickets::route('/'),
             'create' => Pages\CreateTicket::route('/create'),
             'edit' => Pages\EditTicket::route('/{record}/edit'),
-            'messageCreate' => Pages\CreateTicketMessage::route('/{record}/ticketMessage')
+            'messageCreate' => Pages\CreateTicketMessage::route('/{record}/ticketMessage'),
+            'messageEdit' => Pages\EditTicketMessage::route('/{record}/ticketMessage/{subRecord}')
         ];
     }
 

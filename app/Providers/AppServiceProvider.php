@@ -2,10 +2,13 @@
 
 namespace App\Providers;
 
+
+use App\Models\PanelUser;
+use App\Models\TicketMessage;
+use App\Models\User;
 use Filament\Facades\Filament;
-use Filament\Tables\Columns\Column;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,5 +39,11 @@ class AppServiceProvider extends ServiceProvider
                 asset('css/fonts.css'),
             ]);
         });
+
+        Relation::enforceMorphMap([
+            'ticketMessage' => TicketMessage::class,
+            'user' => User::class,
+            'panelUser' => PanelUser::class,
+        ]);
     }
 }
