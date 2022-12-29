@@ -18,6 +18,11 @@ class CreateTicketMessage extends Page implements Forms\Contracts\HasForms
 
     protected static string $view = 'filament.resources.ticket-resource.pages.create-ticket-message';
 
+    protected function getTitle(): string
+    {
+        return __('names.create ticket');
+    }
+
     public Ticket $ticket;
     public TicketMessage $ticketMessage;
 
@@ -43,14 +48,15 @@ class CreateTicketMessage extends Page implements Forms\Contracts\HasForms
     {
         return [
             Forms\Components\TextInput::make('text')
+                ->label(__('names.message text'))
                 ->required()
                 ->maxLength(255),
 
             Forms\Components\FileUpload::make('image')
+                ->label(__('names.image'))
                 ->label('Image')
                 ->disk('public')
                 ->multiple()
-                ->maxFiles(3)
                 ->image()
             // ...
         ];

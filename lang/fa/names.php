@@ -16,4 +16,9 @@ return [
     'last message' => 'آخرین پیام',
     'state' => 'وضعیت',
     'last update' => 'آخرین به‌روزرسانی',
+    'message text' => 'متن پیام',
+    'image' => 'عکس',
+    'response to ticket' => 'پاسخ به این پیام',
+    'create ticket' => 'ایجاد پیام',
+    'edit ticket' => 'ویرایش پیام',
 ];
