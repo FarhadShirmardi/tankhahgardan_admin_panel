@@ -2,7 +2,12 @@
 
 namespace App\Providers;
 
-use Illuminate\Pagination\Paginator;
+
+use App\Models\PanelUser;
+use App\Models\TicketMessage;
+use App\Models\User;
+use Filament\Facades\Filament;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,6 +29,21 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Paginator::defaultView('vendor.pagination.bootstrap-5');
+        Filament::serving(function () {
+            // Using Vite
+            Filament::registerViteTheme([
+                'resources/css/filament.css',
+            ]);
+
+            Filament::registerStyles([
+                asset('css/fonts.css'),
+            ]);
+        });
+
+        Relation::enforceMorphMap([
+            'ticketMessage' => TicketMessage::class,
+            'user' => User::class,
+            'panelUser' => PanelUser::class,
+        ]);
     }
 }
