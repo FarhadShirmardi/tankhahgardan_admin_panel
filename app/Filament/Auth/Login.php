@@ -77,7 +77,7 @@ class Login extends Component implements HasForms
                 ->label(__('filament::login.fields.password.label'))
                 ->password()
                 ->required(),
-            Captcha::make('captcha'),
+            Captcha::make('captcha')->config('math'),
             Checkbox::make('remember')
                 ->label(__('filament::login.fields.remember.label')),
         ];
