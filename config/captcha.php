@@ -14,10 +14,12 @@ return [
     ],
     'math' => [
         'length' => 9,
-        'width' => 120,
-        'height' => 36,
+        'width' => 220,
+        'height' => 50,
         'quality' => 90,
         'math' => true,
+        'bgImage' => false,
+        'bgColor' => '#ecf2f4',
     ],
 
     'flat' => [
