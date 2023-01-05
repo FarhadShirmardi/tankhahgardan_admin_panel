@@ -13,6 +13,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
+use Yepsua\Filament\Forms\Components\Captcha;
 
 /**
  * @property ComponentContainer $form
@@ -76,6 +77,7 @@ class Login extends Component implements HasForms
                 ->label(__('filament::login.fields.password.label'))
                 ->password()
                 ->required(),
+            Captcha::make('captcha'),
             Checkbox::make('remember')
                 ->label(__('filament::login.fields.remember.label')),
         ];

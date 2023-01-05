@@ -18,7 +18,8 @@
         "laravel/octane": "^1.3",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
-        "spiral/roadrunner": "^2.8.2"
+        "spiral/roadrunner": "^2.8.2",
+        "yepsua/filament-captcha-field": "^0.1.0"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.7",
