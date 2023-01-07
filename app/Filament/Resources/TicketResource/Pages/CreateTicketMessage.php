@@ -10,7 +10,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use GuzzleHttp\Client;
 
-class CreateTicketMessage extends Page implements Forms\Contracts\HasForms
+class CreateTicketMessage extends Page
 {
     use Forms\Concerns\InteractsWithForms;
 

@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\TicketResource\RelationManagers;
 
 use App\Filament\Resources\TicketResource;
-use App\Filament\Resources\TicketResource\Pages\CreateTicketMessage;
 use App\Models\TicketMessage;
 use Ariaieboy\FilamentJalaliDatetime\JalaliDateTimeColumn;
 use Filament\Forms;
@@ -12,7 +11,6 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Contracts\HasRelationshipTable;
 use Illuminate\Database\Eloquent\Model;
 
 class TicketMessagesRelationManager extends RelationManager
@@ -40,10 +38,7 @@ class TicketMessagesRelationManager extends RelationManager
                 Forms\Components\SpatieMediaLibraryFileUpload::make('images')
                     ->label('Image')
                     ->image()
-                    ->multiple()
-                    ->saveUploadedFileUsing(function (Model $record) {
-                        dd($record);
-                    }),
+                    ->multiple(),
             ]);
     }
 
@@ -78,16 +73,16 @@ class TicketMessagesRelationManager extends RelationManager
                 Tables\Actions\CreateAction::make()
                     ->url(function (RelationManager $livewire) {
                         return TicketResource::getUrl('messageCreate', ['record' => $livewire->ownerRecord->id]);
-                    })
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->url(function (RelationManager $livewire, Model $record) {
                         return TicketResource::getUrl('messageEdit', [
                             'record' => $livewire->ownerRecord->id,
-                            'subRecord' => $record->id
+                            'subRecord' => $record->id,
                         ]);
-                    })
+                    }),
             ])
             ->bulkActions([
             ]);
