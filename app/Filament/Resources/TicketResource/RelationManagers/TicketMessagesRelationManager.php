@@ -5,12 +5,14 @@ namespace App\Filament\Resources\TicketResource\RelationManagers;
 use App\Filament\Resources\TicketResource;
 use App\Models\TicketMessage;
 use Ariaieboy\FilamentJalaliDatetime\JalaliDateTimeColumn;
+use Closure;
 use Filament\Forms;
 use Filament\Resources\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 
 class TicketMessagesRelationManager extends RelationManager
@@ -71,6 +73,8 @@ class TicketMessagesRelationManager extends RelationManager
             ->headerActions([
 
                 Tables\Actions\CreateAction::make()
+                    ->label(__('names.response to ticket'))
+                    ->icon('go-reply-24')
                     ->url(function (RelationManager $livewire) {
                         return TicketResource::getUrl('messageCreate', ['record' => $livewire->ownerRecord->id]);
                     }),

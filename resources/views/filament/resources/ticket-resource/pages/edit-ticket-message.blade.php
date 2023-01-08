@@ -27,7 +27,7 @@
         </x-filament::button>
     @else
         <x-filament::button type="submit" wire:click="response">
-            {{ __('names.response to ticket') }}
+            {{ __('names.response to message') }}
         </x-filament::button>
     @endif
 </x-filament::page>

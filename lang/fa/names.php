@@ -18,7 +18,8 @@ return [
     'last update' => 'آخرین به‌روزرسانی',
     'message text' => 'متن پیام',
     'image' => 'عکس',
-    'response to ticket' => 'پاسخ به این پیام',
+    'response to ticket' => 'پاسخ به این تیکت',
+    'response to message' => 'پاسخ به این پیام',
     'create ticket' => 'ایجاد پیام',
     'edit ticket' => 'ویرایش پیام',
 ];
