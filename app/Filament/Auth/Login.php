@@ -70,7 +70,6 @@ class Login extends Component implements HasForms
     {
         return [
             TextInput::make('phone_number')
-                ->telRegex('/^((0)(9){1}[0-9]{9})+$/')
                 ->label(__('filament::login.fields.phone_number.label'))
                 ->required(),
             TextInput::make('password')

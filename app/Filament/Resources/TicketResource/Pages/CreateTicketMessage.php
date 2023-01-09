@@ -47,10 +47,9 @@ class CreateTicketMessage extends Page
     protected function getFormSchema(): array
     {
         return [
-            Forms\Components\TextInput::make('text')
+            Forms\Components\Textarea::make('text')
                 ->label(__('names.message text'))
-                ->required()
-                ->maxLength(255),
+                ->required(),
 
             Forms\Components\FileUpload::make('image')
                 ->label(__('names.image'))

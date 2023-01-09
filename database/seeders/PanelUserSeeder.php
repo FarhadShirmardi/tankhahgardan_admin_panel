@@ -28,12 +28,5 @@ class PanelUserSeeder extends Seeder
             'password' => Hash::make('pP12345678'),
             'type' => PanelUserTypeEnum::ADMIN,
         ]);
-
-        $user = PanelUser::firstWhere('phone_number', '9382204247');
-
-        $permission = Permission::query()->create([
-            'name' => PermissionEnum::VIEW_TICKET->value
-        ]);
-        $user->givePermissionTo(PermissionEnum::VIEW_TICKET->value);
     }
 }

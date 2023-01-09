@@ -12,6 +12,7 @@ return [
     ],
     'phone number' => 'شماره تلفن',
     'username' => 'نام کاربری',
+    'full name' => 'نام و نام خانوادگی',
     'title' => 'عنوان',
     'last message' => 'آخرین پیام',
     'state' => 'وضعیت',
@@ -22,4 +23,5 @@ return [
     'response to message' => 'پاسخ به این پیام',
     'create ticket' => 'ایجاد پیام',
     'edit ticket' => 'ویرایش پیام',
+    'permissions' => 'دسترسی‌ها',
 ];

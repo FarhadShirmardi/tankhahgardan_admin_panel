@@ -20,9 +20,14 @@ class TicketPolicy
     {
     }
 
+    public function create(PanelUser $user): bool
+    {
+        return $user->hasPermissionTo(PermissionEnum::RESPONSE_TICKET->value);
+    }
+
     public function update(PanelUser $user, Ticket $ticket): bool
     {
-        return $user->hasPermissionTo(PermissionEnum::VIEW_TICKET->value);
+        return $user->hasPermissionTo(PermissionEnum::RESPONSE_TICKET->value);
     }
 
     public function delete(PanelUser $user, Ticket $ticket): bool

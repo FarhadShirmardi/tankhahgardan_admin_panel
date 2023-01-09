@@ -56,11 +56,10 @@ class EditTicketMessage extends Page implements Forms\Contracts\HasForms
     protected function getFormSchema(): array
     {
         return [
-            Forms\Components\TextInput::make('text')
+            Forms\Components\Textarea::make('text')
                 ->label(__('names.message text'))
                 ->when(!$this->isUser)
-                ->required()
-                ->maxLength(255),
+                ->required(),
 
             Forms\Components\Placeholder::make('user_text')
                 ->label(__('names.message text'))
