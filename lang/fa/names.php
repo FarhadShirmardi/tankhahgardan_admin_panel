@@ -24,4 +24,28 @@ return [
     'create ticket' => 'ایجاد پیام',
     'edit ticket' => 'ویرایش پیام',
     'permissions' => 'دسترسی‌ها',
+
+    'project_user_type' => [
+        'owner' => 'مالک',
+        'admin' => 'ادمین',
+        'manager' => 'مدیر',
+        'custodian' => 'تنخواه‌دار',
+    ],
+    'premium_state' => [
+        'free' => 'رایگان',
+        'premium' => 'پولی',
+        'expired_premium' => 'اتمام اعتبار',
+        'near_ending_premium' => 'نزدیک به پایان',
+    ],
+    'user state' => 'وضعیت کاربر',
+    'registered at' => 'تاریخ و ساعت ثبت‌نام',
+    'last record time' => 'آخرین ثبت',
+    'total project count' => 'تعداد کل پروژه‌ها',
+    'owned project count' => 'تعداد پروژه مالک',
+    'not owned project count' => 'تعداد پروژه غیرمالک',
+    'payment count' => 'تعداد پرداخت',
+    'receive count' => 'تعداد دریافت',
+    'imprest count' => 'تعداد تنخواه',
+    'image count' => 'تعداد عکس',
+    'image size' => 'حجم عکس(MB)',
 ];

@@ -8,6 +8,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 class PanelUser extends Authenticatable implements FilamentUser
 {
+    protected $connection = 'mysql';
+    
     use HasRoles;
 
     protected $fillable = [

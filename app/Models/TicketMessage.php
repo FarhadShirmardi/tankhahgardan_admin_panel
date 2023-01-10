@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class TicketMessage extends Model
 {
+    protected $connection = 'mysql';
+
     protected $fillable = [
         'text',
         'panel_user_id'

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Ticket extends Model
 {
+    protected $connection = 'mysql';
     protected $fillable = [
         'title',
         'state',

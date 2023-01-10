@@ -9,7 +9,7 @@ enum PermissionEnum: string
 
     case EDIT_USER_PANELS = 'edit_user_panels';
 
-    public function getTitle()
+    public function getTitle(): string
     {
         return match ($this) {
             self::VIEW_TICKET => 'نمایش تیکت',

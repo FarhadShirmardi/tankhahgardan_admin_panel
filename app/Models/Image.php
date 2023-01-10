@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Image extends Model
 {
+    protected $connection = 'mysql';
+
     use SoftDeletes, HasFactory;
 
     protected $fillable = [
