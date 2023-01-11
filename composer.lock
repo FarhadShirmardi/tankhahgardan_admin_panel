@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "56f4e8d05ff6f3ee7581c87fc1bd9ed3",
+    "content-hash": "31f36de54ff18f42aaf7d042f83b1839",
     "packages": [
         {
             "name": "actb/blade-github-octicons",
@@ -192,6 +192,79 @@
                 "source": "https://github.com/ariaieboy/filament-jalali-datetime/tree/1.1.0"
             },
             "time": "2022-09-13T15:46:09+00:00"
+        },
+        {
+            "name": "ariaieboy/filament-jalali-datetimepicker",
+            "version": "1.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ariaieboy/filament-jalali-datetimepicker.git",
+                "reference": "d174bd2144983e9d7ce65480d90ba877f37aa3e2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ariaieboy/filament-jalali-datetimepicker/zipball/d174bd2144983e9d7ce65480d90ba877f37aa3e2",
+                "reference": "d174bd2144983e9d7ce65480d90ba877f37aa3e2",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^2.16.2",
+                "illuminate/contracts": "^8.0|^9.0",
+                "php": "~8.0.0|~8.1.0|~8.2.0",
+                "spatie/laravel-package-tools": "^1.13.5"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.11",
+                "nunomaduro/collision": "^6.3",
+                "nunomaduro/larastan": "^2.2",
+                "orchestra/testbench": "^7.7",
+                "pestphp/pest": "^1.22.1",
+                "pestphp/pest-plugin-laravel": "^1.2",
+                "phpstan/extension-installer": "^1.1",
+                "phpstan/phpstan-deprecation-rules": "^1.0",
+                "phpstan/phpstan-phpunit": "^1.1.1",
+                "phpunit/phpunit": "^9.5.24",
+                "spatie/laravel-ray": "^1.30"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Ariaieboy\\FilamentJalaliDatetimepicker\\FilamentJalaliDatetimepickerServiceProvider"
+                    ],
+                    "aliases": {
+                        "FilamentJalaliDatetimepicker": "Ariaieboy\\FilamentJalaliDatetimepicker\\Facades\\FilamentJalaliDatetimepicker"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Ariaieboy\\FilamentJalaliDatetimepicker\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "ariaieboy",
+                    "email": "smr.seddighy@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "This is my package filament-jalali-datetimepicker",
+            "homepage": "https://github.com/ariaieboy/filament-jalali-datetimepicker",
+            "keywords": [
+                "ariaieboy",
+                "filament-jalali-datetimepicker",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/ariaieboy/filament-jalali-datetimepicker/issues",
+                "source": "https://github.com/ariaieboy/filament-jalali-datetimepicker/tree/1.2.1"
+            },
+            "time": "2022-12-13T10:11:06+00:00"
         },
         {
             "name": "beberlei/assert",
@@ -8621,6 +8694,62 @@
                 }
             ],
             "time": "2022-03-08T17:03:00+00:00"
+        },
+        {
+            "name": "webbingbrasil/filament-advancedfilter",
+            "version": "v1.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webbingbrasil/filament-advancedfilter.git",
+                "reference": "3d2397773b8d620c6c12b6f5b5d2fdf4b1c8658d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webbingbrasil/filament-advancedfilter/zipball/3d2397773b8d620c6c12b6f5b5d2fdf4b1c8658d",
+                "reference": "3d2397773b8d620c6c12b6f5b5d2fdf4b1c8658d",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^2.15.23",
+                "php": "^8.0",
+                "spatie/laravel-package-tools": "^1.9.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Webbingbrasil\\FilamentAdvancedFilter\\FilamentAdvancedFilterProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Webbingbrasil\\FilamentAdvancedFilter\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Danilo Andrade",
+                    "email": "danilo@webbingbrasil.com.br",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Advanced filter component for filament admin.",
+            "homepage": "https://github.com/webbingbrasil/filament-advancedfilter",
+            "keywords": [
+                "filament",
+                "filter",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/webbingbrasil/filament-advancedfilter/issues",
+                "source": "https://github.com/webbingbrasil/filament-advancedfilter/tree/v1.1.2"
+            },
+            "time": "2022-11-01T13:37:21+00:00"
         },
         {
             "name": "webmozart/assert",

@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::table('user_reports', function (Blueprint $table) {
             $table->dropColumn('note_count');
             $table->dropColumn('not_own_project_count');
+            $table->dateTime('registered_at')->nullable()->change();
             $table->renameColumn('feedback_count', 'ticket_count');
         });
     }

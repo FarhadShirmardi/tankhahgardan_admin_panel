@@ -3,17 +3,18 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
-use Filament\Pages\Actions;
-use Filament\Resources\Pages\ViewRecord;
+use Filament\Resources\Pages\Page;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Contracts\View\View;
 
-class ViewUser extends ViewRecord
+class ViewUser extends Page
 {
     protected static string $resource = UserResource::class;
 
-    protected function getActions(): array
+    protected static string $view = 'filament.resources.user-resource.pages.view-user';
+
+    protected function getTitle(): string
     {
-        return [
-            Actions\DeleteAction::make(),
-        ];
+        return '';
     }
 }
