@@ -23,9 +23,9 @@ class Login extends Component implements HasForms
     use InteractsWithForms;
     use WithRateLimiting;
 
-    public string $phone_number = '';
-    public string $password = '';
-    public bool $remember = false;
+    protected string $phone_number = '';
+    protected string $password = '';
+    protected bool $remember = false;
 
     public function mount(): void
     {
