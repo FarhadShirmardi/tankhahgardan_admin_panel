@@ -34,7 +34,9 @@ class Login extends Component implements HasForms
         }
 
         $this->form->fill([
-            'phone_number' => ''
+            'phone_number' => '',
+            'password' => '',
+            'remember' => false
         ]);
 
     }
