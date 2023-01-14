@@ -33,11 +33,11 @@ class Login extends Component implements HasForms
             redirect()->intended(Filament::getUrl());
         }
 
-        $this->form->fill([
+        $this->form->fill(json_decode(json_encode([
             'phone_number' => '',
             'password' => '',
             'remember' => false
-        ]);
+        ]), true));
 
     }
 
