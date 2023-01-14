@@ -23,9 +23,10 @@ class Login extends Component implements HasForms
     use InteractsWithForms;
     use WithRateLimiting;
 
-    public string $phone_number = '';
-    public string $password = '';
-    public bool $remember = false;
+    public string $phone_number;
+    public string $password;
+    public bool $remember;
+    public string $captcha;
 
     public function mount(): void
     {
@@ -33,11 +34,12 @@ class Login extends Component implements HasForms
             redirect()->intended(Filament::getUrl());
         }
 
-        $this->form->fill(json_decode(json_encode([
+        $this->form->fill([
             'phone_number' => '',
             'password' => '',
-            'remember' => false
-        ]), true));
+            'captcha' => '',
+            'remember' => true,
+        ]);
 
     }
 
@@ -56,7 +58,7 @@ class Login extends Component implements HasForms
 
         $data = $this->form->getState();
 
-        if (!Filament::auth()->attempt([
+        if (! Filament::auth()->attempt([
             'phone_number' => formatPhoneNumber($data['phone_number']),
             'password' => $data['password'],
         ], $data['remember'])) {
