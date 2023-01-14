@@ -4,6 +4,8 @@ namespace App\Providers;
 
 
 use App\Models\PanelUser;
+use App\Models\Payment;
+use App\Models\Receive;
 use App\Models\TicketMessage;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -44,6 +46,8 @@ class AppServiceProvider extends ServiceProvider
             'ticketMessage' => TicketMessage::class,
             'user' => User::class,
             'panelUser' => PanelUser::class,
+            'payment' => Payment::class,
+            'receive' => Receive::class,
         ]);
     }
 }

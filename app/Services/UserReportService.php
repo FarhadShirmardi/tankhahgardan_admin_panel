@@ -16,6 +16,7 @@ use App\Models\StepByStep;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Models\UserStatus;
+use Illuminate\Database\Eloquent\Builder;
 
 class UserReportService
 {
@@ -55,7 +56,11 @@ class UserReportService
             ->getQuery();
         $imageCountQuery = Image::query()
             ->withoutTrashed()
-            ->whereColumn('user_id', 'users.id')
+            ->whereHasMorph(
+                'hasImage',
+                [Payment::class, Receive::class],
+                fn (Builder $query) => $query->whereIn('project_user_id', $projectUserIdsQuery)
+            )
             ->selectRaw($countQuery)
             ->getQuery();
         $deviceCountQuery = Device::query()
@@ -81,7 +86,11 @@ class UserReportService
             ->toSql();
 
         $imageSizeQuery = Image::withoutTrashed()
-            ->whereColumn('user_id', 'users.id')
+            ->whereHasMorph(
+                'hasImage',
+                [Payment::class, Receive::class],
+                fn (Builder $query) => $query->whereIn('project_user_id', $projectUserIdsQuery)
+            )
             ->selectRaw('IFNULL(sum(size), 0) / 1024 / 1024')
             ->getQuery();
 

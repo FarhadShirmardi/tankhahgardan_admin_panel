@@ -25,6 +25,8 @@ return [
     'edit ticket' => 'ویرایش پیام',
     'permissions' => 'دسترسی‌ها',
 
+    'project name' => 'نام شرکت',
+
     'project_user_type' => [
         'owner' => 'مالک',
         'admin' => 'ادمین',

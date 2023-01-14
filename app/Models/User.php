@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -50,5 +51,19 @@ class User extends Authenticatable
         return Attribute::make(
             get: fn () => trim((($this->name or $this->family) ? $this->full_name : reformatPhoneNumber($this->phone_number)) ?? '')
         );
+    }
+
+    /** @return Attribute<string, never> */
+    protected function formattedUsername(): Attribute
+    {
+        $phoneNumber = reformatPhoneNumber($this->phone_number);
+        return Attribute::make(
+            get: fn () => $this->username . " ($phoneNumber)"
+        );
+    }
+
+    public function projectUsers(): HasMany
+    {
+        return $this->hasMany(ProjectUser::class, 'user_id', 'id');
     }
 }
