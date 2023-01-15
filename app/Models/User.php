@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\ProjectUserTypeEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -65,5 +67,36 @@ class User extends Authenticatable
     public function projectUsers(): HasMany
     {
         return $this->hasMany(ProjectUser::class, 'user_id', 'id');
+    }
+
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class)
+            ->as('projectUser')
+            ->using(ProjectUser::class)
+            ->whereNull('project_user.deleted_at')
+            ->withPivot(['id', 'user_type', 'state'])
+            ->withTimestamps();
+    }
+
+    public function ownedProjects(): BelongsToMany
+    {
+        return $this->projects()->wherePivot('user_type', ProjectUserTypeEnum::OWNER);
+    }
+
+    public function userStatuses(): HasMany
+    {
+        return $this->hasMany(UserStatus::class)->latest('end_date');
+    }
+
+    /** @return Attribute<?UserStatus, never> */
+    protected function currentUserStatus(): Attribute
+    {
+        $this->loadMissing('userStatuses');
+        return Attribute::make(
+            get: fn () => $this->userStatuses
+                ->where('start_date', '<=', now()->toDateTimeString())
+                ->firstWhere('end_date', '>=', now()->toDateTimeString())
+        );
     }
 }

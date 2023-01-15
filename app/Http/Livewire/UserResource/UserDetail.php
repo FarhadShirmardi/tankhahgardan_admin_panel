@@ -42,26 +42,6 @@ class UserDetail extends Component implements Forms\Contracts\HasForms
                         ->label(__('names.last record time'))
                         ->extraAttributes(['class' => 'ltr-col'])
                         ->content(fn (UserReport $record): ?string => $record->max_time ? Jalali::parse($record->max_time)->toJalaliDateTimeString() : '-'),
-
-                    Forms\Components\Placeholder::make('payment_count')
-                        ->label(__('names.payment count'))
-                        ->content(fn (UserReport $record): ?string => $record->payment_count),
-
-                    Forms\Components\Placeholder::make('receive_count')
-                        ->label(__('names.receive count'))
-                        ->content(fn (UserReport $record): ?string => $record->receive_count),
-
-                    Forms\Components\Placeholder::make('imprest_count')
-                        ->label(__('names.imprest count'))
-                        ->content(fn (UserReport $record): ?string => $record->imprest_count),
-
-                    Forms\Components\Placeholder::make('image_count')
-                        ->label(__('names.image count'))
-                        ->content(fn (UserReport $record): ?string => $record->image_count),
-
-                    Forms\Components\Placeholder::make('image_size')
-                        ->label(__('names.image size'))
-                        ->content(fn (UserReport $record): ?string => $record->image_size),
                 ]),
         ];
     }

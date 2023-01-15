@@ -18,4 +18,22 @@ enum ProjectUserTypeEnum: int
             self::CUSTODIAN => __('names.project_user_type.custodian'),
         };
     }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::OWNER => 'success',
+            self::ADMIN => 'warning',
+            self::MANAGER => 'primary',
+            self::CUSTODIAN => 'secondary',
+        };
+    }
+
+    public static function columnValues(): array
+    {
+        return collect(self::cases())
+            ->mapWithKeys(function (self $enum) {
+                return [$enum->value => $enum->description()];
+            })->toArray();
+    }
 }

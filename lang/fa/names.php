@@ -33,6 +33,11 @@ return [
         'manager' => 'مدیر',
         'custodian' => 'تنخواه‌دار',
     ],
+    'project_user_state' => [
+        'active' => 'فعال',
+        'pending' => 'در انتظار پاسخ',
+        'inactive' => 'غیرفعال',
+    ],
     'premium_state' => [
         'free' => 'رایگان',
         'premium' => 'پولی',
@@ -59,4 +64,7 @@ return [
     'imprest count' => 'تعداد تنخواه',
     'image count' => 'تعداد عکس',
     'image size' => 'حجم عکس(MB)',
+    'sum' => 'جمع',
+    'user_consumption' => 'وضعیت مصرف',
+    'role' => 'نقش',
 ];

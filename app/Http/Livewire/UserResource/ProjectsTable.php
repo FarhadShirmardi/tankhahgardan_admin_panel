@@ -2,11 +2,13 @@
 
 namespace App\Http\Livewire\UserResource;
 
+use App\Enums\ProjectUserTypeEnum;
 use App\Models\Image;
 use App\Models\Imprest;
 use App\Models\Payment;
 use App\Models\Receive;
 use App\Models\User;
+use App\Models\UserReport;
 use Filament\Tables;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -61,6 +63,7 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
             ->join('projects', 'projects.id', 'project_user.project_id')
             ->addSelect('projects.name as name')
             ->addSelect('projects.id as id')
+            ->addSelect('project_user.user_type as user_type')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($imprestCountQuery, 'imprest_count')
             ->selectSub($imageCountQuery, 'image_count')
@@ -78,6 +81,10 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
         return [
             Tables\Columns\TextColumn::make('name')
                 ->label(__('names.project name')),
+            Tables\Columns\BadgeColumn::make('user_type')
+                ->label(__('names.role'))
+                ->enum(ProjectUserTypeEnum::columnValues())
+                ->color(static fn ($state) => ProjectUserTypeEnum::from($state)->color()),
             Tables\Columns\TextColumn::make('payments_count')
                 ->label(__('names.payment count'))
                 ->counts('payments'),
@@ -90,6 +97,22 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
             Tables\Columns\TextColumn::make('image_size')
                 ->label(__('names.image size')),
         ];
+    }
+
+    protected function getTableContentFooter(): ?View
+    {
+        $userReport = UserReport::findOrFail($this->user->id);
+        return \view('livewire.user-resource.projects-table-footer', [
+            'footer_columns' => [
+                __('names.sum'),
+                '',
+                $userReport->payment_count,
+                $userReport->receive_count,
+                $userReport->imprest_count,
+                $userReport->image_count,
+                $userReport->image_size,
+            ],
+        ]);
     }
 
     public function render(): View
