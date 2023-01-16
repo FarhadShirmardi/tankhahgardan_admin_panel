@@ -3,15 +3,18 @@
 namespace App\Http\Livewire\UserResource;
 
 use App\Enums\ProjectUserTypeEnum;
+use App\Enums\UserActivityTypeEnum;
 use App\Models\Image;
 use App\Models\Imprest;
 use App\Models\Payment;
+use App\Models\ProjectUser;
 use App\Models\Receive;
 use App\Models\User;
 use App\Models\UserReport;
 use Filament\Tables;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Livewire\Component;
 
@@ -19,11 +22,13 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
 {
     use Tables\Concerns\InteractsWithTable;
 
-    private User $user;
+    public User $user;
+    public UserReport $userReport;
 
     public function mount(User $user)
     {
         $this->user = $user;
+        $this->userReport = UserReport::findOrFail($this->user->id);
     }
 
     protected function getTableQuery(): Builder|Relation
@@ -60,10 +65,13 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
             ->getQuery();
 
         return $this->user->projectUsers()
+            ->with('teams')
             ->join('projects', 'projects.id', 'project_user.project_id')
             ->addSelect('projects.name as name')
-            ->addSelect('projects.id as id')
-            ->addSelect('project_user.user_type as user_type')
+            ->addSelect('projects.created_at as created_at')
+            ->addSelect('project_user.id as id')
+            ->addSelect('project_id')
+            ->addSelect('user_type')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($imprestCountQuery, 'imprest_count')
             ->selectSub($imageCountQuery, 'image_count')
@@ -71,9 +79,29 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
             ->getQuery();
     }
 
+    protected function getDefaultTableSortColumn(): ?string
+    {
+        return 'created_at';
+    }
+
+    protected function getDefaultTableSortDirection(): ?string
+    {
+        return 'desc';
+    }
+
     protected function isTablePaginationEnabled(): bool
     {
         return false;
+    }
+
+    protected function getTableFilters(): array
+    {
+        return [
+            Tables\Filters\SelectFilter::make('user_type')
+                ->label(__('names.role'))
+                ->multiple()
+                ->options(ProjectUserTypeEnum::columnValues()),
+        ];
     }
 
     protected function getTableColumns(): array
@@ -81,36 +109,44 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
         return [
             Tables\Columns\TextColumn::make('name')
                 ->label(__('names.project name')),
+            Tables\Columns\TextColumn::make('created_at')
+                ->hidden()
+                ->label(__('names.project created at')),
             Tables\Columns\BadgeColumn::make('user_type')
                 ->label(__('names.role'))
+                ->tooltip($this->getTeamNames())
                 ->enum(ProjectUserTypeEnum::columnValues())
                 ->color(static fn ($state) => ProjectUserTypeEnum::from($state)->color()),
             Tables\Columns\TextColumn::make('payments_count')
+                ->sortable()
                 ->label(__('names.payment count'))
                 ->counts('payments'),
             Tables\Columns\TextColumn::make('receive_count')
+                ->sortable()
                 ->label(__('names.receive count')),
             Tables\Columns\TextColumn::make('imprest_count')
+                ->sortable()
                 ->label(__('names.imprest count')),
             Tables\Columns\TextColumn::make('image_count')
+                ->sortable()
                 ->label(__('names.image count')),
             Tables\Columns\TextColumn::make('image_size')
+                ->sortable()
                 ->label(__('names.image size')),
         ];
     }
 
     protected function getTableContentFooter(): ?View
     {
-        $userReport = UserReport::findOrFail($this->user->id);
         return \view('livewire.user-resource.projects-table-footer', [
             'footer_columns' => [
                 __('names.sum'),
                 '',
-                $userReport->payment_count,
-                $userReport->receive_count,
-                $userReport->imprest_count,
-                $userReport->image_count,
-                $userReport->image_size,
+                $this->userReport->payment_count,
+                $this->userReport->receive_count,
+                $this->userReport->imprest_count,
+                $this->userReport->image_count,
+                $this->userReport->image_size,
             ],
         ]);
     }
@@ -118,5 +154,16 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
     public function render(): View
     {
         return view('livewire.user-resource.projects-table');
+    }
+
+    private function getTeamNames(): \Closure
+    {
+        return function (ProjectUser $record) {
+            $teams = $record->teams;
+            $isDefault = (($teams->count() == 1) and ($teams->first()->is_default));
+            $text = $teams->pluck('name')->implode('، ');
+            $text .= $isDefault ? ' ('.__('names.default').')' : '';
+            return $text;
+        };
     }
 }
