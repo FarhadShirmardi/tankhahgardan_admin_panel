@@ -7,6 +7,7 @@ use App\Models\UserReport;
 use App\Services\UserReportService;
 use DB;
 use Illuminate\Console\Command;
+use Schema;
 
 class GenerateUserReport extends Command
 {
@@ -17,7 +18,7 @@ class GenerateUserReport extends Command
     public function handle()
     {
         UserReport::query()->truncate();
-        $columnList = \Schema::getColumnListing('user_reports');
+        $columnList = Schema::getColumnListing('user_reports');
         $bar = $this->output->createProgressBar(User::query()->count());
         User::query()
             ->withoutEagerLoads()

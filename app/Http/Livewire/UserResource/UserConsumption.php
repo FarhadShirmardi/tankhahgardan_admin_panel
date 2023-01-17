@@ -4,31 +4,43 @@ namespace App\Http\Livewire\UserResource;
 
 use App\DataObjects\UserPremiumData;
 use App\Forms\Components\BooleanLabeledIcon;
-use App\Forms\Components\LineGraph;
 use App\Forms\Components\ProgressBar;
 use App\Models\User;
 use Closure;
 use Filament\Forms;
-use Filament\Tables\Columns\TextColumn;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
+/**
+ * @property Forms\ComponentContainer|View|mixed|null $form
+ */
 class UserConsumption extends Component implements Forms\Contracts\HasForms
 {
     use Forms\Concerns\InteractsWithForms;
 
+    public User $user;
+
+    private bool $isLoaded = false;
+
     public function mount(User $user)
     {
-        $data = new UserPremiumData($user);
+        $this->user = $user;
+    }
+
+    public function loadData()
+    {
+        $data = new UserPremiumData($this->user);
+        $this->isLoaded = true;
         $this->form->fill($data->toArray());
-        //dd($data);
     }
 
     protected function getFormSchema(): array
     {
         return [
             Forms\Components\Section::make(__('names.user_consumption'))
+                ->collapsible()
                 ->columns(4)
+                ->extraAttributes($this->isLoaded ? [] : ['class' => 'animate-pulse'])
                 ->schema([
                     ProgressBar::make('transaction_count')
                         ->label(__('names.consumption.transaction count'))

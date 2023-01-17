@@ -15,17 +15,19 @@ use App\Models\Receive;
 use App\Models\StepByStep;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Models\UserReport;
 use App\Models\UserStatus;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class UserReportService
 {
-    public static function getSingleUserQuery(int $userId)
+    public static function getSingleUser(int $userId): UserReport|Model
     {
         return self::getUsersQuery([$userId])->first();
     }
 
-    public static function getUsersQuery(?array $userIds = null)
+    public static function getUsersQuery(?array $userIds = null): Builder
     {
         $countQuery = 'count(*)';
         $maxCreatedAtQuery = 'MAX(created_at)';
@@ -172,7 +174,7 @@ class UserReportService
             ->selectRaw("IFNULL( (".$userStateQuery->toSql()." ), ".UserPremiumStateEnum::FREE->value.") as user_state");
     }
 
-    private static function timesArray(): array
+    public static function timesArray(): array
     {
         return [
             1 => ['>=', now()->subDays(7)->toDateTimeString(), 1],

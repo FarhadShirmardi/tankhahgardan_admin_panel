@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\ProjectUserStateEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -45,5 +47,10 @@ class ProjectUser extends Pivot
                 'admin_transaction_delete_permission',
             ])
             ->withTimestamps();
+    }
+
+    public function scopeIsActive(Builder $query): Builder
+    {
+        return $query->where('state', ProjectUserStateEnum::ACTIVE);
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Http\Livewire\UserResource;
 
 use App\Enums\ProjectUserTypeEnum;
-use App\Enums\UserActivityTypeEnum;
 use App\Models\Image;
 use App\Models\Imprest;
 use App\Models\Payment;
@@ -11,10 +10,11 @@ use App\Models\ProjectUser;
 use App\Models\Receive;
 use App\Models\User;
 use App\Models\UserReport;
+use Closure;
+use Exception;
 use Filament\Tables;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Livewire\Component;
 
@@ -25,14 +25,24 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
     public User $user;
     public UserReport $userReport;
 
+    private bool $isLoaded = false;
+
     public function mount(User $user)
     {
         $this->user = $user;
         $this->userReport = UserReport::findOrFail($this->user->id);
     }
 
+    public function loadData()
+    {
+        $this->isLoaded = true;
+    }
+
     protected function getTableQuery(): Builder|Relation
     {
+        if (! $this->isLoaded) {
+            return $this->user->projectUsers()->whereRaw('false')->getQuery();
+        }
         $countQuery = 'count(*)';
 
         $receiveCountQuery = Receive::query()
@@ -94,6 +104,9 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
         return false;
     }
 
+    /**
+     * @throws Exception
+     */
     protected function getTableFilters(): array
     {
         return [
@@ -102,6 +115,16 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
                 ->multiple()
                 ->options(ProjectUserTypeEnum::columnValues()),
         ];
+    }
+
+    protected function getTableEmptyStateIcon(): ?string
+    {
+        return 'heroicon-o-download';
+    }
+
+    protected function getTableEmptyStateHeading(): ?string
+    {
+        return __('message.loading_data');
     }
 
     protected function getTableColumns(): array
@@ -131,6 +154,7 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
                 ->sortable()
                 ->label(__('names.image count')),
             Tables\Columns\TextColumn::make('image_size')
+                ->formatStateUsing(fn (string $state): string => round($state, 2))
                 ->sortable()
                 ->label(__('names.image size')),
         ];
@@ -156,7 +180,7 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
         return view('livewire.user-resource.projects-table');
     }
 
-    private function getTeamNames(): \Closure
+    private function getTeamNames(): Closure
     {
         return function (ProjectUser $record) {
             $teams = $record->teams;

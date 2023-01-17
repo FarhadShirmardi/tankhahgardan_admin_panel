@@ -4,6 +4,8 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
 use App\Models\User;
+use App\Models\UserReport;
+use App\Services\UserReportService;
 use Filament\Resources\Pages\Page;
 
 class ViewUser extends Page
@@ -22,5 +24,6 @@ class ViewUser extends Page
     public function mount(int $record)
     {
         $this->user = User::findOrFail($record);
+        $this->user->updateUserReport();
     }
 }

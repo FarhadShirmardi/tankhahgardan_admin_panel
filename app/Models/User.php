@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Enums\ProjectUserTypeEnum;
+use App\Services\UserReportService;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -60,7 +62,7 @@ class User extends Authenticatable
     {
         $phoneNumber = reformatPhoneNumber($this->phone_number);
         return Attribute::make(
-            get: fn () => $this->username . " ($phoneNumber)"
+            get: fn () => $this->username." ($phoneNumber)"
         );
     }
 
@@ -92,11 +94,20 @@ class User extends Authenticatable
     /** @return Attribute<?UserStatus, never> */
     protected function currentUserStatus(): Attribute
     {
-        $this->loadMissing('userStatuses');
         return Attribute::make(
             get: fn () => $this->userStatuses
                 ->where('start_date', '<=', now()->toDateTimeString())
                 ->firstWhere('end_date', '>=', now()->toDateTimeString())
         );
+    }
+
+    public function userReport(): HasOne
+    {
+        return $this->hasOne(UserReport::class, 'id');
+    }
+
+    public function updateUserReport()
+    {
+        $this->userReport()->update(UserReportService::getSingleUser($this->id)->toArray());
     }
 }
