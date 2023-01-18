@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\UserActivityTypeEnum;
+use App\Enums\ActivityTypeEnum;
 use App\Enums\UserPremiumStateEnum;
 use App\Filament\Components\JalaliDatePicker;
 use App\Filament\Resources\UserResource\Pages;
@@ -45,8 +45,8 @@ class UserResource extends Resource
                     ->rowIndex(),
                 ColorColumn::make('user_type')
                     ->label('')
-                    ->tooltip(fn (UserReport $record) => UserActivityTypeEnum::from($record->user_type)->description())
-                    ->getStateUsing(fn (UserReport $record) => UserActivityTypeEnum::from($record->user_type)->color()),
+                    ->tooltip(fn (UserReport $record) => ActivityTypeEnum::from($record->user_type)->description())
+                    ->getStateUsing(fn (UserReport $record) => ActivityTypeEnum::from($record->user_type)->color()),
                 TextColumn::make('name')
                     ->label(__('names.full name'))
                     ->copyable(),
@@ -102,7 +102,7 @@ class UserResource extends Resource
                     Tables\Filters\SelectFilter::make('user_type')
                         ->label(__('names.last record time state'))
                         ->multiple()
-                        ->options(UserActivityTypeEnum::columnValues()),
+                        ->options(ActivityTypeEnum::columnValues()),
                     Tables\Filters\SelectFilter::make('user_state')
                         ->label(__('names.user state'))
                         ->multiple()

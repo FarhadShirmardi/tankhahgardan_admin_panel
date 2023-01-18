@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\UserResource\Widgets;
 
-use App\Enums\UserActivityTypeEnum;
+use App\Enums\ActivityTypeEnum;
 use App\Models\User;
 use App\Models\UserReport;
 use Filament\Widgets\BarChartWidget;
@@ -39,7 +39,7 @@ class UserActivityChart extends BarChartWidget
         $counts = UserReport::query()
             ->groupBy('user_type')
             ->orderBy('user_type')
-            ->where('user_type', '<>', UserActivityTypeEnum::DISABLE)
+            ->where('user_type', '<>', ActivityTypeEnum::DISABLE)
             ->get([
                 \DB::raw("count(*) count"),
                 'user_type',
@@ -49,11 +49,11 @@ class UserActivityChart extends BarChartWidget
             'datasets' => [
                 [
                     'label' => 'نمودار تعداد بر حسب وضعیت',
-                    'backgroundColor' => $counts->map(fn ($item) => UserActivityTypeEnum::from($item->user_type)->color())->toArray(),
+                    'backgroundColor' => $counts->map(fn ($item) => ActivityTypeEnum::from($item->user_type)->color())->toArray(),
                     'data' => $counts->pluck('count')->toArray(),
                 ],
             ],
-            'labels' => $counts->map(fn ($item) => UserActivityTypeEnum::from($item->user_type)->description())->toArray(),
+            'labels' => $counts->map(fn ($item) => ActivityTypeEnum::from($item->user_type)->description())->toArray(),
         ];
     }
 }

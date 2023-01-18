@@ -71,9 +71,14 @@ class ProjectReportService
             ->whereColumn('project_id', 'projects.id')
             ->selectRaw('count(distinct project_user.user_id)')
             ->getQuery();
-        $activeUserCountQuery = ProjectUser::withoutTrashed()
-            ->whereColumn('user_id', 'projects.id')
-            ->isActive()
+        $activeUserCountQuery = User::query()
+            ->whereIn(
+                'id',
+                ProjectUser::withoutTrashed()
+                    ->whereColumn('project_id', 'projects.id')
+                    ->isActive()
+                    ->select('user_id')
+            )
             ->selectRaw($countQuery)
             ->getQuery();
 

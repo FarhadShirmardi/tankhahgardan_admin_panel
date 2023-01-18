@@ -27,6 +27,12 @@ return [
 
     'project name' => 'نام شرکت',
     'project created at' => 'تاریخ ایجاد شرکت',
+    'project location' => 'محل شرکت',
+    'province' => 'استان',
+    'city' => 'شهر',
+    'total user count' => 'تعداد کل کاربران',
+    'active user count' => 'کاربران فعال پروژه',
+    'project type' => 'نوع پروژه',
 
     'project_user_type' => [
         'owner' => 'مالک',
@@ -100,4 +106,12 @@ return [
         'team level' => 'تعریف فرایند تایید گزارشات',
     ],
     'default' => 'پیشفرض',
+
+    'project_types' => [
+        'building' => 'پیمانکاری/ساختمانی',
+        'business' => 'بازرگانی',
+        'production' => 'تولیدی',
+        'services' => 'خدماتی',
+        'other' => 'سایر',
+    ],
 ];

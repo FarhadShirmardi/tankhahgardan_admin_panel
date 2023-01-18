@@ -2,8 +2,12 @@
 
 namespace App\Enums;
 
+use App\Traits\HasColumnValues;
+
 enum ProjectUserTypeEnum: int
 {
+    use HasColumnValues;
+
     case OWNER = 1;
     case ADMIN = 2;
     case MANAGER = 3;
@@ -27,13 +31,5 @@ enum ProjectUserTypeEnum: int
             self::MANAGER => 'primary',
             self::CUSTODIAN => 'secondary',
         };
-    }
-
-    public static function columnValues(): array
-    {
-        return collect(self::cases())
-            ->mapWithKeys(function (self $enum) {
-                return [$enum->value => $enum->description()];
-            })->toArray();
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ProjectReport extends Model
 {
@@ -12,6 +14,7 @@ class ProjectReport extends Model
 
     protected $fillable = [
         'name',
+        'type',
         'province_id',
         'city_id',
         'max_time',
@@ -22,4 +25,14 @@ class ProjectReport extends Model
         'imprest_count',
         'project_type',
     ];
+
+    public function province(): HasOne
+    {
+        return $this->hasOne(Province::class, 'id', 'province_id');
+    }
+
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
+    }
 }

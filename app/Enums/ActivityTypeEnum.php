@@ -2,8 +2,12 @@
 
 namespace App\Enums;
 
-enum UserActivityTypeEnum: int
+use App\Traits\HasColumnValues;
+
+enum ActivityTypeEnum: int
 {
+    use HasColumnValues;
+
     case ONE_WEEK = 1;
     case TWO_WEEK = 2;
     case ONE_MONTH = 3;
@@ -27,13 +31,5 @@ enum UserActivityTypeEnum: int
             self::ONE_MONTH => '#f05b4a',
             self::DISABLE => '#F1F3F4',
         };
-    }
-
-    public static function columnValues(): array
-    {
-        return collect(self::cases())
-            ->mapWithKeys(function (self $enum) {
-                return [$enum->value => $enum->description()];
-            })->toArray();
     }
 }
