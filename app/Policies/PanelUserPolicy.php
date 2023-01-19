@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Enums\PanelUserTypeEnum;
 use App\Enums\PermissionEnum;
 use App\Models\PanelUser;
 use Illuminate\Auth\Access\HandlesAuthorization;

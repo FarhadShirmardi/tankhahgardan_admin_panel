@@ -19,12 +19,16 @@ class UserConsumption extends Component implements Forms\Contracts\HasForms
     use Forms\Concerns\InteractsWithForms;
 
     public User $user;
+    public bool $isOwner;
+    public bool $collapsed;
 
     private bool $isLoaded = false;
 
-    public function mount(User $user)
+    public function mount(User $user, bool $isOwner = false, bool $collapsed = false)
     {
         $this->user = $user;
+        $this->isOwner = $isOwner;
+        $this->collapsed = $collapsed;
     }
 
     public function loadData()
@@ -37,8 +41,13 @@ class UserConsumption extends Component implements Forms\Contracts\HasForms
     protected function getFormSchema(): array
     {
         return [
-            Forms\Components\Section::make(__('names.user_consumption'))
+            Forms\Components\Section::make(
+                $this->isOwner ?
+                    __('names.owner consumption') :
+                    __('names.user consumption')
+            )
                 ->collapsible()
+                ->collapsed($this->collapsed)
                 ->columns(4)
                 ->extraAttributes($this->isLoaded ? [] : ['class' => 'animate-pulse'])
                 ->schema([

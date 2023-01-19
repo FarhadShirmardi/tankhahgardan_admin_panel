@@ -2,22 +2,13 @@
 
 namespace App\Services;
 
-use App\Constants\PremiumConstants;
-use App\Enums\ProjectUserTypeEnum;
-use App\Enums\UserPremiumStateEnum;
-use App\Models\Device;
-use App\Models\File;
-use App\Models\Image;
 use App\Models\Imprest;
 use App\Models\Payment;
 use App\Models\Project;
 use App\Models\ProjectUser;
 use App\Models\Receive;
-use App\Models\StepByStep;
-use App\Models\Ticket;
 use App\Models\User;
 use App\Models\UserReport;
-use App\Models\UserStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 

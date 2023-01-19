@@ -2,7 +2,6 @@
 
 namespace App\DataObjects;
 
-use Spatie\LaravelData\Data;
 use App\Enums\PremiumPlanEnum;
 use App\Enums\ProjectUserStateEnum;
 use App\Models\File;
@@ -17,6 +16,7 @@ use App\Models\UserStatus;
 use DB;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder;
+use Spatie\LaravelData\Data;
 
 class UserPremiumData extends Data
 {

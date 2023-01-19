@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\UserResource;
 
 use App\Enums\ProjectUserTypeEnum;
+use App\Filament\Resources\ProjectResource;
 use App\Models\Image;
 use App\Models\Imprest;
 use App\Models\Payment;
@@ -13,8 +14,10 @@ use App\Models\UserReport;
 use Closure;
 use Exception;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Livewire\Component;
 
@@ -36,6 +39,11 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
     public function loadData()
     {
         $this->isLoaded = true;
+    }
+
+    protected function getTableRecordUrlUsing(): ?Closure
+    {
+        return fn (Model $record): string => ProjectResource::getUrl('view', ['record' => $record->project_id]);
     }
 
     protected function getTableQuery(): Builder|Relation
@@ -130,6 +138,8 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
     protected function getTableColumns(): array
     {
         return [
+            TextColumn::make(__('names.table.row index'))
+                ->rowIndex(),
             Tables\Columns\TextColumn::make('name')
                 ->label(__('names.project name')),
             Tables\Columns\TextColumn::make('created_at')
@@ -164,6 +174,7 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
     {
         return \view('livewire.user-resource.projects-table-footer', [
             'footer_columns' => [
+                '',
                 __('names.sum'),
                 '',
                 $this->userReport->payment_count,

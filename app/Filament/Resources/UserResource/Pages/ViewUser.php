@@ -4,8 +4,6 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
 use App\Models\User;
-use App\Models\UserReport;
-use App\Services\UserReportService;
 use Filament\Resources\Pages\Page;
 
 class ViewUser extends Page

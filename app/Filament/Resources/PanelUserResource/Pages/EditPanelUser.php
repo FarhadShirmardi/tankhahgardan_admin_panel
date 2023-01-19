@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\PanelUserResource\Pages;
 
 use App\Filament\Resources\PanelUserResource;
-use Filament\Pages\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditPanelUser extends EditRecord
@@ -12,6 +11,7 @@ class EditPanelUser extends EditRecord
 
     protected function getRedirectUrl(): string
     {
+        /** @noinspection PhpUndefinedMethodInspection */
         return self::getResource()::getUrl('index');
     }
 

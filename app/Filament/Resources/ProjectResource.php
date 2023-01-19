@@ -5,11 +5,11 @@ namespace App\Filament\Resources;
 use App\Enums\ActivityTypeEnum;
 use App\Enums\ProjectTypeEnum;
 use App\Filament\Resources\ProjectResource\Pages;
-use App\Filament\Resources\ProjectResource\RelationManagers;
 use App\Models\City;
 use App\Models\ProjectReport;
 use App\Models\Province;
 use Ariaieboy\FilamentJalaliDatetime\JalaliDateTimeColumn;
+use Exception;
 use Filament\Forms;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
@@ -17,6 +17,7 @@ use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProjectResource extends Resource
 {
@@ -42,6 +43,9 @@ class ProjectResource extends Resource
             ]);
     }
 
+    /**
+     * @throws Exception
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -95,7 +99,7 @@ class ProjectResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('location')
                     ->label(__('names.project location'))
-                    ->columns(2)
+                    ->columns()
                     ->columnSpan(2)
                     ->form([
                         Forms\Components\Select::make('province_id')
@@ -110,11 +114,13 @@ class ProjectResource extends Resource
                                 if ($province) {
                                     $cityId = (int) $get('city_id');
 
-                                    if ($cityId && $city = City::find($cityId)) {
+                                    if ($cityId and $city = City::find($cityId)) {
                                         if ($city->province_id !== $province->id) {
                                             $set('city_id', null);
                                         }
                                     }
+                                } else {
+                                    $set('city_id', null);
                                 }
                             }),
                         Forms\Components\Select::make('city_id')
@@ -127,11 +133,33 @@ class ProjectResource extends Resource
                                     return $province->cities->pluck('name', 'id');
                                 }
 
-                                //return City::all()->pluck('name', 'id');
+                                return City::all()->pluck('name', 'id');
                             }),
-                    ]),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        $provinceId = (int) $data['province_id'];
+                        $cityId = (int) $data['city_id'];
+
+                        if ($provinceId != 0) {
+                            $query->where('province_id', $provinceId);
+                        }
+
+                        if ($cityId != 0) {
+                            $query->where('city_id', $cityId);
+                        }
+
+                    }),
+                Tables\Filters\SelectFilter::make('project_type')
+                    ->label(__('names.last record time state'))
+                    ->multiple()
+                    ->options(ActivityTypeEnum::columnValues()),
+                Tables\Filters\SelectFilter::make('type')
+                    ->label(__('names.project type'))
+                    ->multiple()
+                    ->options(ProjectTypeEnum::columnValues()),
             ], layout: Tables\Filters\Layout::AboveContent)
             ->actions([
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
             ]);
@@ -148,6 +176,7 @@ class ProjectResource extends Resource
     {
         return [
             'index' => Pages\ListProjects::route('/'),
+            'view' => Pages\ViewProject::route('/{record}'),
         ];
     }
 }
