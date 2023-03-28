@@ -80,6 +80,8 @@ class TicketResource extends Resource
                     ->rowIndex(),
                 TextColumn::make('username')
                     ->label(__('names.username'))
+                    ->words(3)
+                    ->tooltip(fn (Ticket $record) => $record->user->username)
                     ->getStateUsing(fn (Ticket $record) => $record->user->username)
                     ->copyable(),
                 TextColumn::make('title')

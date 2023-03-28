@@ -9,7 +9,7 @@ return new class extends Migration
     public function up()
     {
         $tableNames = config('permission.table_names');
-        Schema::table($tableNames['permissions'], function (Blueprint $table) {
+        Schema::connection('mysql')->table($tableNames['permissions'], function (Blueprint $table) {
             $table->string('title')->nullable()->after('name');
         });
     }
@@ -17,7 +17,7 @@ return new class extends Migration
     public function down()
     {
         $tableNames = config('permission.table_names');
-        Schema::table($tableNames['permissions'], function (Blueprint $table) {
+        Schema::connection('mysql')->table($tableNames['permissions'], function (Blueprint $table) {
             $table->dropColumn('title');
         });
     }

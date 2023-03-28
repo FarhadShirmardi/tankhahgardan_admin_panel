@@ -110,4 +110,9 @@ class User extends Authenticatable
     {
         $this->userReport()->update(UserReportService::getSingleUser($this->id)->toArray());
     }
+
+    public function devices(): HasMany
+    {
+        return $this->hasMany(Device::class);
+    }
 }

@@ -11,6 +11,13 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('generate:user-report')
             ->dailyAt('05:17');
+        $schedule->command('generate:project-report')
+            ->dailyAt('05:27');
+
+        $schedule->command('generate:new-user-report')
+            ->everyFiveMinutes();
+        $schedule->command('generate:new-project-report')
+            ->everyFiveMinutes();
     }
 
     protected function commands()
