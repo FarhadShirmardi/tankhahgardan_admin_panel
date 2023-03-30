@@ -62,7 +62,7 @@ class User extends Authenticatable
     {
         $phoneNumber = reformatPhoneNumber($this->phone_number);
         return Attribute::make(
-            get: fn () => $this->username." ($phoneNumber)"
+            get: fn () => $this->username . " ($phoneNumber)"
         );
     }
 
@@ -114,5 +114,10 @@ class User extends Authenticatable
     public function devices(): HasMany
     {
         return $this->hasMany(Device::class);
+    }
+
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class);
     }
 }

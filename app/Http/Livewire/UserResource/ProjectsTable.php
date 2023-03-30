@@ -19,26 +19,15 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Livewire\Component;
 
-class ProjectsTable extends Component implements Tables\Contracts\HasTable
+class ProjectsTable extends UserDetailTable
 {
-    use Tables\Concerns\InteractsWithTable;
-
-    public User $user;
     public UserReport $userReport;
-
-    private bool $isLoaded = false;
 
     public function mount(User $user)
     {
         $this->user = $user;
         $this->userReport = UserReport::findOrFail($this->user->id);
-    }
-
-    public function loadData()
-    {
-        $this->isLoaded = true;
     }
 
     protected function getTableRecordUrlUsing(): ?Closure
@@ -97,16 +86,6 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
             ->getQuery();
     }
 
-    protected function getDefaultTableSortColumn(): ?string
-    {
-        return 'created_at';
-    }
-
-    protected function getDefaultTableSortDirection(): ?string
-    {
-        return 'desc';
-    }
-
     protected function isTablePaginationEnabled(): bool
     {
         return false;
@@ -123,16 +102,6 @@ class ProjectsTable extends Component implements Tables\Contracts\HasTable
                 ->multiple()
                 ->options(ProjectUserTypeEnum::columnValues()),
         ];
-    }
-
-    protected function getTableEmptyStateIcon(): ?string
-    {
-        return 'heroicon-o-download';
-    }
-
-    protected function getTableEmptyStateHeading(): ?string
-    {
-        return __('message.loading_data');
     }
 
     protected function getTableColumns(): array

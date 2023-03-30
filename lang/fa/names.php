@@ -52,6 +52,20 @@ return [
         'expired_premium' => 'اتمام اعتبار',
         'near_ending_premium' => 'نزدیک به پایان',
     ],
+    'title_plan' => [
+        'free' => 'رایگان',
+        'bronze' => 'برنزی',
+        'silver' => 'نقره‌ای',
+        'gold' => 'طلایی',
+        'special' => 'ویژه',
+    ],
+    'premium_duration' => [
+        'one_month' => 'یک ماهه',
+        'half_month' => '۱۵ روزه',
+        'one_week' => 'یک هفته',
+        'one_year' => 'یک ساله',
+        'special' => 'ویژه',
+    ],
     'user_activity_type' => [
         'one_week' => 'یک هفته',
         'two_week' => 'دو هفته',
@@ -116,4 +130,20 @@ return [
         'services' => 'خدماتی',
         'other' => 'سایر',
     ],
+
+    'platform' => 'پلتفرم',
+    'platforms' => [
+        'android' => 'اندروید',
+        'web' => 'وب',
+        'web-app' => 'وب‌اپ'
+    ],
+    'device model' => 'مدل',
+    'os version' => 'نسخه',
+    'app version' => 'نسخه اپ',
+    'device serial' => 'سریال دستگاه',
+    'start date' => 'تاریخ شروع',
+    'end date' => 'تاریخ پایان',
+    'plan type' => 'نوع طرح',
+    'plan' => 'طرح',
+    'create new plan' => 'ایجاد طرح',
 ];

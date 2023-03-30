@@ -69,40 +69,46 @@ class TicketResource extends Resource
             ]);
     }
 
+    public static function getTicketsTableColumns(bool $showUsername = true): array
+    {
+        return [
+            TextColumn::make(__('names.table.row index'))
+                ->rowIndex(),
+            TextColumn::make('username')
+                ->label(__('names.username'))
+                ->words(3)
+                ->hidden(!$showUsername)
+                ->tooltip(fn (Ticket $record) => $record->user->username)
+                ->getStateUsing(fn (Ticket $record) => $record->user->username)
+                ->copyable(),
+            TextColumn::make('title')
+                ->label(__('names.title'))
+                ->words(4)
+                ->tooltip(fn (Ticket $record) => $record->title),
+            TextColumn::make('lastTicketMessage.text')
+                ->label(__('names.last message'))
+                ->words(4)
+                ->tooltip(fn (Ticket $record) => $record->lastTicketMessage->text),
+            TextColumn::make('state')
+                ->label(__('names.state'))
+                ->getStateUsing(fn (Ticket $record) => $record->state->description()),
+            JalaliDateTimeColumn::make('lastTicketMessage.created_at')
+                ->label(__('names.last update'))
+                ->extraAttributes([
+                    'class' => 'ltr-col',
+                ])
+                ->sortable()
+                ->dateTime(),
+        ];
+    }
+
     /**
      * @throws Exception
      */
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
-                TextColumn::make(__('names.table.row index'))
-                    ->rowIndex(),
-                TextColumn::make('username')
-                    ->label(__('names.username'))
-                    ->words(3)
-                    ->tooltip(fn (Ticket $record) => $record->user->username)
-                    ->getStateUsing(fn (Ticket $record) => $record->user->username)
-                    ->copyable(),
-                TextColumn::make('title')
-                    ->label(__('names.title'))
-                    ->words(4)
-                    ->tooltip(fn (Ticket $record) => $record->title),
-                TextColumn::make('lastTicketMessage.text')
-                    ->label(__('names.last message'))
-                    ->words(4)
-                    ->tooltip(fn (Ticket $record) => $record->lastTicketMessage->text),
-                TextColumn::make('state')
-                    ->label(__('names.state'))
-                    ->getStateUsing(fn (Ticket $record) => $record->state->description()),
-                JalaliDateTimeColumn::make('lastTicketMessage.created_at')
-                    ->label(__('names.last update'))
-                    ->extraAttributes([
-                        'class' => 'ltr-col',
-                    ])
-                    ->sortable()
-                    ->dateTime(),
-            ])
+            ->columns(self::getTicketsTableColumns())
             ->filters(
                 [
                     SelectFilter::make('state')

@@ -2,8 +2,12 @@
 
 namespace App\Enums;
 
+use App\Traits\HasColumnValues;
+
 enum PremiumPlanEnum: int
 {
+    use HasColumnValues;
+
     case FREE = 1;
     case BRONZE = 2;
     case SILVER = 3;
@@ -23,15 +27,20 @@ enum PremiumPlanEnum: int
         };
     }
 
+    public function description(): string
+    {
+        return match ($this) {
+            self::FREE => __('names.title_plan.free'),
+            self::BRONZE => __('names.title_plan.bronze'),
+            self::SILVER => __('names.title_plan.silver'),
+            self::GOLD => __('names.title_plan.gold'),
+            self::SPECIAL => __('names.title_plan.special'),
+        };
+    }
+
     public function title(): string
     {
-        return 'طرح '.match ($this) {
-                self::FREE => __('names.title_plan.free'),
-                self::BRONZE => __('names.title_plan.bronze'),
-                self::SILVER => __('names.title_plan.silver'),
-                self::GOLD => __('names.title_plan.gold'),
-                self::SPECIAL => __('names.title_plan.special'),
-            };
+        return 'طرح ' . $this->description();
     }
 
     public function subTitle(): string

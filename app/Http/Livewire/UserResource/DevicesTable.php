@@ -2,42 +2,17 @@
 
 namespace App\Http\Livewire\UserResource;
 
-use App\Enums\ProjectUserTypeEnum;
-use App\Filament\Resources\ProjectResource;
-use App\Models\Image;
-use App\Models\Imprest;
-use App\Models\Payment;
-use App\Models\ProjectUser;
-use App\Models\Receive;
-use App\Models\User;
-use App\Models\UserReport;
-use Closure;
-use Exception;
+use App\Enums\PlatformEnum;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Livewire\Component;
+use stdClass;
 
-class DevicesTable extends Component implements Tables\Contracts\HasTable
+class DevicesTable extends UserDetailTable
 {
-    use Tables\Concerns\InteractsWithTable;
-
-    public User $user;
-
-    private bool $isLoaded = false;
-
-    public function mount(User $user)
-    {
-        $this->user = $user;
-    }
-
-    public function loadData()
-    {
-        $this->isLoaded = true;
-    }
+    public int $device_page = 1;
 
     protected function getTableQuery(): Builder|Relation
     {
@@ -46,48 +21,41 @@ class DevicesTable extends Component implements Tables\Contracts\HasTable
         }
 
         return $this->user->devices()
-            ->select([
-                'devices.id',
-                'devices.serial',
-                'devices.platform',
-                'devices.model',
-                'devices.app_version',
-                'devices.os_version',
-            ])
             ->orderByDesc('devices.created_at')
             ->getQuery();
     }
 
-    protected function getTableRecordsPerPage(): int
+    protected function getDefaultTableRecordsPerPageSelectOption(): int
     {
         return 5;
     }
 
-    protected function getDefaultTableSortColumn(): ?string
+    protected function getTablePaginationPageName(): string
     {
-        return 'created_at';
-    }
-
-    protected function getDefaultTableSortDirection(): ?string
-    {
-        return 'desc';
-    }
-
-    protected function getTableEmptyStateIcon(): ?string
-    {
-        return 'heroicon-o-download';
-    }
-
-    protected function getTableEmptyStateHeading(): ?string
-    {
-        return __('message.loading_data');
+        return 'device_page';
     }
 
     protected function getTableColumns(): array
     {
         return [
-            TextColumn::make(__('names.table.row index'))
-                ->rowIndex(),
+            TextColumn::make(__('names.table.row index'))->getStateUsing(
+                static function (stdClass $rowLoop, Tables\Contracts\HasTable $livewire): string {
+                    return (string)($rowLoop->iteration + ($rowLoop->count * ($livewire->device_page - 1)));
+                }
+            ),
+            Tables\Columns\BadgeColumn::make('platform')
+                ->label(__('names.platform'))
+                ->enum(PlatformEnum::columnValues())
+                ->color(static fn ($state) => PlatformEnum::from($state)->color()),
+            TextColumn::make('model')
+                ->label(__('names.device model')),
+            TextColumn::make('os_version')
+                ->label(__('names.os version')),
+            TextColumn::make('app_version')
+                ->label(__('names.app version')),
+            TextColumn::make('serial')
+                ->label(__('names.device serial'))
+                ->copyable()
         ];
     }
 

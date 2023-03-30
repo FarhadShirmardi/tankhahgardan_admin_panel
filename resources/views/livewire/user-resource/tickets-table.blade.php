@@ -1,7 +1,7 @@
 <div wire:init="loadData">
-    <x-filament::card @class(['animate-pulse' => !$this->isLoaded])>
+    <x-filament::card>
         <x-filament::card.heading>
-            {{ __('filament::pages/user.devices title') }}
+            {{ __('filament::pages/user.tickets title') }}
         </x-filament::card.heading>
         {{ $this->table }}
     </x-filament::card>
