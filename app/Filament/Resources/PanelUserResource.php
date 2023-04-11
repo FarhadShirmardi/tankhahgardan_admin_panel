@@ -22,6 +22,11 @@ class PanelUserResource extends Resource
 {
     protected static ?string $model = PanelUser::class;
 
+    protected static function getNavigationGroup(): ?string
+    {
+        return __('names.panel settings');
+    }
+
     public static function getModelLabel(): string
     {
         return __('filament::pages/panel-user.title');

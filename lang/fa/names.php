@@ -138,7 +138,8 @@ return [
         'web-app' => 'وب‌اپ'
     ],
     'device model' => 'مدل',
-    'os version' => 'نسخه',
+    'os version' => 'نسخه دستگاه',
+    'device created at' => 'تاریخ اولین استفاده',
     'app version' => 'نسخه اپ',
     'device serial' => 'سریال دستگاه',
     'start date' => 'تاریخ شروع',
@@ -146,4 +147,5 @@ return [
     'plan type' => 'نوع طرح',
     'plan' => 'طرح',
     'create new plan' => 'ایجاد طرح',
+    'panel settings' => 'تنظیمات پنل',
 ];

@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\UserResource;
 
 use App\Enums\PlatformEnum;
+use Ariaieboy\FilamentJalaliDatetime\JalaliDateTimeColumn;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Contracts\View\View;
@@ -53,9 +54,12 @@ class DevicesTable extends UserDetailTable
                 ->label(__('names.os version')),
             TextColumn::make('app_version')
                 ->label(__('names.app version')),
-            TextColumn::make('serial')
-                ->label(__('names.device serial'))
-                ->copyable()
+            JalaliDateTimeColumn::make('created_at')
+                ->label(__('names.device created at'))
+                ->extraAttributes([
+                    'class' => 'ltr-col',
+                ])
+                ->dateTime()
         ];
     }
 

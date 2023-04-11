@@ -22,6 +22,13 @@ class TicketResource extends Resource
 {
     protected static ?string $model = Ticket::class;
 
+    protected static function getNavigationBadge(): ?string
+    {
+        return Ticket::query()
+            ->whereIn('state', [TicketStateEnum::PENDING, TicketStateEnum::OPENED])
+            ->count();
+    }
+
     public static function getModelLabel(): string
     {
         return __('filament::pages/ticket.title');

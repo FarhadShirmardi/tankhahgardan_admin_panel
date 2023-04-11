@@ -72,7 +72,7 @@ class TicketMessagesRelationManager extends RelationManager
 
                 Tables\Actions\CreateAction::make()
                     ->label(__('names.response to ticket'))
-                    ->icon('go-reply-24')
+                    ->icon('lucide-reply')
                     ->url(function (RelationManager $livewire) {
                         return TicketResource::getUrl('messageCreate', ['record' => $livewire->ownerRecord->id]);
                     }),

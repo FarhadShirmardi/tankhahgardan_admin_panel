@@ -50,14 +50,14 @@ class UserStatusesTable extends UserDetailTable
                 ->extraAttributes([
                     'class' => 'ltr-col',
                 ])
-                ->date()
+                ->dateTime()
                 ->sortable(),
             JalaliDateTimeColumn::make('end_date')
                 ->label(__('names.end date'))
                 ->extraAttributes([
                     'class' => 'ltr-col',
                 ])
-                ->date()
+                ->dateTime()
                 ->sortable(),
         ];
     }
