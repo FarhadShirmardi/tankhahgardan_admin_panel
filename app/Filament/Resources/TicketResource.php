@@ -68,7 +68,7 @@ class TicketResource extends Resource
 
                                 Forms\Components\Select::make('state')
                                     ->label(__('names.state'))
-                                    ->options(self::getStateOptions()),
+                                    ->options(TicketStateEnum::columnValues()),
                             ])
                             ->columns(2)
                             ->columnSpan(['lg' => 2]),
@@ -121,7 +121,7 @@ class TicketResource extends Resource
                     SelectFilter::make('state')
                         ->label(__('names.state'))
                         ->multiple()
-                        ->options(self::getStateOptions())
+                        ->options(TicketStateEnum::columnValues())
                         ->default([
                             TicketStateEnum::PENDING->value,
                             TicketStateEnum::OPENED->value,
@@ -151,12 +151,5 @@ class TicketResource extends Resource
             'messageCreate' => Pages\CreateTicketMessage::route('/{record}/ticketMessage'),
             'messageEdit' => Pages\EditTicketMessage::route('/{record}/ticketMessage/{subRecord}')
         ];
-    }
-
-    private static function getStateOptions(): array
-    {
-        return collect(TicketStateEnum::cases())->mapWithKeys(function ($item) {
-            return [$item->value => $item->description()];
-        })->toArray();
     }
 }

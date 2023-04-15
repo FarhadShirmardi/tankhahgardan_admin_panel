@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    public function up()
+    public function up(): void
     {
         $tableNames = config('permission.table_names');
         if (!Schema::connection('mysql')->hasColumn($tableNames['permissions'], 'name')) {
@@ -15,7 +15,7 @@ return new class extends Migration {
         }
     }
 
-    public function down()
+    public function down(): void
     {
         $tableNames = config('permission.table_names');
         if (Schema::connection('mysql')->hasColumn($tableNames['permissions'], 'name')) {

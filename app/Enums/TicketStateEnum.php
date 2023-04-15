@@ -2,8 +2,11 @@
 
 namespace App\Enums;
 
+use App\Traits\HasColumnValues;
+
 enum TicketStateEnum: int
 {
+    use HasColumnValues;
     case CLOSED = 1;
     case OPENED = 2;
     case PENDING = 3;

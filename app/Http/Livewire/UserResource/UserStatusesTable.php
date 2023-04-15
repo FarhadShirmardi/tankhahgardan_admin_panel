@@ -2,15 +2,16 @@
 
 namespace App\Http\Livewire\UserResource;
 
-use App\Enums\ActivityTypeEnum;
-use App\Enums\PlatformEnum;
+use App\Data\EndPlanData;
+use App\Enums\EndPlanReturnTypeEnum;
 use App\Enums\PremiumDurationEnum;
-use App\Enums\PremiumPlanEnum;
-use App\Models\ProjectReport;
-use App\Models\UserReport;
 use App\Models\UserStatus;
+use App\Services\PremiumService;
 use Ariaieboy\FilamentJalaliDatetime\JalaliDateTimeColumn;
 use Closure;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Contracts\View\View;
@@ -26,8 +27,6 @@ class UserStatusesTable extends UserDetailTable
         }
 
         return $this->user->userStatuses()
-//            ->join('premium_plans','user_statuses.premium_plan_id', 'premium_plans.id')
-//            ->addSelect('premium_plans.type as plan_type')
             ->orderByDesc('user_statuses.end_date')
             ->getQuery();
     }
@@ -62,9 +61,50 @@ class UserStatusesTable extends UserDetailTable
         ];
     }
 
+    protected function getTableActions(): array
+    {
+        return [
+            Tables\Actions\Action::make('Cancel plan')
+                ->label(__('names.cancel plan'))
+                ->visible(fn (Tables\Actions\Action $action) => $action->getRecord()->start_date < now()->toDateTimeString() and $action->getRecord()->end_date > now()->toDateTimeString())
+                ->icon('lucide-x')
+                ->action(function (UserStatus $record, array $data) {
+                    PremiumService::endPlan($record, EndPlanData::from($data));
+
+                    Notification::make()
+                        ->success()
+                        ->title(__('message.plan ended successfully'))
+                        ->send();
+
+                    $this->emitSelf('$refresh');
+                })
+                ->modalHeading(__('names.cancel plan title'))
+                ->form([
+                    Select::make('type')
+                        ->label(__('names.return money type.title'))
+                        ->inlineLabel()
+                        ->required()
+                        ->options(EndPlanReturnTypeEnum::columnValues()),
+                    Textarea::make('text')
+                        ->label(__('names.description'))
+                        ->inlineLabel()
+                        ->required()
+                ])
+                ->modalContent(fn (UserStatus $record) => \view('filament.resources.user-status-resource.modals.end-plan', ['record' => $record]))
+        ];
+    }
+
     protected function getTableRecordClassesUsing(): ?Closure
     {
-        return fn (UserStatus $record) => ($record->start_date < now()->toDateTimeString() and $record->end_date > now()->toDateTimeString()) ? 'bg-success-500/10' : '';
+        return function (UserStatus $record) {
+            if ($record->start_date < now()->toDateTimeString() and $record->end_date > now()->toDateTimeString()) {
+                return 'bg-success-500/10';
+            }
+            if ($record->start_date > now()->toDateTimeString() and $record->end_date > now()->toDateTimeString()) {
+                return 'bg-gray-200';
+            }
+            return '';
+        };
     }
 
     protected function isTablePaginationEnabled(): bool

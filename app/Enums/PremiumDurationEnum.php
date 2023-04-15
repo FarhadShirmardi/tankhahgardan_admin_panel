@@ -2,7 +2,9 @@
 
 namespace App\Enums;
 
+use App\Data\PremiumDurationData;
 use App\Traits\HasColumnValues;
+use Illuminate\Support\Collection;
 
 enum PremiumDurationEnum: int
 {
@@ -35,5 +37,43 @@ enum PremiumDurationEnum: int
             self::HALF_MONTH, self::ONE_WEEK => 'secondary',
             self::SPECIAL => 'warning',
         };
+    }
+
+    public function getTitle(): string
+    {
+        return match ($this) {
+            self::ONE_WEEK => __('names.premium_duration.one_week'),
+            self::MONTH => __('names.premium_duration.one_month'),
+            self::YEAR => __('names.premium_duration.one_year'),
+            self::HALF_MONTH => __('names.premium_duration.half_month'),
+            self::SPECIAL => __('names.premium_duration.special'),
+        };
+    }
+
+    public static function getItem(int $id, int $basePrice = 0, float $yearlyDiscountPercent = 0): PremiumDurationData
+    {
+        $items = self::getList($basePrice, $yearlyDiscountPercent);
+
+        return $items->firstWhere('id', $id);
+    }
+
+    public static function getList(int $basePrice = 0, float $yearlyDiscountPercent = 0, bool $firstBuyFlag = true): Collection
+    {
+        $halfMonth = self::HALF_MONTH;
+        $oneMonth = self::MONTH;
+        $oneYear = self::YEAR;
+        $items = collect([
+            (new PremiumDurationData($halfMonth, true, 0, 0)),
+            (new PremiumDurationData($oneMonth, false, $basePrice, $basePrice)),
+            (new PremiumDurationData($oneYear, false, $basePrice * 12, roundDown(
+                $basePrice * 12 * (1 - $yearlyDiscountPercent),
+                0
+            ))),
+        ]);
+        if (! $firstBuyFlag) {
+            $items = $items->where('is_gift', false);
+        }
+
+        return $items->values();
     }
 }

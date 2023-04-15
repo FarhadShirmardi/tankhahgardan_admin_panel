@@ -105,6 +105,7 @@ class ProjectResource extends Resource
                         Forms\Components\Select::make('province_id')
                             ->label(__('names.province'))
                             ->searchable()
+                            ->reactive()
                             ->options(
                                 fn () => Province::query()->pluck('name', 'id')->toArray()
                             )

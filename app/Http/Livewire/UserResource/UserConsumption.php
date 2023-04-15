@@ -2,7 +2,7 @@
 
 namespace App\Http\Livewire\UserResource;
 
-use App\DataObjects\UserPremiumData;
+use App\Data\UserPremiumData;
 use App\Forms\Components\BooleanLabeledIcon;
 use App\Forms\Components\ProgressBar;
 use App\Models\User;

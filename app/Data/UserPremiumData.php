@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DataObjects;
+namespace App\Data;
 
 use App\Enums\PremiumPlanEnum;
 use App\Enums\ProjectUserStateEnum;

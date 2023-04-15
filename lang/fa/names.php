@@ -148,4 +148,12 @@ return [
     'plan' => 'طرح',
     'create new plan' => 'ایجاد طرح',
     'panel settings' => 'تنظیمات پنل',
+    'cancel plan' => 'اتمام',
+    'cancel plan title' => 'اتمام طرح',
+    'return money type' => [
+        'title' => 'نحوه برگشت پول',
+        'wallet' => 'کیف پول',
+        'card' => 'کارت به کارت'
+    ],
+    'description' => 'توضیحات',
 ];
