@@ -4,7 +4,7 @@ namespace App\Enums;
 
 use App\Traits\HasColumnValues;
 
-enum EndPlanReturnTypeEnum: int
+enum EndPremiumPlanReturnTypeEnum: int
 {
     use HasColumnValues;
     case WALLET = 1;

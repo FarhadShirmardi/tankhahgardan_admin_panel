@@ -49,6 +49,8 @@ class UserResource extends Resource
                     ->getStateUsing(fn (UserReport $record) => ActivityTypeEnum::from($record->user_type)->color()),
                 TextColumn::make('name')
                     ->label(__('names.full name'))
+                    ->tooltip(fn (UserReport $record) => $record->name)
+                    ->words(4)
                     ->copyable(),
                 TextColumn::make('phone_number')
                     ->label(__('names.phone number'))
@@ -158,6 +160,7 @@ class UserResource extends Resource
         return [
             'index' => Pages\ListUsers::route('/'),
             'view' => Pages\ViewUser::route('/{record}'),
+            'new-premium-plan' => Pages\NewPremiumPlan::route('/{record}/new-plan'),
         ];
     }
 }

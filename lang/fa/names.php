@@ -60,6 +60,7 @@ return [
         'special' => 'ویژه',
     ],
     'premium_duration' => [
+        'title' => 'مدت زمان طرح',
         'one_month' => 'یک ماهه',
         'half_month' => '۱۵ روزه',
         'one_week' => 'یک هفته',

@@ -19,7 +19,7 @@ class ViewUser extends Page
         return $this->user->formatted_username;
     }
 
-    public function mount(int $record)
+    public function mount(int $record): void
     {
         $this->user = User::findOrFail($record);
         $this->user->updateUserReport();

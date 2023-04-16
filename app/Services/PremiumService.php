@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Data\EndPlanData;
-use App\Enums\EndPlanReturnTypeEnum;
+use App\Data\EndPremiumPlanData;
+use App\Enums\EndPremiumPlanReturnTypeEnum;
 use App\Enums\LogType;
 use App\Enums\PremiumDurationEnum;
 use App\Models\PremiumPlan;
@@ -29,10 +29,10 @@ class PremiumService
         );
     }
 
-    public static function endPlan(UserStatus $userStatus, EndPlanData $data): void
+    public static function endPlan(UserStatus $userStatus, EndPremiumPlanData $data): void
     {
         $userStatus->update(['end_date' => now()->toDateTimeString()]);
-        if ($data->type == EndPlanReturnTypeEnum::WALLET) {
+        if ($data->type == EndPremiumPlanReturnTypeEnum::WALLET) {
             $user = User::findOrFail($userStatus->user_id);
             $user->wallet += self::getCancelPlanCreditAmount($userStatus);
             $user->save();

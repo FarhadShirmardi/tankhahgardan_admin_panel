@@ -2,8 +2,8 @@
 
 namespace App\Http\Livewire\UserResource;
 
-use App\Data\EndPlanData;
-use App\Enums\EndPlanReturnTypeEnum;
+use App\Data\EndPremiumPlanData;
+use App\Enums\EndPremiumPlanReturnTypeEnum;
 use App\Enums\PremiumDurationEnum;
 use App\Models\UserStatus;
 use App\Services\PremiumService;
@@ -69,7 +69,7 @@ class UserStatusesTable extends UserDetailTable
                 ->visible(fn (Tables\Actions\Action $action) => $action->getRecord()->start_date < now()->toDateTimeString() and $action->getRecord()->end_date > now()->toDateTimeString())
                 ->icon('lucide-x')
                 ->action(function (UserStatus $record, array $data) {
-                    PremiumService::endPlan($record, EndPlanData::from($data));
+                    PremiumService::endPlan($record, EndPremiumPlanData::from($data));
 
                     Notification::make()
                         ->success()
@@ -84,7 +84,7 @@ class UserStatusesTable extends UserDetailTable
                         ->label(__('names.return money type.title'))
                         ->inlineLabel()
                         ->required()
-                        ->options(EndPlanReturnTypeEnum::columnValues()),
+                        ->options(EndPremiumPlanReturnTypeEnum::columnValues()),
                     Textarea::make('text')
                         ->label(__('names.description'))
                         ->inlineLabel()

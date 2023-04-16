@@ -2,13 +2,13 @@
 
 namespace App\Data;
 
-use App\Enums\EndPlanReturnTypeEnum;
+use App\Enums\EndPremiumPlanReturnTypeEnum;
 use Spatie\LaravelData\Data;
 
-class EndPlanData extends Data
+class EndPremiumPlanData extends Data
 {
     public function __construct(
-        public EndPlanReturnTypeEnum $type,
+        public EndPremiumPlanReturnTypeEnum $type,
         public string $text
     )
     {

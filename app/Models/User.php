@@ -19,22 +19,12 @@ class User extends Authenticatable
 
     protected $connection = 'mysql';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
     ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
+    
     protected $hidden = [
         'password',
         'remember_token',
@@ -106,7 +96,7 @@ class User extends Authenticatable
         return $this->hasOne(UserReport::class, 'id');
     }
 
-    public function updateUserReport()
+    public function updateUserReport(): void
     {
         $this->userReport()->update(UserReportService::getSingleUser($this->id)->toArray());
     }

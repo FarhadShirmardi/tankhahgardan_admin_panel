@@ -29,6 +29,17 @@ enum PremiumDurationEnum: int
         };
     }
 
+    public function getDayCount(): int
+    {
+        return match ($this) {
+            self::ONE_WEEK => 7,
+            self::MONTH => 31,
+            self::YEAR => 365,
+            self::HALF_MONTH => 15,
+            self::SPECIAL => 0,
+        };
+    }
+
     public function color(): string
     {
         return match ($this) {

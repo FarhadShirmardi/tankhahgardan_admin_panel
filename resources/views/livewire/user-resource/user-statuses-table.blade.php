@@ -5,7 +5,12 @@
                 {{ __('filament::pages/user.user statuses title') }}
             </div>
             <div>
-                <x-filament::button color="success" icon="heroicon-o-plus">
+                <x-filament::button
+                    tag="a"
+                    color="success"
+                    icon="heroicon-o-plus"
+                    href="{{ \App\Filament\Resources\UserResource::getUrl('new-premium-plan', ['record' => $user]) }}"
+                >
                     {{ __('names.create new plan') }}
                 </x-filament::button>
             </div>

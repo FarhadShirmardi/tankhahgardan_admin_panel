@@ -34,6 +34,11 @@ class PremiumPlan extends Model
         return $query->where('is_active', true);
     }
 
+    public function scopeBuyable(Builder $query): Builder
+    {
+        return $query->where('is_buyable', true);
+    }
+
     public function scopeByType(Builder $query, PremiumPlanEnum $type): Builder
     {
         return $query->where('type', $type->value);
