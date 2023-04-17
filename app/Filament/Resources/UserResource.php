@@ -118,7 +118,7 @@ class UserResource extends Resource
                             return $query->when(
                                 $data['phone_number'],
                                 function (Builder $query, $phoneNumber) {
-                                    $phoneNumber = englishString($phoneNumber);
+                                    $phoneNumber = formatPhoneNumber(englishString($phoneNumber));
                                     return $query
                                         ->where('phone_number', 'like', "%$phoneNumber%");
                                 }

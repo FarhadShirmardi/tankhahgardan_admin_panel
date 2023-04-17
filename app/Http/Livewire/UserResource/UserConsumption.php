@@ -75,7 +75,6 @@ class UserConsumption extends Component implements Forms\Contracts\HasForms
                     Forms\Components\Placeholder::make('transaction_image_count')
                         ->label(__('names.consumption.transaction image count'))
                         ->inlineLabel()
-                        ->hidden($this->showOnlyBars)
                         ->content($this->getLimitClosure('transaction_image_count')),
                     ProgressBar::make('pdf_count')
                         ->label(__('names.consumption.pdf count'))

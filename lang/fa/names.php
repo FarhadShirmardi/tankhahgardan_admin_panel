@@ -157,4 +157,5 @@ return [
         'card' => 'کارت به کارت'
     ],
     'description' => 'توضیحات',
+    'infinity' => 'بی نهایت',
 ];

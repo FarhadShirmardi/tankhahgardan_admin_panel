@@ -9,7 +9,11 @@ use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use GuzzleHttp\Client;
+use Illuminate\Contracts\View\View;
 
+/**
+ * @property Forms\ComponentContainer|View|mixed|null $form
+ */
 class CreateTicketMessage extends Page
 {
     use Forms\Concerns\InteractsWithForms;

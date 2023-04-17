@@ -12,10 +12,8 @@ use Carbon\Carbon;
 use Closure;
 use Filament\Forms;
 use Filament\Resources\Pages\Page;
-use Filament\Tables\Columns\TextColumn;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
-use Yepsua\Filament\Forms\Components\RangeSlider;
 
 /**
  * @property Forms\ComponentContainer|View|mixed|null $form
@@ -26,10 +24,49 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
 
     public User $user;
     public Collection $plans;
+    public int $userCount;
 
     protected static string $resource = UserResource::class;
 
     protected static string $view = 'filament.resources.user-resource.pages.new-premium-plan';
+
+    /**
+     * @return string[]
+     */
+    public function getConsumptionKeys(): array
+    {
+        return [
+            'transaction_count',
+            'image_count',
+            'project_count',
+            'imprest_count',
+            'user_count',
+            'transaction_image_count'
+        ];
+    }
+
+    public function getConsumptionLimitInputText(string $field): Forms\Components\TextInput
+    {
+        return Forms\Components\TextInput::make("{$field}_count")
+            ->numeric()
+            ->reactive()
+            ->suffixAction(
+                fn (Closure $get, string $state) => ($get('premium_plan_id') != PremiumPlanEnum::SPECIAL->value or $state == PremiumPlanEnum::UNLIMITED or $field == 'transaction_image') ?
+                    null :
+                    Forms\Components\Actions\Action::make("{$field}_count_infinity")
+                        ->action(fn () => $this->form->fill([
+                            "{$field}_count" => PremiumPlanEnum::UNLIMITED
+                        ]))
+                        ->icon('lucide-infinity')
+                        ->label(__('names.infinity'))
+            )
+            ->required()
+            ->disabled(fn (Closure $get) => $get('premium_plan_id') != PremiumPlanEnum::SPECIAL->value)
+            ->minValue(1)
+            ->maxValue(fn () => $field == 'transaction_image' ? 50 : PremiumPlanEnum::UNLIMITED)
+            ->hint(fn (string $state): ?string => $state == PremiumPlanEnum::UNLIMITED ? __('names.unlimited') : null)
+            ->label(__("names.consumption.".str_replace('_', ' ', $field)." count"));
+    }
 
     protected function getTitle(): string
     {
@@ -73,16 +110,19 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
                     Forms\Components\Select::make('premium_plan_id')
                         ->label(__('names.plan'))
                         ->reactive()
-                        ->options([
-                            ...$this->getPlansSelectOptions(),
-                            null => __('names.title_plan.special')
-                        ]),
+                        ->required()
+                        ->options($this->getPlansSelectOptions()->put(PremiumPlanEnum::SPECIAL->value, __('names.title_plan.special')))
+                        ->afterStateUpdated(function (Closure $set, $state) {
+                            if ($state != PremiumPlanEnum::SPECIAL->value) {
+                                $this->form->fill([...$this->getPlanLimits($this->getConsumptionKeys(), PremiumPlanEnum::from($state))]);
+                            }
+                        }),
                 ]),
             Forms\Components\Grid::make(3)
                 ->schema([
-                    Forms\Components\TextInput::make('user_count')
-                        ->prefixIcon('lucide-infinity')
-                        ->label('تعداد کاربر')
+                    ...collect($this->getConsumptionKeys())
+                        ->map(fn ($key) => $this->getConsumptionLimitInputText(str_replace('_count', '', $key)))
+                        ->toArray(),
                 ]),
         ];
     }
@@ -106,16 +146,19 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
         $duration = PremiumDurationEnum::MONTH;
         $startDate = $this->getMinDate();
         $endDate = $this->getEndDate($startDate, $duration);
+
         $this->form->fill([
             'start_date' => $startDate,
             'end_date' => $endDate,
-            'duration_id' => $duration->value
+            'duration_id' => $duration->value,
+            ...$this->getPlanLimits($this->getConsumptionKeys(), PremiumPlanEnum::FREE)
+
         ]);
     }
 
     private function getPlansSelectOptions(): Collection
     {
-        return $this->getPlans()->mapWithKeys(fn (PremiumPlan $plan) => [$plan->id => $plan->type->title()]);
+        return $this->getPlans()->mapWithKeys(fn (PremiumPlan $plan) => [(string) $plan->id => $plan->type->title()]);
     }
 
     private function getPlans(): Collection
@@ -124,5 +167,17 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
             ->active()
             ->buyable()
             ->get();
+    }
+
+    public function save(): void
+    {
+        dd($this->form->getState());
+    }
+
+    private function getPlanLimits(array $keys, PremiumPlanEnum $planEnum): array
+    {
+        $limits = $planEnum->limits();
+
+        return collect($keys)->mapWithKeys(fn ($key) => [$key => data_get($limits, $key.'_limit', 1)])->toArray();
     }
 }
