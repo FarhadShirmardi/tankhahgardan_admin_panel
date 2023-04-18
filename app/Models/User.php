@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ProjectUserTypeEnum;
+use App\Enums\UserStatusTypeEnum;
 use App\Services\UserReportService;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -109,5 +110,20 @@ class User extends Authenticatable
     public function tickets(): HasMany
     {
         return $this->hasMany(Ticket::class);
+    }
+
+    /** @return Attribute<int, never> */
+    protected function walletAmount(): Attribute
+    {
+        $usedWalletQuery = (int) (UserStatusLog::query()
+            ->without('transaction')
+            ->where('status', UserStatusTypeEnum::SUCCEED)
+            ->where('user_id', $this->id)
+            ->selectRaw('sum(wallet_amount) as wallet')
+            ->value('wallet'));
+
+        return Attribute::make(
+            get: fn () => $this->wallet - $this->reserve_wallet - $usedWalletQuery
+        );
     }
 }

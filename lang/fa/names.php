@@ -158,4 +158,12 @@ return [
     ],
     'description' => 'توضیحات',
     'infinity' => 'بی نهایت',
+    'rial' => 'ریال',
+    'total amount' => 'مبلغ کل',
+    'added value amount' => 'مالیات بر ارزش افزوده',
+    'promo code' => 'کد تخفیف',
+    'discount' => 'تخفیف',
+    'percent' => 'درصد',
+    'up_to' => 'تا',
+    'toman' => 'تومان',
 ];

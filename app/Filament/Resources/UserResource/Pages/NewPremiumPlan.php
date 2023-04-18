@@ -2,12 +2,16 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
+use App\Constants\PremiumConstants;
 use App\Enums\PremiumDurationEnum;
 use App\Enums\PremiumPlanEnum;
 use App\Filament\Components\JalaliDateTimePicker;
 use App\Filament\Resources\UserResource;
+use App\Helpers\UtilHelpers;
 use App\Models\PremiumPlan;
+use App\Models\PromoCode;
 use App\Models\User;
+use App\Services\PromoCodeService;
 use Carbon\Carbon;
 use Closure;
 use Filament\Forms;
@@ -24,11 +28,36 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
 
     public User $user;
     public Collection $plans;
+    public Collection $promoCodes;
+    public int $walletAmount = 0;
     public int $userCount;
 
     protected static string $resource = UserResource::class;
 
     protected static string $view = 'filament.resources.user-resource.pages.new-premium-plan';
+
+    /**
+     * @param Closure $get
+     * @return int
+     */
+    function getAddedValueAmount(Closure $get): int
+    {
+        $totalAmount = $get('total_amount');
+        if (!$totalAmount) {
+            return 0;
+        }
+        $discountAmount = $this->getDiscountAmount($get, $totalAmount);
+        $payableAmount = UtilHelpers::getPayableAmount(totalAmount: $totalAmount, discountAmount: $discountAmount);
+        $walletAmount = $get('use_wallet') ? min($this->walletAmount, $payableAmount) : 0;
+        return (int) round(($payableAmount - $walletAmount) * PremiumConstants::ADDED_VALUE_PERCENT);
+    }
+
+    public function getDiscountAmount(Closure $get, $totalAmount): int|float
+    {
+        return $get('promo_code_id') ?
+            PromoCodeService::getDiscountAmount($totalAmount, $this->promoCodes->firstWhere('id', $get('promo_code_id'))) :
+            0;
+    }
 
     /**
      * @return string[]
@@ -124,6 +153,43 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
                         ->map(fn ($key) => $this->getConsumptionLimitInputText(str_replace('_count', '', $key)))
                         ->toArray(),
                 ]),
+            Forms\Components\Grid::make(3)
+                ->schema([
+                    Forms\Components\TextInput::make('total_amount')
+                        ->label(__('names.total amount'))
+                        ->numeric()
+                        ->hint(__('names.rial'))
+                        ->required()
+                        ->reactive()
+                        ->mask(fn (Forms\Components\TextInput\Mask $mask) => $mask->numeric()
+                            ->integer()
+                            ->thousandsSeparator()
+                        ),
+                    Forms\Components\Select::make('promo_code_id')
+                        ->label(__('names.promo code'))
+                        ->options($this->getPromoCodeOptions()),
+                    Forms\Components\Toggle::make('use_wallet')
+                        ->inline(false)
+                        ->hint(function (Closure $get, bool $state) {
+                            if (!$state) {
+                                return null;
+                            }
+                            $totalAmount = $get('total_amount');
+                            if (!$totalAmount) {
+                                return 'مبلغ کل نباید خالی باشد.';
+                            }
+                            $discountAmount = $this->getDiscountAmount($get, $totalAmount);
+                            $payableAmount = UtilHelpers::getPayableAmount(totalAmount: $totalAmount, discountAmount: $discountAmount);
+                            return 'کسر '.formatPrice(min($this->walletAmount, $payableAmount)).' ریال';
+                        })
+                        ->reactive()
+                        ->label(fn () => "استفاده از کیف پول (".formatPrice($this->walletAmount)." ریال)"),
+                    Forms\Components\Placeholder::make('added_value_amount')
+                        ->label(PremiumConstants::ADDED_VALUE_PERCENT * 100 .' '.__('names.percent').__('names.added value amount'))
+                        ->inlineLabel()
+                        ->reactive()
+                        ->content(fn (Closure $get) => formatPrice($this->getAddedValueAmount($get)).' ریال'),
+                ]),
         ];
     }
 
@@ -143,6 +209,7 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
     public function mount(int $record): void
     {
         $this->user = User::findOrFail($record);
+        $this->walletAmount = $this->user->wallet_amount;
         $duration = PremiumDurationEnum::MONTH;
         $startDate = $this->getMinDate();
         $endDate = $this->getEndDate($startDate, $duration);
@@ -179,5 +246,28 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
         $limits = $planEnum->limits();
 
         return collect($keys)->mapWithKeys(fn ($key) => [$key => data_get($limits, $key.'_limit', 1)])->toArray();
+    }
+
+    private function getPromoCodes()
+    {
+        return $this->promoCodes ?? PromoCodeService::promoCodesQuery($this->user)->get();
+    }
+
+    private function getPromoCodeOptions()
+    {
+        return $this->getPromoCodes()->mapWithKeys(fn (PromoCode $code) => [$code->id => $this->getPromoCodeText($code)]);
+    }
+
+    private function getPromoCodeText(PromoCode $promoCode): string
+    {
+        $text = $promoCode->text;
+        if ($promoCode->discount_percent > 0) {
+            $text .= " - ".$promoCode->discount_percent." ".__('names.percent')." ".__('names.discount');
+        }
+        if ($promoCode->max_discount > 0) {
+            $text .= " ".__('names.up_to')." ".formatPrice($promoCode->max_discount / 10)." ".__('names.toman');
+        }
+        $text .= " ($promoCode->code)";
+        return $text;
     }
 }
