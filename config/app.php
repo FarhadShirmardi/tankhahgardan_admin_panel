@@ -217,4 +217,10 @@ return [
         'panel',
         env('TANKHAH_TOKEN', 'TOKEN'),
     ]),
+
+    'app_direct_url' => implode('/', [
+        env('TANKHAH_DOCKER_URL', 'https://tankhahgardan.com'),
+        'panel',
+        env('TANKHAH_TOKEN', 'TOKEN'),
+    ]),
 ];

@@ -3,6 +3,8 @@
 namespace App\Http\Livewire\UserResource;
 
 use App\Filament\Resources\TicketResource;
+use App\Models\Ticket;
+use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -35,6 +37,11 @@ class TicketsTable extends UserDetailTable
     protected function getTableColumns(): array
     {
         return TicketResource::getTicketsTableColumns(showUsername: false);
+    }
+
+    protected function getTableRecordUrlUsing(): ?Closure
+    {
+        return fn (Ticket $record): string => TicketResource::getUrl('edit', ['record' => $record]);
     }
 
     public function render(): View

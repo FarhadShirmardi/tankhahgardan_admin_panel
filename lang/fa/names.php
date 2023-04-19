@@ -166,4 +166,8 @@ return [
     'percent' => 'درصد',
     'up_to' => 'تا',
     'toman' => 'تومان',
+    'final invoice' => 'فاکتور نهایی',
+    'undefined plan' => 'طرح نامشخص',
+    'use wallet' => 'استفاده از اعتبار حساب',
+    'payable amount' => 'مبلغ قابل پرداخت',
 ];

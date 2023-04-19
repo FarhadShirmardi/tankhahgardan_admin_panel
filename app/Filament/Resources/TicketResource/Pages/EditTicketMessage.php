@@ -107,7 +107,7 @@ class EditTicketMessage extends Page implements Forms\Contracts\HasForms
         collect($this->image)->map(function ($item) {
             $http = new Client();
             $http->post(
-                config('app.app_url')."/ticketMessage/{$this->ticketMessage->id}/images",
+                config('app.app_direct_url')."/ticketMessage/{$this->ticketMessage->id}/images",
                 [
                     'headers' => [
                         'Accept' => 'application/json',

@@ -2,17 +2,20 @@
     {{ $this->form }}
 
     @if($this->oldImages->count() != 0)
-        <x-filament-support::grid :default=3 class="gap-x-2 gap-y-4">
+        <x-filament-support::grid :default=8 class="gap-x-2 gap-y-4">
             @foreach($this->oldImages as $oldImage)
-                <x-filament-support::grid.column x-data="{hideDelete: {{$oldImage['is_deleted'] ? 1 : 0}}}" x-show="!hideDelete">
+                <x-filament-support::grid.column x-data="{hideDelete: {{$oldImage['is_deleted'] ? 1 : 0}}}"
+                                                 x-show="!hideDelete">
                     <div class="relative">
-                        <img class="w-full" src="{{ $oldImage['path'] }}" alt="image"/>
+                        <a href="{{ $oldImage['path'] }}" target="_blank">
+                            <img class="w-full" src="{{ $oldImage['path'] }}" alt="image" />
+                        </a>
                         <div class="absolute bottom-0 left-0 p-2">
                             <x-forms::icon-button
-                                wire:click="deleteImage({{ $oldImage['id'] }})"
-                                @click="hideDelete = 1;"
-                                class="bg-white hover:bg-gray-100 text-red-500"
-                                icon="heroicon-o-trash"
+                                    wire:click="deleteImage({{ $oldImage['id'] }})"
+                                    @click="hideDelete = 1;"
+                                    class="bg-white hover:bg-gray-100 text-red-500"
+                                    icon="heroicon-o-trash"
                             />
                         </div>
                     </div>

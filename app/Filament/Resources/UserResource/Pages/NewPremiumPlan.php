@@ -36,26 +36,38 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
 
     protected static string $view = 'filament.resources.user-resource.pages.new-premium-plan';
 
-    /**
-     * @param Closure $get
-     * @return int
-     */
-    function getAddedValueAmount(Closure $get): int
+    public function getAddedValueAmount(): int
     {
-        $totalAmount = $get('total_amount');
+        $totalAmount = $this->form->getComponent('total_amount')->getState();
         if (!$totalAmount) {
             return 0;
         }
-        $discountAmount = $this->getDiscountAmount($get, $totalAmount);
+        $discountAmount = $this->getDiscountAmount($totalAmount);
         $payableAmount = UtilHelpers::getPayableAmount(totalAmount: $totalAmount, discountAmount: $discountAmount);
-        $walletAmount = $get('use_wallet') ? min($this->walletAmount, $payableAmount) : 0;
+        $walletAmount = $this->form->getComponent('use_wallet')->getState() ? min($this->walletAmount, $payableAmount) : 0;
         return (int) round(($payableAmount - $walletAmount) * PremiumConstants::ADDED_VALUE_PERCENT);
     }
 
-    public function getDiscountAmount(Closure $get, $totalAmount): int|float
+    public function getUseWalletAmount(): int
     {
-        return $get('promo_code_id') ?
-            PromoCodeService::getDiscountAmount($totalAmount, $this->promoCodes->firstWhere('id', $get('promo_code_id'))) :
+        $useWallet = $this->form->getComponent('use_wallet')->getState();
+        if (!$useWallet) {
+            return 0;
+        }
+        $totalAmount = $this->form->getComponent('total_amount')->getState();
+        if (!$totalAmount) {
+            return 0;
+        }
+        $discountAmount = $this->getDiscountAmount($totalAmount);
+        $payableAmount = UtilHelpers::getPayableAmount(totalAmount: $totalAmount, discountAmount: $discountAmount);
+        return min($this->walletAmount, $payableAmount);
+    }
+
+    public function getDiscountAmount($totalAmount): int|float
+    {
+        $promoCodeId = $this->form->getComponent('promo_code_id')->getState();
+        return $promoCodeId ?
+            PromoCodeService::getDiscountAmount($totalAmount, $this->getPromoCodes()->firstWhere('id', $promoCodeId)) :
             0;
     }
 
@@ -141,9 +153,12 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
                         ->reactive()
                         ->required()
                         ->options($this->getPlansSelectOptions()->put(PremiumPlanEnum::SPECIAL->value, __('names.title_plan.special')))
-                        ->afterStateUpdated(function (Closure $set, $state) {
+                        ->afterStateUpdated(function (Closure $set, $state, Closure $get) {
                             if ($state != PremiumPlanEnum::SPECIAL->value) {
-                                $this->form->fill([...$this->getPlanLimits($this->getConsumptionKeys(), PremiumPlanEnum::from($state))]);
+                                /** @var PremiumPlan $plan */
+                                $plan = $this->getPlans()->firstWhere('id', $state);
+                                $durationPrice = PremiumDurationEnum::getItem($get('duration_id'), $plan->price, $plan->yearly_discount);
+                                $this->form->fill([...$this->getPlanLimits($this->getConsumptionKeys(), $plan->limits), 'total_amount' => $durationPrice->price]);
                             }
                         }),
                 ]),
@@ -160,35 +175,15 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
                         ->numeric()
                         ->hint(__('names.rial'))
                         ->required()
-                        ->reactive()
-                        ->mask(fn (Forms\Components\TextInput\Mask $mask) => $mask->numeric()
-                            ->integer()
-                            ->thousandsSeparator()
-                        ),
+                        ->reactive(),
                     Forms\Components\Select::make('promo_code_id')
                         ->label(__('names.promo code'))
+                        ->reactive()
                         ->options($this->getPromoCodeOptions()),
                     Forms\Components\Toggle::make('use_wallet')
                         ->inline(false)
-                        ->hint(function (Closure $get, bool $state) {
-                            if (!$state) {
-                                return null;
-                            }
-                            $totalAmount = $get('total_amount');
-                            if (!$totalAmount) {
-                                return 'مبلغ کل نباید خالی باشد.';
-                            }
-                            $discountAmount = $this->getDiscountAmount($get, $totalAmount);
-                            $payableAmount = UtilHelpers::getPayableAmount(totalAmount: $totalAmount, discountAmount: $discountAmount);
-                            return 'کسر '.formatPrice(min($this->walletAmount, $payableAmount)).' ریال';
-                        })
                         ->reactive()
                         ->label(fn () => "استفاده از کیف پول (".formatPrice($this->walletAmount)." ریال)"),
-                    Forms\Components\Placeholder::make('added_value_amount')
-                        ->label(PremiumConstants::ADDED_VALUE_PERCENT * 100 .' '.__('names.percent').__('names.added value amount'))
-                        ->inlineLabel()
-                        ->reactive()
-                        ->content(fn (Closure $get) => formatPrice($this->getAddedValueAmount($get)).' ریال'),
                 ]),
         ];
     }
@@ -218,7 +213,7 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
             'start_date' => $startDate,
             'end_date' => $endDate,
             'duration_id' => $duration->value,
-            ...$this->getPlanLimits($this->getConsumptionKeys(), PremiumPlanEnum::FREE)
+            ...$this->getPlanLimits($this->getConsumptionKeys(), PremiumPlanEnum::FREE->limits())
 
         ]);
     }
@@ -230,10 +225,11 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
 
     private function getPlans(): Collection
     {
-        return $this->plans ?? PremiumPlan::query()
+        $this->plans = $this->plans ?? PremiumPlan::query()
             ->active()
             ->buyable()
             ->get();
+        return $this->plans;
     }
 
     public function save(): void
@@ -241,19 +237,18 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
         dd($this->form->getState());
     }
 
-    private function getPlanLimits(array $keys, PremiumPlanEnum $planEnum): array
+    private function getPlanLimits(array $keys, array $limits): array
     {
-        $limits = $planEnum->limits();
-
         return collect($keys)->mapWithKeys(fn ($key) => [$key => data_get($limits, $key.'_limit', 1)])->toArray();
     }
 
-    private function getPromoCodes()
+    private function getPromoCodes(): Collection
     {
-        return $this->promoCodes ?? PromoCodeService::promoCodesQuery($this->user)->get();
+        $this->promoCodes = $this->promoCodes ?? PromoCodeService::promoCodesQuery($this->user)->get();
+        return $this->promoCodes;
     }
 
-    private function getPromoCodeOptions()
+    private function getPromoCodeOptions(): Collection
     {
         return $this->getPromoCodes()->mapWithKeys(fn (PromoCode $code) => [$code->id => $this->getPromoCodeText($code)]);
     }
@@ -269,5 +264,18 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
         }
         $text .= " ($promoCode->code)";
         return $text;
+    }
+
+    public function getPlanText(): string
+    {
+        /** @var PremiumPlan $plan */
+        $planId = $this->form->getComponent('premium_plan_id')->getState();
+        $durationId = $this->form->getComponent('duration_id')->getState();
+        $duration = PremiumDurationEnum::from($durationId);
+        if (!$planId or !$durationId) {
+            return __('names.undefined plan');
+        }
+
+        return PremiumPlanEnum::from($planId)->title() . ' - ' . $duration->getTitle();
     }
 }

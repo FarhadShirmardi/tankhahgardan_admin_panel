@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TicketResource\Pages;
 
+use App\Enums\TicketStateEnum;
 use App\Filament\Resources\TicketResource;
 use App\Models\Ticket;
 use App\Models\TicketMessage;
@@ -72,11 +73,12 @@ class CreateTicketMessage extends Page
             ...$this->form->getState(),
             'panel_user_id' => auth()->id(),
         ]);
+        $this->ticket->update(['state' => TicketStateEnum::ANSWERED]);
 
         collect($this->image)->map(function ($item) use ($ticketMessage) {
             $http = new Client();
             $http->post(
-                config('app.app_url')."/ticketMessage/$ticketMessage->id/images",
+                config('app.app_direct_url')."/ticketMessage/$ticketMessage->id/images",
                 [
                     'headers' => [
                         'Accept' => 'application/json',
