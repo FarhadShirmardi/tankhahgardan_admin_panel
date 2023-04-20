@@ -5,9 +5,12 @@ namespace App\Filament\Resources\UserResource\Pages;
 use App\Constants\PremiumConstants;
 use App\Enums\PremiumDurationEnum;
 use App\Enums\PremiumPlanEnum;
+use App\Enums\PurchaseTypeEnum;
+use App\Enums\UserStatusTypeEnum;
 use App\Filament\Components\JalaliDateTimePicker;
 use App\Filament\Resources\UserResource;
 use App\Helpers\UtilHelpers;
+use App\Models\Invoice;
 use App\Models\PremiumPlan;
 use App\Models\PromoCode;
 use App\Models\User;
@@ -15,9 +18,13 @@ use App\Services\PromoCodeService;
 use Carbon\Carbon;
 use Closure;
 use Filament\Forms;
+use Filament\Forms\Components\TextInput\Mask;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Laravel\Octane\Exceptions\DdException;
 
 /**
  * @property Forms\ComponentContainer|View|mixed|null $form
@@ -92,7 +99,7 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
             ->numeric()
             ->reactive()
             ->suffixAction(
-                fn (Closure $get, string $state) => ($get('premium_plan_id') != PremiumPlanEnum::SPECIAL->value or $state == PremiumPlanEnum::UNLIMITED or $field == 'transaction_image') ?
+                fn (Closure $get, string $state) => ($get('premium_plan_id') != -1 or $state == PremiumPlanEnum::UNLIMITED or $field == 'transaction_image') ?
                     null :
                     Forms\Components\Actions\Action::make("{$field}_count_infinity")
                         ->action(fn () => $this->form->fill([
@@ -102,7 +109,7 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
                         ->label(__('names.infinity'))
             )
             ->required()
-            ->disabled(fn (Closure $get) => $get('premium_plan_id') != PremiumPlanEnum::SPECIAL->value)
+            ->disabled(fn (Closure $get) => $get('premium_plan_id') != -1)
             ->minValue(1)
             ->maxValue(fn () => $field == 'transaction_image' ? 50 : PremiumPlanEnum::UNLIMITED)
             ->hint(fn (string $state): ?string => $state == PremiumPlanEnum::UNLIMITED ? __('names.unlimited') : null)
@@ -152,9 +159,9 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
                         ->label(__('names.plan'))
                         ->reactive()
                         ->required()
-                        ->options($this->getPlansSelectOptions()->put(PremiumPlanEnum::SPECIAL->value, __('names.title_plan.special')))
+                        ->options($this->getPlansSelectOptions()->put(-1, __('names.title_plan.special')))
                         ->afterStateUpdated(function (Closure $set, $state, Closure $get) {
-                            if ($state != PremiumPlanEnum::SPECIAL->value) {
+                            if ($state != -1) {
                                 /** @var PremiumPlan $plan */
                                 $plan = $this->getPlans()->firstWhere('id', $state);
                                 $durationPrice = PremiumDurationEnum::getItem($get('duration_id'), $plan->price, $plan->yearly_discount);
@@ -172,9 +179,10 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
                 ->schema([
                     Forms\Components\TextInput::make('total_amount')
                         ->label(__('names.total amount'))
-                        ->numeric()
-                        ->hint(__('names.rial'))
+                        ->hint(fn (Closure $get) => $get('total_amount') ? convertNumberToText($get('total_amount')).' '.__('names.rial') : null)
+                        ->disabled(fn (Closure $get) => $get('premium_plan_id') != -1)
                         ->required()
+                        ->numeric()
                         ->reactive(),
                     Forms\Components\Select::make('promo_code_id')
                         ->label(__('names.promo code'))
@@ -232,9 +240,48 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
         return $this->plans;
     }
 
+    /**
+     * @throws \Throwable
+     * @throws DdException
+     */
     public function save(): void
     {
-        dd($this->form->getState());
+        DB::transaction(function () {
+            $data = $this->form->getState();
+            $totalAmount = $data['total_amount'];
+            if ($data['premium_plan_id'] == -1) {
+                $plan = PremiumPlan::query()->create([
+                    'type' => PremiumPlanEnum::SPECIAL,
+                    'price' => $totalAmount,
+                    'limits' => array_merge(PremiumPlanEnum::GOLD->limits(), $data),
+                    'is_buyable' => false,
+                    'features' => [],
+                    'is_active' => false,
+                    'yearly_discount' => 0
+                ]);
+            } else {
+                $plan = $this->getPlans()->firstWhere('id', $data['premium_plan_id']);
+            }
+            $invoice = $this->user->invoices()->create([
+                'premium_plan_id' => $plan->id,
+                'start_date' => $data['start_date'],
+                'end_date' => $data['end_date'],
+                'type' => PurchaseTypeEnum::NEW,
+                'total_amount' => $totalAmount,
+                'added_value_amount' => $this->getAddedValueAmount(),
+                'discount_amount' => $this->getDiscountAmount($totalAmount),
+                'wallet_amount' => $this->getUseWalletAmount(),
+                'duration_id' => $data['duration_id'],
+                'status' => UserStatusTypeEnum::PENDING,
+            ]);
+        });
+
+        Notification::make()
+            ->success()
+            ->title(__('filament::resources/pages/create-record.messages.created'))
+            ->send();
+
+        $this->redirect(UserResource::getUrl('view', ['record' => $this->user]));
     }
 
     private function getPlanLimits(array $keys, array $limits): array
@@ -270,12 +317,13 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
     {
         /** @var PremiumPlan $plan */
         $planId = $this->form->getComponent('premium_plan_id')->getState();
+        $plan = $this->getPlans()->firstWhere('id', $planId);
         $durationId = $this->form->getComponent('duration_id')->getState();
         $duration = PremiumDurationEnum::from($durationId);
         if (!$planId or !$durationId) {
             return __('names.undefined plan');
         }
 
-        return PremiumPlanEnum::from($planId)->title() . ' - ' . $duration->getTitle();
+        return ($plan ? $plan->type->title() : PremiumPlanEnum::SPECIAL->title()).' - '.$duration->getTitle();
     }
 }

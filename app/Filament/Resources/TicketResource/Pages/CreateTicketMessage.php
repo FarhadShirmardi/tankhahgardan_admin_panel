@@ -96,7 +96,7 @@ class CreateTicketMessage extends Page
 
         Notification::make()
             ->success()
-            ->title(__('filament::resources/pages/create-record.messages.created'))
+            ->title(__('filament::pages/ticket-message.ticket message created successfully'))
             ->send();
 
         $this->redirect(TicketResource::getUrl('edit', ['record' => $this->ticket->id]));

@@ -77,6 +77,10 @@ class User extends Authenticatable
         return $this->projects()->wherePivot('user_type', ProjectUserTypeEnum::OWNER);
     }
 
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
     public function userStatuses(): HasMany
     {
         return $this->hasMany(UserStatus::class)->latest('end_date');
