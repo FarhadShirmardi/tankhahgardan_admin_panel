@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Services\PromoCodeService;
 use Carbon\Carbon;
 use Closure;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
@@ -215,6 +216,7 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
 
     public function mount(int $record): void
     {
+        abort_unless(Filament::auth()->user()->can('viewAny', PremiumPlan::class), 403);
         $this->user = User::findOrFail($record);
         $this->walletAmount = $this->user->wallet_amount;
         $duration = PremiumDurationEnum::MONTH;
