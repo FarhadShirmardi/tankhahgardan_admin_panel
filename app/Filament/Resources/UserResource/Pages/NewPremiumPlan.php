@@ -10,7 +10,6 @@ use App\Enums\UserStatusTypeEnum;
 use App\Filament\Components\JalaliDateTimePicker;
 use App\Filament\Resources\UserResource;
 use App\Helpers\UtilHelpers;
-use App\Models\Invoice;
 use App\Models\PremiumPlan;
 use App\Models\PromoCode;
 use App\Models\User;
@@ -18,7 +17,6 @@ use App\Services\PromoCodeService;
 use Carbon\Carbon;
 use Closure;
 use Filament\Forms;
-use Filament\Forms\Components\TextInput\Mask;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Contracts\View\View;
@@ -68,6 +66,12 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
         $discountAmount = $this->getDiscountAmount($totalAmount);
         $payableAmount = UtilHelpers::getPayableAmount(totalAmount: $totalAmount, discountAmount: $discountAmount);
         return min($this->walletAmount, $payableAmount);
+    }
+
+    public function getPromoCode(): ?PromoCode
+    {
+        $promoCodeId = $this->form->getComponent('promo_code_id')->getState();
+        return $promoCodeId ? $this->getPromoCodes()->firstWhere('id', $promoCodeId) : null;
     }
 
     public function getDiscountAmount($totalAmount): int|float
@@ -262,6 +266,7 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
             } else {
                 $plan = $this->getPlans()->firstWhere('id', $data['premium_plan_id']);
             }
+            $promoCode = $this->getPromoCode();
             $invoice = $this->user->invoices()->create([
                 'premium_plan_id' => $plan->id,
                 'start_date' => $data['start_date'],
@@ -271,6 +276,8 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
                 'added_value_amount' => $this->getAddedValueAmount(),
                 'discount_amount' => $this->getDiscountAmount($totalAmount),
                 'wallet_amount' => $this->getUseWalletAmount(),
+                'campaign_id' => $promoCode?->campaign_id,
+                'promo_code_id' => $promoCode?->id,
                 'duration_id' => $data['duration_id'],
                 'status' => UserStatusTypeEnum::PENDING,
             ]);

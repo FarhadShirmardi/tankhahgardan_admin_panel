@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TicketResource\RelationManagers;
 
+use App\Filament\Resources\ProjectResource;
 use App\Filament\Resources\TicketResource;
 use App\Models\TicketMessage;
 use Ariaieboy\FilamentJalaliDatetime\JalaliDateTimeColumn;
@@ -48,15 +49,16 @@ class TicketMessagesRelationManager extends RelationManager
             ->columns([
                 TextColumn::make(__('names.table.row index'))
                     ->rowIndex(),
-
                 Tables\Columns\TextColumn::make('user_text')
                     ->label('متن کاربر')
                     ->getStateUsing(fn (TicketMessage $record) => ($record->panel_user_id == null ? $record->text : ' - ')),
-
                 Tables\Columns\TextColumn::make('panel_text')
                     ->label('متن پشتیبان')
                     ->getStateUsing(fn (TicketMessage $record) => $record->panel_user_id != null ? $record->text : ' - '),
-
+                Tables\Columns\TextColumn::make('panel_text')
+                    ->label('پروژه')
+                    ->url(fn (TicketMessage $record) =>  $record->project_user_id != null ? ProjectResource::getUrl('view', ['record' => $record->getProjectUser()?->project_id]) : null)
+                    ->getStateUsing(fn (TicketMessage $record) => $record->project_user_id != null ? $record->getProjectUser()?->getProjectTeamText() : ' - '),
                 JalaliDateTimeColumn::make('created_at')
                     ->label('تاریخ و ساعت')
                     ->extraAttributes([
@@ -69,7 +71,6 @@ class TicketMessagesRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-
                 Tables\Actions\CreateAction::make()
                     ->label(__('names.response to ticket'))
                     ->icon('lucide-reply')

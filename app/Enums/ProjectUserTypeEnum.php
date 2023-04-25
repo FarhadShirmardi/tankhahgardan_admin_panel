@@ -32,4 +32,9 @@ enum ProjectUserTypeEnum: int
             self::CUSTODIAN => 'secondary',
         };
     }
+
+    public function isCustodian(): bool
+    {
+        return $this == self::CUSTODIAN;
+    }
 }

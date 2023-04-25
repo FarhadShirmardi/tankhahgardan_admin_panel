@@ -151,6 +151,10 @@ return [
     'panel settings' => 'تنظیمات پنل',
     'cancel plan' => 'اتمام',
     'cancel plan title' => 'اتمام طرح',
+    'delete invoice' => 'لغو',
+    'delete invoice title' => 'لغو پیش فاکتور',
+    'pay invoice' => 'پرداخت',
+    'pay invoice title' => 'پرداخت پیش فاکتور',
     'return money type' => [
         'title' => 'نحوه برگشت پول',
         'wallet' => 'کیف پول',
@@ -160,6 +164,7 @@ return [
     'infinity' => 'بی نهایت',
     'rial' => 'ریال',
     'total amount' => 'مبلغ کل',
+    'total amount column' => 'مبلغ کل(ریال)',
     'added value amount' => 'مالیات بر ارزش افزوده',
     'promo code' => 'کد تخفیف',
     'discount' => 'تخفیف',
@@ -170,4 +175,5 @@ return [
     'undefined plan' => 'طرح نامشخص',
     'use wallet' => 'استفاده از اعتبار حساب',
     'payable amount' => 'مبلغ قابل پرداخت',
+    'management panel' => 'پنل مدیر'
 ];

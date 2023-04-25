@@ -56,7 +56,7 @@ class TicketResource extends Resource
                                 Forms\Components\Placeholder::make('lastTicketMessage.created_at')
                                     ->label(__('names.last update'))
                                     ->extraAttributes(['class' => 'ltr-col'])
-                                    ->content(fn (Ticket $record): ?string => Jalali::parse($record->lastTicketMessage->created_at)->toJalaliDateTimeString()),
+                                    ->content(fn (Ticket $record): ?string => Jalali::parse($record->lastTicketMessage?->created_at)->toJalaliDateTimeString()),
 
                                 Forms\Components\Placeholder::make('user.phone_number')
                                     ->label(__('names.phone number'))
@@ -95,7 +95,7 @@ class TicketResource extends Resource
             TextColumn::make('lastTicketMessage.text')
                 ->label(__('names.last message'))
                 ->words(4)
-                ->tooltip(fn (Ticket $record) => $record->lastTicketMessage->text),
+                ->tooltip(fn (Ticket $record) => $record->lastTicketMessage?->text),
             TextColumn::make('state')
                 ->label(__('names.state'))
                 ->getStateUsing(fn (Ticket $record) => $record->state->description()),

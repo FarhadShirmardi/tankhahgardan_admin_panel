@@ -11,7 +11,7 @@
     $total = $getTotal();
     $progressed = $getProgressed();
     try{
-        $progressBar = is_null($total) ? 0 : ((int) $progressed / (int) $total * 100);
+        $progressBar = min(100, is_null($total) ? 0 : ((int) $progressed / (int) $total * 100));
     } catch (Error|Exception) {
         $progressBar = 100;
     }

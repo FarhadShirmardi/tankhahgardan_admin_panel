@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PurchaseTypeEnum;
 use App\Enums\UserStatusTypeEnum;
 use App\Helpers\UtilHelpers;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -24,9 +25,12 @@ class Invoice extends Model
         'premium_plan_id',
         'duration_id',
         'credit_amount',
+        'campaign_id',
+        'promo_code_id'
     ];
 
     protected $casts = [
+        'type' => PurchaseTypeEnum::class,
         'status' => UserStatusTypeEnum::class,
     ];
 
@@ -46,5 +50,10 @@ class Invoice extends Model
                 $this->credit_amount
             ),
         );
+    }
+
+    public function premiumPlan(): BelongsTo
+    {
+        return $this->belongsTo(PremiumPlan::class);
     }
 }

@@ -7,4 +7,5 @@ return [
     'devices title' => 'دستگاه‌ها',
     'tickets title' => 'تیکت‌ها',
     'user statuses title' => 'طرح‌های کاربر',
+    'invoices title' => 'پیش فاکتورهای کاربر',
 ];

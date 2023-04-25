@@ -34,4 +34,16 @@ class TicketMessage extends Model
     {
         return $this->belongsTo(PanelUser::class);
     }
+
+    public function projectUser(): BelongsTo
+    {
+        return $this->belongsTo(ProjectUser::class, 'project_user_id');
+    }
+
+    public function getProjectUser(): ?ProjectUser
+    {
+        $this->loadMissing('projectUser');
+
+        return $this->projectUser;
+    }
 }
