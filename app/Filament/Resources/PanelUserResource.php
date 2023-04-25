@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PanelUserResource\Pages;
-use App\Filament\Resources\PanelUserResource\RelationManagers;
 use App\Models\PanelUser;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\CheckboxList;

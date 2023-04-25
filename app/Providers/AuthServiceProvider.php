@@ -4,9 +4,13 @@ namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
 use App\Models\PanelUser;
+use App\Models\PremiumPlan;
 use App\Models\Ticket;
+use App\Models\UserReport;
 use App\Policies\PanelUserPolicy;
+use App\Policies\PremiumPlanPolicy;
 use App\Policies\TicketPolicy;
+use App\Policies\UserReportPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -20,6 +24,8 @@ class AuthServiceProvider extends ServiceProvider
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
         Ticket::class => TicketPolicy::class,
         PanelUser::class => PanelUserPolicy::class,
+        UserReport::class => UserReportPolicy::class,
+        PremiumPlan::class => PremiumPlanPolicy::class,
     ];
 
     /**
