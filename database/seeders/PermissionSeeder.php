@@ -10,7 +10,7 @@ use Illuminate\Database\Seeder;
 
 class PermissionSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $permissions = collect();
         foreach (PermissionEnum::cases() as $permissionEnum) {

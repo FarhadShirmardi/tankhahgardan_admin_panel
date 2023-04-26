@@ -1,44 +1,44 @@
 <?php
 
-namespace App\Http\Livewire\UserResource;
+namespace App\Http\Livewire\ProjectResource;
 
 use App\Enums\ProjectUserTypeEnum;
-use App\Filament\Resources\ProjectResource;
-use App\Models\Image;
+use App\Filament\Resources\UserResource;
+use App\Http\Livewire\UserResource\ProjectsTable;
 use App\Models\Imprest;
 use App\Models\Payment;
+use App\Models\Project;
+use App\Models\ProjectReport;
 use App\Models\ProjectUser;
 use App\Models\Receive;
-use App\Models\User;
-use App\Models\UserReport;
 use Closure;
+use DB;
 use Exception;
 use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
-class ProjectsTable extends UserDetailTable
+class UsersTable extends ProjectDetailTable
 {
-    public UserReport $userReport;
+    public ProjectReport $projectReport;
 
-    public function mount(User $user): void
+    public function mount(Project $project): void
     {
-        $this->user = $user;
-        $this->userReport = UserReport::findOrFail($this->user->id);
+        $this->project = $project;
+        $this->projectReport = ProjectReport::findOrFail($this->project->id);
     }
 
     protected function getTableRecordUrlUsing(): ?Closure
     {
-        return fn (Model $record): string => ProjectResource::getUrl('view', ['record' => $record->project_id]);
+        return fn (Model $record): string => UserResource::getUrl('view', ['record' => $record->user_id]);
     }
 
     protected function getTableQuery(): Builder|Relation
     {
         if (! $this->isLoaded) {
-            return $this->user->projectUsers()->whereRaw('false')->getQuery();
+            return $this->project->projectUsers()->whereRaw('false')->getQuery();
         }
         $countQuery = 'count(*)';
 
@@ -57,38 +57,19 @@ class ProjectsTable extends UserDetailTable
             ->whereColumn('project_user_id', 'project_user.id')
             ->selectRaw($countQuery)
             ->getQuery();
-        $imageCountQuery = Image::query()
-            ->withoutTrashed()
-            ->whereHasMorph(
-                'hasImage',
-                [Payment::class, Receive::class],
-                fn (Builder $query) => $query->whereColumn('project_user_id', 'project_user.id')
-            )
-            ->selectRaw($countQuery)
-            ->getQuery();
-        $imageSizeQuery = Image::query()
-            ->withoutTrashed()
-            ->whereHasMorph(
-                'hasImage',
-                [Payment::class, Receive::class],
-                fn (Builder $query) => $query->whereColumn('project_user_id', 'project_user.id')
-            )
-            ->selectRaw('IFNULL(sum(size), 0) / 1024 / 1024')
-            ->getQuery();
 
-        return $this->user->projectUsers()
+        return $this->project->projectUsers()
             ->with('teams')
-            ->join('projects', 'projects.id', 'project_user.project_id')
-            ->addSelect('projects.name as name')
-            ->addSelect('projects.created_at as created_at')
+            ->join('users', 'users.id', 'project_user.user_id')
+            ->addSelect('users.phone_number as phone_number')
+            ->addSelect(DB::raw("CONCAT_WS(' ', IFNULL(users.name, ''), IFNULL(users.family, '')) as name"))
+            ->addSelect('project_user.created_at as created_at')
             ->addSelect('project_user.id as id')
-            ->addSelect('project_id')
+            ->addSelect('user_id')
             ->addSelect('user_type')
             ->selectSub($paymentCountQuery, 'payment_count')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($imprestCountQuery, 'imprest_count')
-            ->selectSub($imageCountQuery, 'image_count')
-            ->selectSub($imageSizeQuery, 'image_size')
             ->getQuery();
     }
 
@@ -113,16 +94,23 @@ class ProjectsTable extends UserDetailTable
     protected function getTableColumns(): array
     {
         return [
-            TextColumn::make(__('names.table.row index'))
+            Tables\Columns\TextColumn::make(__('names.table.row index'))
                 ->rowIndex(),
             Tables\Columns\TextColumn::make('name')
-                ->label(__('names.project name')),
+                ->label(__('names.full name'))
+                ->tooltip(fn (ProjectUser $record) => $record->name)
+                ->words(4)
+                ->copyable(),
+            Tables\Columns\TextColumn::make('phone_number')
+                ->label(__('names.phone number'))
+                ->getStateUsing(fn (ProjectUser $record) => reformatPhoneNumber($record->phone_number))
+                ->copyable(),
             Tables\Columns\TextColumn::make('created_at')
                 ->hidden()
                 ->label(__('names.project created at')),
             Tables\Columns\BadgeColumn::make('user_type')
                 ->label(__('names.role'))
-                ->tooltip(self::getTeamNames())
+                ->tooltip(ProjectsTable::getTeamNames())
                 ->enum(ProjectUserTypeEnum::columnValues())
                 ->color(static fn ($state) => ProjectUserTypeEnum::from($state)->color()),
             Tables\Columns\TextColumn::make('payments_count')
@@ -135,41 +123,26 @@ class ProjectsTable extends UserDetailTable
             Tables\Columns\TextColumn::make('imprest_count')
                 ->sortable()
                 ->label(__('names.imprest count')),
-            Tables\Columns\TextColumn::make('image_count')
-                ->sortable()
-                ->label(__('names.image count')),
         ];
     }
 
     protected function getTableContentFooter(): ?View
     {
-        return \view('livewire.user-resource.projects-table-footer', [
+        return \view('livewire.project-resource.users-table-footer', [
             'footer_columns' => [
                 '',
                 __('names.sum'),
                 '',
-                $this->userReport->payment_count,
-                $this->userReport->receive_count,
-                $this->userReport->imprest_count,
-                $this->userReport->image_count,
-                $this->userReport->image_size,
+                '',
+                $this->projectReport->payment_count,
+                $this->projectReport->receive_count,
+                $this->projectReport->imprest_count,
             ],
         ]);
     }
 
     public function render(): View
     {
-        return view('livewire.user-resource.projects-table');
-    }
-
-    public static function getTeamNames(): Closure
-    {
-        return function (ProjectUser $record) {
-            $teams = $record->teams;
-            $isDefault = (($teams->count() == 1) and ($teams->first()->is_default));
-            $text = $teams->pluck('name')->implode('، ');
-            $text .= $isDefault ? ' ('.__('names.default').')' : '';
-            return $text;
-        };
+        return view('livewire.project-resource.users-table');
     }
 }

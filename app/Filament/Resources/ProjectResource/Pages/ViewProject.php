@@ -20,7 +20,7 @@ class ViewProject extends Page
         return __('names.project').' '.$this->project->name;
     }
 
-    public function mount(int $record)
+    public function mount(int $record): void
     {
         $this->project = Project::findOrFail($record);
         $this->project->updateProjectReport();

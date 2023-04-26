@@ -20,13 +20,6 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 
 class UserStatusesTable extends UserDetailTable
 {
-    protected $listeners = ['updateUserStatuses' => 'refreshTable'];
-
-    public function refreshTable(): void
-    {
-        $this->emitSelf('$refresh');
-    }
-
     protected function getTableQuery(): Builder|Relation
     {
         if (!$this->isLoaded) {

@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Http\Livewire\UserResource;
+namespace App\Http\Livewire\ProjectResource;
 
-use App\Models\User;
+use App\Models\Project;
 use Filament\Tables;
 use Livewire\Component;
 
-class UserDetailTable extends Component implements Tables\Contracts\HasTable
+class ProjectDetailTable extends Component implements Tables\Contracts\HasTable
 {
     use Tables\Concerns\InteractsWithTable;
 
-    public User $user;
+    public Project $project;
 
     public bool $isLoaded = false;
 
-    public function mount(User $user): void
+    public function mount(Project $project): void
     {
-        $this->user = $user;
+        $this->project = $project;
     }
 
     public function loadData(): void

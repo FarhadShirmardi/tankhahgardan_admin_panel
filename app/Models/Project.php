@@ -43,8 +43,13 @@ class Project extends Model
         return collect($this->owner)->first();
     }
 
-    public function updateProjectReport()
+    public function updateProjectReport(): void
     {
         $this->projectReport()->update(ProjectReportService::getSingleProject($this->id)->toArray());
+    }
+
+    public function teams(): HasMany
+    {
+        return $this->hasMany(Team::class);
     }
 }

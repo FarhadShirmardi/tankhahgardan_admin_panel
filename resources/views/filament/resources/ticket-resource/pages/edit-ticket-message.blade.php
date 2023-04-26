@@ -10,14 +10,16 @@
                         <a href="{{ $oldImage['path'] }}" target="_blank">
                             <img class="w-full" src="{{ $oldImage['path'] }}" alt="image" />
                         </a>
-                        <div class="absolute bottom-0 left-0 p-2">
-                            <x-forms::icon-button
-                                    wire:click="deleteImage({{ $oldImage['id'] }})"
-                                    @click="hideDelete = 1;"
-                                    class="bg-white hover:bg-gray-100 text-red-500"
-                                    icon="heroicon-o-trash"
-                            />
-                        </div>
+                        @if(!$this->isUser)
+                            <div class="absolute bottom-0 left-0 p-2">
+                                <x-forms::icon-button
+                                        wire:click="deleteImage({{ $oldImage['id'] }})"
+                                        @click="hideDelete = 1;"
+                                        class="bg-white hover:bg-gray-100 text-red-500"
+                                        icon="heroicon-o-trash"
+                                />
+                            </div>
+                        @endif
                     </div>
                 </x-filament-support::grid.column>
             @endforeach

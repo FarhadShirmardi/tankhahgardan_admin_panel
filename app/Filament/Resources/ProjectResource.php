@@ -178,6 +178,7 @@ class ProjectResource extends Resource
         return [
             'index' => Pages\ListProjects::route('/'),
             'view' => Pages\ViewProject::route('/{record}'),
+            'viewTeam' => Pages\ViewTeam::route('/{record}/teams/{subRecord}')
         ];
     }
 }

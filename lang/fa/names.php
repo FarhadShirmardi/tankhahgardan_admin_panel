@@ -26,6 +26,9 @@ return [
     'permissions' => 'دسترسی‌ها',
 
     'project name' => 'نام شرکت',
+    'team' => 'تیم',
+    'team name' => 'نام تیم',
+    'default team' => 'تیم پیش‌فرض',
     'project created at' => 'تاریخ ایجاد شرکت',
     'project location' => 'محل شرکت',
     'province' => 'استان',
@@ -34,6 +37,7 @@ return [
     'active user count' => 'کاربران فعال شرکت',
     'project type' => 'نوع شرکت',
     'project' => 'شرکت',
+    'created at' => 'تاریخ ثبت',
 
     'project_user_type' => [
         'owner' => 'مالک',
@@ -175,5 +179,8 @@ return [
     'undefined plan' => 'طرح نامشخص',
     'use wallet' => 'استفاده از اعتبار حساب',
     'payable amount' => 'مبلغ قابل پرداخت',
-    'management panel' => 'پنل مدیر'
+    'management panel' => 'پنل مدیر',
+    'currency unit' => 'واحد پول',
+    'bank transaction number' => 'شماره تراکنش بانک',
+    'tankhah transaction number' => 'شماره تراکنش تنخواه'
 ];

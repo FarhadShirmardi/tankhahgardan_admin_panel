@@ -78,7 +78,6 @@ class InvoicesTable extends UserDetailTable
                         ->title(__('message.invoice deleted successfully'))
                         ->send();
 
-                    $this->emit('updateUserStatuses');
                     $this->emitSelf('$refresh');
                 })
                 ->requiresConfirmation(),
