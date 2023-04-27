@@ -19,6 +19,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\JoinClause;
 
 class ProjectsTable extends UserDetailTable
 {
@@ -57,23 +58,21 @@ class ProjectsTable extends UserDetailTable
             ->whereColumn('project_user_id', 'project_user.id')
             ->selectRaw($countQuery)
             ->getQuery();
-        $imageCountQuery = Image::query()
-            ->withoutTrashed()
-            ->whereHasMorph(
-                'hasImage',
-                [Payment::class, Receive::class],
-                fn (Builder $query) => $query->whereColumn('project_user_id', 'project_user.id')
-            )
+        $paymentImageCount = Image::query()
+            ->join('payments', function (JoinClause $join) {
+                $join->on('model_id', 'payments.id')
+                    ->where('model_type', (new Payment())->getMorphClass());
+            })
+            ->whereColumn('project_user_id', 'project_user.id')
             ->selectRaw($countQuery)
             ->getQuery();
-        $imageSizeQuery = Image::query()
-            ->withoutTrashed()
-            ->whereHasMorph(
-                'hasImage',
-                [Payment::class, Receive::class],
-                fn (Builder $query) => $query->whereColumn('project_user_id', 'project_user.id')
-            )
-            ->selectRaw('IFNULL(sum(size), 0) / 1024 / 1024')
+        $receiveImageCount = Image::query()
+            ->join('receives', function (JoinClause $join) {
+                $join->on('model_id', 'receives.id')
+                    ->where('model_type', (new Receive())->getMorphClass());
+            })
+            ->whereColumn('project_user_id', 'project_user.id')
+            ->selectRaw($countQuery)
             ->getQuery();
 
         return $this->user->projectUsers()
@@ -87,8 +86,8 @@ class ProjectsTable extends UserDetailTable
             ->selectSub($paymentCountQuery, 'payment_count')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($imprestCountQuery, 'imprest_count')
-            ->selectSub($imageCountQuery, 'image_count')
-            ->selectSub($imageSizeQuery, 'image_size')
+            ->selectSub($paymentImageCount, 'payment_image_count')
+            ->selectSub($receiveImageCount, 'receive_image_count')
             ->getQuery();
     }
 
@@ -136,7 +135,7 @@ class ProjectsTable extends UserDetailTable
                 ->sortable()
                 ->label(__('names.imprest count')),
             Tables\Columns\TextColumn::make('image_count')
-                ->sortable()
+                ->getStateUsing(fn ($record) => $record->payment_image_count + $record->receive_image_count)
                 ->label(__('names.image count')),
         ];
     }
@@ -152,7 +151,6 @@ class ProjectsTable extends UserDetailTable
                 $this->userReport->receive_count,
                 $this->userReport->imprest_count,
                 $this->userReport->image_count,
-                $this->userReport->image_size,
             ],
         ]);
     }

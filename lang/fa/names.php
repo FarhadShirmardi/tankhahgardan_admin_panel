@@ -172,6 +172,7 @@ return [
     'added value amount' => 'مالیات بر ارزش افزوده',
     'promo code' => 'کد تخفیف',
     'discount' => 'تخفیف',
+    'credit' => 'اعتبار',
     'percent' => 'درصد',
     'up_to' => 'تا',
     'toman' => 'تومان',

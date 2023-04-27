@@ -5,13 +5,17 @@ namespace App\Filament\Resources;
 use App\Enums\UserStatusTypeEnum;
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Helpers\UtilHelpers;
+use App\Models\User;
 use App\Models\UserStatusLog;
-use Ariaieboy\FilamentJalaliDatetime\JalaliDateTimeColumn;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
-use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
 
 class TransactionResource extends Resource
 {
@@ -32,57 +36,78 @@ class TransactionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
-                TextColumn::make(__('names.table.row index'))
-                    ->rowIndex(),
-                TextColumn::make('username')
-                    ->formatStateUsing(fn ($record) => $record->user->username)
-                    ->tooltip(fn ($record) => reformatPhoneNumber($record->user->phone_number))
-                    ->label(__('names.full name')),
-                TextColumn::make('trace_no')
-                    ->label(__('names.bank transaction number')),
-                TextColumn::make('trace_number')
-                    ->label(__('names.tankhah transaction number')),
-                TextColumn::make('payable_amount')
-                    ->formatStateUsing(fn ($record) => formatPrice(UtilHelpers::getPayableAmount($record->total_amount, $record->added_value_amount, $record->discount_amount, $record->wallet_amount, $record->credit_amount)))
-                    ->label(__('names.payable amount')),
-                IconColumn::make('status')
-                    ->options([
-                        'heroicon-o-x-circle',
-                        'heroicon-o-clock' => UserStatusTypeEnum::PENDING->value,
-                        'heroicon-o-check-circle' => UserStatusTypeEnum::SUCCEED->value
-                    ])
-                    ->colors([
-                        'danger' => UserStatusTypeEnum::FAILED->value,
-                        'warning' => UserStatusTypeEnum::PENDING->value,
-                        'success' => UserStatusTypeEnum::SUCCEED->value,
-                    ])
-                    ->label(__('names.state')),
-                JalaliDateTimeColumn::make('start_date')
-                    ->label(__('names.start date').' '.__('names.plan'))
-                    ->extraAttributes([
-                        'class' => 'ltr-col',
-                    ])
-                    ->dateTime()
-                    ->sortable(),
-                JalaliDateTimeColumn::make('end_date')
-                    ->label(__('names.end date').' '.__('names.plan'))
-                    ->extraAttributes([
-                        'class' => 'ltr-col',
-                    ])
-                    ->dateTime()
-                    ->sortable(),
-            ])
-            ->actions([
-            ])
+            ->columns(self::getColumns())
+            ->actions(self::getActions())
             ->bulkActions([
+            ])
+            ->filters([
+                Filter::make('phone_number')
+                    ->form([
+                        TextInput::make('phone_number')->label(__('names.phone number')),
+                    ])
+                    ->indicateUsing(fn (array $data) => ! $data['phone_number'] ? null : __('names.phone number').': '.$data['phone_number'])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['phone_number'],
+                            function (Builder $query, $phoneNumber) {
+                                $phoneNumber = formatPhoneNumber(englishString($phoneNumber));
+                                return $query->whereIn('user_id', User::query()->where('phone_number', 'like', "%$phoneNumber%")->select('id'));
+                            }
+                        );
+                    })
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with('user');
     }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListTransactions::route('/'),
+        ];
+    }
+
+    public static function getColumns(bool $showUsername = true): array
+    {
+        return [
+            TextColumn::make(__('names.table.row index'))
+                ->rowIndex(),
+            TextColumn::make('username')
+                ->formatStateUsing(fn ($record) => $record->user->username)
+                ->hidden(!$showUsername)
+                ->tooltip(fn ($record) => reformatPhoneNumber($record->user->phone_number))
+                ->label(__('names.full name')),
+            TextColumn::make('transaction.trace_no')
+                ->label(__('names.bank transaction number')),
+            TextColumn::make('trace_number')
+                ->label(__('names.tankhah transaction number')),
+            TextColumn::make('payable_amount')
+                ->formatStateUsing(fn ($record) => formatPrice(UtilHelpers::getPayableAmount($record->total_amount, $record->added_value_amount, $record->discount_amount, $record->wallet_amount, $record->credit_amount)))
+                ->label(__('names.payable amount')),
+            IconColumn::make('status')
+                ->options([
+                    'heroicon-o-x-circle',
+                    'heroicon-o-clock' => UserStatusTypeEnum::PENDING->value,
+                    'heroicon-o-check-circle' => UserStatusTypeEnum::SUCCEED->value
+                ])
+                ->colors([
+                    'danger' => UserStatusTypeEnum::FAILED->value,
+                    'warning' => UserStatusTypeEnum::PENDING->value,
+                    'success' => UserStatusTypeEnum::SUCCEED->value,
+                ])
+                ->label(__('names.state')),
+        ];
+    }
+
+    public static function getActions(): array
+    {
+        return [
+            ViewAction::make('view_details')
+                ->modalHeading(__('filament::resources/pages/view-record.title', ['label' => __('filament::pages/transaction.single title')]))
+                ->modalContent(fn ($record) => \view('filament.resources.transaction-resource.modals.view-transaction', ['record' => $record]))
         ];
     }
 }

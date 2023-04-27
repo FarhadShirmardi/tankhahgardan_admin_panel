@@ -86,6 +86,11 @@ class User extends Authenticatable
         return $this->hasMany(UserStatus::class)->latest('end_date');
     }
 
+    public function userStatusLogs(): HasMany
+    {
+        return $this->hasMany(UserStatusLog::class);
+    }
+
     /** @return Attribute<?UserStatus, never> */
     protected function currentUserStatus(): Attribute
     {
