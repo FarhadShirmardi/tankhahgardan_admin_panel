@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\TicketResource\RelationManagers;
 
+use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Resources\ProjectResource;
 use App\Filament\Resources\TicketResource;
 use App\Models\TicketMessage;
-use Ariaieboy\FilamentJalaliDatetime\JalaliDateTimeColumn;
 use Filament\Forms;
 use Filament\Resources\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -61,9 +61,6 @@ class TicketMessagesRelationManager extends RelationManager
                     ->getStateUsing(fn (TicketMessage $record) => $record->project_user_id != null ? $record->getProjectUser()?->getProjectTeamText() : ' - '),
                 JalaliDateTimeColumn::make('created_at')
                     ->label('تاریخ و ساعت')
-                    ->extraAttributes([
-                        'class' => 'ltr-col',
-                    ])
                     ->sortable()
                     ->dateTime(),
             ])

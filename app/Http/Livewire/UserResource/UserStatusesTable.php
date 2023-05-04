@@ -5,9 +5,9 @@ namespace App\Http\Livewire\UserResource;
 use App\Data\EndPremiumPlanData;
 use App\Enums\EndPremiumPlanReturnTypeEnum;
 use App\Enums\PremiumDurationEnum;
+use App\Filament\Components\JalaliDateTimeColumn;
 use App\Models\UserStatus;
 use App\Services\PremiumService;
-use Ariaieboy\FilamentJalaliDatetime\JalaliDateTimeColumn;
 use Closure;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -46,16 +46,10 @@ class UserStatusesTable extends UserDetailTable
                 ->color(static fn ($state) => PremiumDurationEnum::from($state)->color()),
             JalaliDateTimeColumn::make('start_date')
                 ->label(__('names.start date'))
-                ->extraAttributes([
-                    'class' => 'ltr-col',
-                ])
                 ->dateTime()
                 ->sortable(),
             JalaliDateTimeColumn::make('end_date')
                 ->label(__('names.end date'))
-                ->extraAttributes([
-                    'class' => 'ltr-col',
-                ])
                 ->dateTime()
                 ->sortable(),
         ];

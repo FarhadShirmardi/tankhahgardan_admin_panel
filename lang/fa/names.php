@@ -149,6 +149,7 @@ return [
     'device serial' => 'سریال دستگاه',
     'start date' => 'تاریخ شروع',
     'end date' => 'تاریخ پایان',
+    'expire date' => 'تاریخ انقضا',
     'plan type' => 'نوع طرح',
     'plan' => 'طرح',
     'create new plan' => 'ایجاد طرح',
@@ -183,5 +184,16 @@ return [
     'management panel' => 'پنل مدیر',
     'currency unit' => 'واحد پول',
     'bank transaction number' => 'شماره تراکنش بانک',
-    'tankhah transaction number' => 'شماره تراکنش تنخواه'
+    'tankhah transaction number' => 'شماره تراکنش تنخواه',
+    'campaign' => [
+        'name' => 'نام کمپین',
+        'count' => 'تعداد',
+        'symbol' => 'نماد',
+    ],
+    'promo_code' => [
+        'discount percent' => 'درصد تخفیف',
+        'max discount' => 'حداکثر تخفیف',
+        'max count' => 'حداکثر تعداد',
+        'reserved count' => 'تعداد رزرو شده',
+    ],
 ];

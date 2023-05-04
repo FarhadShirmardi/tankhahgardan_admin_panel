@@ -30,4 +30,14 @@ class PromoCode extends Model
     {
         return $this->belongsTo(Campaign::class);
     }
+
+    public function panelUser(): BelongsTo
+    {
+        return $this->belongsTo(PanelUser::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -22,7 +22,7 @@ class PanelUserSeeder extends Seeder
             'type' => PanelUserTypeEnum::ADMIN,
         ]);
         PanelUser::query()->updateOrInsert([
-            'name' => 'فرهاد شیرمردی',
+            'name' => 'فراز شیری',
         ], [
             'phone_number' => '9382204247',
             'password' => Hash::make('pP12345678'),

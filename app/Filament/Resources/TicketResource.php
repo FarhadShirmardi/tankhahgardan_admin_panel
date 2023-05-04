@@ -3,10 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Enums\TicketStateEnum;
+use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Resources\TicketResource\Pages;
 use App\Filament\Resources\TicketResource\RelationManagers\TicketMessagesRelationManager;
 use App\Models\Ticket;
-use Ariaieboy\FilamentJalaliDatetime\JalaliDateTimeColumn;
 use Derakht\Jalali\Jalali;
 use Exception;
 use Filament\Forms;
@@ -101,9 +101,6 @@ class TicketResource extends Resource
                 ->getStateUsing(fn (Ticket $record) => $record->state->description()),
             JalaliDateTimeColumn::make('lastTicketMessage.created_at')
                 ->label(__('names.last update'))
-                ->extraAttributes([
-                    'class' => 'ltr-col',
-                ])
                 ->sortable()
                 ->dateTime(),
         ];

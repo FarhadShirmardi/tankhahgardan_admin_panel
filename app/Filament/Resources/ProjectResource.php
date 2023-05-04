@@ -4,11 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Enums\ActivityTypeEnum;
 use App\Enums\ProjectTypeEnum;
+use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Resources\ProjectResource\Pages;
 use App\Models\City;
 use App\Models\ProjectReport;
 use App\Models\Province;
-use Ariaieboy\FilamentJalaliDatetime\JalaliDateTimeColumn;
 use Exception;
 use Filament\Forms;
 use Filament\Resources\Form;
@@ -22,6 +22,8 @@ use Illuminate\Database\Eloquent\Builder;
 class ProjectResource extends Resource
 {
     protected static ?string $model = ProjectReport::class;
+
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function getModelLabel(): string
     {
@@ -68,16 +70,10 @@ class ProjectResource extends Resource
                     ->enum(ProjectTypeEnum::columnValues()),
                 JalaliDateTimeColumn::make('created_at')
                     ->label(__('names.project created at'))
-                    ->extraAttributes([
-                        'class' => 'ltr-col',
-                    ])
                     ->dateTime()
                     ->sortable(),
                 JalaliDateTimeColumn::make('max_time')
                     ->label(__('names.last record time'))
-                    ->extraAttributes([
-                        'class' => 'ltr-col',
-                    ])
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('user_count')

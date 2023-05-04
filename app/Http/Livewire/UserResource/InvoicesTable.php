@@ -5,9 +5,9 @@ namespace App\Http\Livewire\UserResource;
 use App\Data\PayInvoiceData;
 use App\Enums\PremiumDurationEnum;
 use App\Enums\UserStatusTypeEnum;
+use App\Filament\Components\JalaliDateTimeColumn;
 use App\Models\Invoice;
 use App\Services\PremiumService;
-use Ariaieboy\FilamentJalaliDatetime\JalaliDateTimeColumn;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Tables;
@@ -44,16 +44,10 @@ class InvoicesTable extends UserDetailTable
                 ->color(static fn ($state) => PremiumDurationEnum::from($state)->color()),
             JalaliDateTimeColumn::make('start_date')
                 ->label(__('names.start date'))
-                ->extraAttributes([
-                    'class' => 'ltr-col',
-                ])
                 ->dateTime()
                 ->sortable(),
             JalaliDateTimeColumn::make('end_date')
                 ->label(__('names.end date'))
-                ->extraAttributes([
-                    'class' => 'ltr-col',
-                ])
                 ->dateTime()
                 ->sortable(),
             TextColumn::make('payable_amount')
