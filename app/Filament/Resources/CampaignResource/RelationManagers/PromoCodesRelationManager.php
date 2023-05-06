@@ -7,8 +7,10 @@ use App\Filament\Components\JalaliDatePicker;
 use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Resources\UserResource;
 use App\Models\PromoCode;
+use App\Models\User;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -37,45 +39,56 @@ class PromoCodesRelationManager extends RelationManager
         return $form
             ->schema([
                 TextInput::make('code')
+                    ->label(__('names.promo_code.code'))
                     ->required(),
 
-                TextInput::make('user_id')
-                    ->integer(),
+                Select::make('user_id')
+                    ->label(__('names.username'))
+                    ->searchable()
+                    ->getSearchResultsUsing(function (string $search) {
+                        $search = formatPhoneNumber($search);
+                        $englishSearch = englishString($search);
+                        $persianSearch = persianString($search);
+
+                        return User::query()
+                            ->where(fn ($query) => $query
+                                ->where('phone_number', 'like', "%$englishSearch%")
+                                ->orWhere('phone_number', 'like', "%$persianSearch%")
+                                ->orWhere('name', 'like', "%$englishSearch%")
+                                ->orWhere('name', 'like', "%$persianSearch%")
+                                ->orWhere('family', 'like', "%$englishSearch%")
+                                ->orWhere('family', 'like', "%$persianSearch%")
+                            )
+                            ->limit(50)
+                            ->get()
+                            ->pluck('username', 'id');
+                    })
+                    ->getOptionLabelUsing(fn ($value): ?string => User::find($value)->username),
 
                 TextInput::make('discount_percent')
+                    ->label(__('names.promo_code.discount percent'))
+                    ->hint(__('names.percent'))
+                    ->minValue(1)
                     ->integer(),
 
                 TextInput::make('max_discount')
+                    ->label(__('names.promo_code.max discount'))
                     ->integer(),
 
                 TextInput::make('max_count')
+                    ->default(1)
                     ->required()
                     ->integer(),
+
+                TextInput::make('text')
+                    ->label(__('names.promo_code.text'))
+                    ->required(),
 
                 JalaliDatePicker::make('start_at')
                     ->label(__('names.start date')),
 
                 JalaliDatePicker::make('expire_at')
                     ->label(__('names.expire date')),
-
-                TextInput::make('text'),
-
-                TextInput::make('reserve_count')
-                    ->required()
-                    ->integer(),
-
-                TextInput::make('panel_user_id')
-                    ->integer(),
-
-
-
-                Placeholder::make('created_at')
-                    ->label('Created Date')
-                    ->content(fn (?PromoCode $record): string => $record?->created_at?->diffForHumans() ?? '-'),
-
-                Placeholder::make('updated_at')
-                    ->label('Last Modified Date')
-                    ->content(fn (?PromoCode $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
 
                 Checkbox::make('is_hidden'),
 
@@ -93,11 +106,12 @@ class PromoCodesRelationManager extends RelationManager
                     ->rowIndex(),
 
                 TextColumn::make('code')
+                    ->label(__('names.promo_code.code'))
                     ->copyable(),
 
                 TextColumn::make('user.username')
                     ->label(__('names.username'))
-                    ->url(fn(PromoCode $record) => UserResource::getUrl('view', ['record' => $record->user_id]), shouldOpenInNewTab: true),
+                    ->url(fn (PromoCode $record) => UserResource::getUrl('view', ['record' => $record->user_id]), shouldOpenInNewTab: true),
 
                 TextColumn::make('discount_percent')
                     ->label(__('names.promo_code.discount percent')),
@@ -120,9 +134,13 @@ class PromoCodesRelationManager extends RelationManager
                 TextColumn::make('reserve_count')
                     ->label(__('names.promo_code.reserved count')),
 
-                IconColumn::make('is_hidden')->boolean(),
+                IconColumn::make('is_hidden')
+                    ->label(__('names.promo_code.is hidden'))
+                    ->boolean(),
 
-                IconColumn::make('is_unlimited')->boolean(),
+                IconColumn::make('is_unlimited')
+                    ->label(__('names.promo_code.is unlimited'))
+                    ->boolean(),
 
                 BadgeColumn::make('duration_id')
                     ->label(__('names.plan type'))

@@ -191,9 +191,13 @@ return [
         'symbol' => 'نماد',
     ],
     'promo_code' => [
+        'code' => 'کد',
+        'text' => 'متن کد تخفیف',
         'discount percent' => 'درصد تخفیف',
         'max discount' => 'حداکثر تخفیف',
         'max count' => 'حداکثر تعداد',
         'reserved count' => 'تعداد رزرو شده',
+        'is hidden' => 'حالت مخفی؟',
+        'is unlimited' => 'نامحدود؟'
     ],
 ];
