@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\ProjectResource;
 
 use App\Enums\ProjectUserTypeEnum;
+use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\ProjectResource;
 use App\Filament\Resources\UserResource;
 use App\Models\Imprest;
@@ -49,8 +50,7 @@ class TeamsTable extends ProjectDetailTable
     protected function getTableColumns(): array
     {
         return [
-            Tables\Columns\TextColumn::make(__('names.table.row index'))
-                ->rowIndex(),
+            RowIndexColumn::make(),
             Tables\Columns\TextColumn::make('name')
                 ->label(__('names.team name'))
                 ->words(4),

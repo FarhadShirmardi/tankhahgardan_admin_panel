@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\UserResource;
 
 use App\Enums\ProjectUserTypeEnum;
+use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\ProjectResource;
 use App\Models\Image;
 use App\Models\Imprest;
@@ -14,7 +15,6 @@ use App\Models\UserReport;
 use Closure;
 use Exception;
 use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -112,8 +112,7 @@ class ProjectsTable extends UserDetailTable
     protected function getTableColumns(): array
     {
         return [
-            TextColumn::make(__('names.table.row index'))
-                ->rowIndex(),
+            RowIndexColumn::make(),
             Tables\Columns\TextColumn::make('name')
                 ->label(__('names.project name')),
             Tables\Columns\TextColumn::make('created_at')

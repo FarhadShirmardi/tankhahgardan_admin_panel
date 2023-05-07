@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\ProjectResource;
 
 use App\Enums\ProjectUserTypeEnum;
+use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\UserResource;
 use App\Http\Livewire\UserResource\ProjectsTable;
 use App\Models\Imprest;
@@ -94,8 +95,7 @@ class UsersTable extends ProjectDetailTable
     protected function getTableColumns(): array
     {
         return [
-            Tables\Columns\TextColumn::make(__('names.table.row index'))
-                ->rowIndex(),
+            RowIndexColumn::make(),
             Tables\Columns\TextColumn::make('name')
                 ->label(__('names.full name'))
                 ->tooltip(fn (ProjectUser $record) => $record->name)

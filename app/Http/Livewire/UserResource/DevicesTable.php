@@ -4,6 +4,7 @@ namespace App\Http\Livewire\UserResource;
 
 use App\Enums\PlatformEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
+use App\Filament\Components\RowIndexColumn;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Contracts\View\View;
@@ -13,8 +14,6 @@ use stdClass;
 
 class DevicesTable extends UserDetailTable
 {
-    public int $device_page = 1;
-
     protected function getTableQuery(): Builder|Relation
     {
         if (!$this->isLoaded) {
@@ -39,11 +38,7 @@ class DevicesTable extends UserDetailTable
     protected function getTableColumns(): array
     {
         return [
-            TextColumn::make(__('names.table.row index'))->getStateUsing(
-                static function (stdClass $rowLoop, Tables\Contracts\HasTable $livewire): string {
-                    return (string)($rowLoop->iteration + ($rowLoop->count * ($livewire->device_page - 1)));
-                }
-            ),
+            RowIndexColumn::make(),
             Tables\Columns\BadgeColumn::make('platform')
                 ->label(__('names.platform'))
                 ->enum(PlatformEnum::columnValues())

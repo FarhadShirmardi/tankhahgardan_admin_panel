@@ -6,5 +6,6 @@ return [
     'plan ended successfully' => 'طرح با موفقیت خاتمه یافت',
     'invoice deleted successfully' => 'پیش فاکتور با موفقیت لغو شد.',
     'invoice payed successfully' => 'پیش فاکتور با موفقیت پرداخت شد.',
-    'invoice payed failed' => 'پرداخت پیش فاکتور با خطا مواجه شد.'
+    'invoice payed failed' => 'پرداخت پیش فاکتور با خطا مواجه شد.',
+    'promo code visible for all users' => 'در صورتی که انتخاب نشود برای تمام کاربران خواهد بود'
 ];

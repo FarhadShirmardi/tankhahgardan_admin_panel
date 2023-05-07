@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\ActivityTypeEnum;
 use App\Enums\ProjectTypeEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
+use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\ProjectResource\Pages;
 use App\Models\City;
 use App\Models\ProjectReport;
@@ -52,8 +53,7 @@ class ProjectResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make(__('names.table.row index'))
-                    ->rowIndex(),
+                RowIndexColumn::make(),
                 ColorColumn::make('project_type')
                     ->label('')
                     ->tooltip(fn (ProjectReport $record) => ActivityTypeEnum::from($record->project_type)->description())

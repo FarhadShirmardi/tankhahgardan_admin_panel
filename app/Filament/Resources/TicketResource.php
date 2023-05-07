@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\TicketStateEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
+use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\TicketResource\Pages;
 use App\Filament\Resources\TicketResource\RelationManagers\TicketMessagesRelationManager;
 use App\Models\Ticket;
@@ -79,8 +80,7 @@ class TicketResource extends Resource
     public static function getTicketsTableColumns(bool $showUsername = true): array
     {
         return [
-            TextColumn::make(__('names.table.row index'))
-                ->rowIndex(),
+            RowIndexColumn::make(),
             TextColumn::make('username')
                 ->label(__('names.username'))
                 ->words(3)

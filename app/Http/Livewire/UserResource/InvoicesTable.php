@@ -6,6 +6,7 @@ use App\Data\PayInvoiceData;
 use App\Enums\PremiumDurationEnum;
 use App\Enums\UserStatusTypeEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
+use App\Filament\Components\RowIndexColumn;
 use App\Models\Invoice;
 use App\Services\PremiumService;
 use Filament\Forms\Components\Textarea;
@@ -32,7 +33,7 @@ class InvoicesTable extends UserDetailTable
     protected function getTableColumns(): array
     {
         return [
-            TextColumn::make(__('names.table.row index'))->rowIndex(),
+            RowIndexColumn::make(),
             Tables\Columns\ColorColumn::make('premiumPlan.type')
                 ->label(__('names.plan'))
                 ->tooltip(fn (Invoice $record) => $record->premiumPlan->type->title())

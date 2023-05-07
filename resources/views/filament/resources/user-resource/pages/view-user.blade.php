@@ -6,5 +6,6 @@
     <livewire:user-resource.user-statuses-table :user="$this->user"/>
     <livewire:user-resource.transactions-table :user="$this->user"/>
     <livewire:user-resource.tickets-table :user="$this->user"/>
+    <livewire:user-resource.promo-code-table :user="$this->user"/>
     <livewire:user-resource.devices-table :user="$this->user"/>
 </x-filament::page>

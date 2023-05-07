@@ -43,4 +43,9 @@ class UserDetailTable extends Component implements Tables\Contracts\HasTable
     {
         return $this->isLoaded ? null : __('message.loading_data');
     }
+
+    protected function getTablePaginationPageName(): string
+    {
+        return 'user_detail_page';
+    }
 }

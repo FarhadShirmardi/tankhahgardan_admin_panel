@@ -6,6 +6,7 @@ use App\Data\EndPremiumPlanData;
 use App\Enums\EndPremiumPlanReturnTypeEnum;
 use App\Enums\PremiumDurationEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
+use App\Filament\Components\RowIndexColumn;
 use App\Models\UserStatus;
 use App\Services\PremiumService;
 use Closure;
@@ -34,7 +35,7 @@ class UserStatusesTable extends UserDetailTable
     protected function getTableColumns(): array
     {
         return [
-            TextColumn::make(__('names.table.row index'))->rowIndex(),
+            RowIndexColumn::make(),
             Tables\Columns\ColorColumn::make('premiumPlan.type')
                 ->label(__('names.plan'))
                 ->tooltip(fn (UserStatus $record) => $record->premiumPlan->type->title())

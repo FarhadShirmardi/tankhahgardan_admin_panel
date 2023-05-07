@@ -30,6 +30,11 @@ class TransactionsTable extends UserDetailTable
         return TransactionResource::getActions();
     }
 
+    protected function getTablePaginationPageName(): string
+    {
+        return 'transaction_page';
+    }
+
     protected function getTableRecordsPerPage(): int
     {
         return 5;

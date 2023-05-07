@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\UserStatusTypeEnum;
+use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Helpers\UtilHelpers;
 use App\Models\User;
@@ -73,8 +74,7 @@ class TransactionResource extends Resource
     public static function getColumns(bool $showUsername = true): array
     {
         return [
-            TextColumn::make(__('names.table.row index'))
-                ->rowIndex(),
+            RowIndexColumn::make(),
             TextColumn::make('username')
                 ->formatStateUsing(fn ($record) => $record->user->username)
                 ->hidden(!$showUsername)

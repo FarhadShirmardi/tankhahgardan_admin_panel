@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\TicketResource\RelationManagers;
 
 use App\Filament\Components\JalaliDateTimeColumn;
+use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\ProjectResource;
 use App\Filament\Resources\TicketResource;
 use App\Models\TicketMessage;
@@ -11,7 +12,6 @@ use Filament\Resources\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Resources\Table;
 use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 
 class TicketMessagesRelationManager extends RelationManager
@@ -47,8 +47,7 @@ class TicketMessagesRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make(__('names.table.row index'))
-                    ->rowIndex(),
+                RowIndexColumn::make(),
                 Tables\Columns\TextColumn::make('user_text')
                     ->label('متن کاربر')
                     ->getStateUsing(fn (TicketMessage $record) => ($record->panel_user_id == null ? $record->text : ' - ')),

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\PanelUserResource\Pages;
 use App\Models\PanelUser;
 use Filament\Forms\Components\Card;
@@ -70,8 +71,7 @@ class PanelUserResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make(__('names.table.row index'))
-                    ->rowIndex(),
+                RowIndexColumn::make(),
                 TextColumn::make('name')
                     ->sortable()
                     ->label(__('names.full name')),

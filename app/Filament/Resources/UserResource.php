@@ -6,6 +6,7 @@ use App\Enums\ActivityTypeEnum;
 use App\Enums\UserPremiumStateEnum;
 use App\Filament\Components\JalaliDatePicker;
 use App\Filament\Components\JalaliDateTimeColumn;
+use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\UserReport;
 use Exception;
@@ -57,8 +58,7 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make(__('names.table.row index'))
-                    ->rowIndex(),
+                RowIndexColumn::make(),
                 ColorColumn::make('user_type')
                     ->label('')
                     ->tooltip(fn (UserReport $record) => ActivityTypeEnum::from($record->user_type)->description())

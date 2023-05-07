@@ -198,6 +198,8 @@ return [
         'max count' => 'حداکثر تعداد',
         'reserved count' => 'تعداد رزرو شده',
         'is hidden' => 'حالت مخفی؟',
-        'is unlimited' => 'نامحدود؟'
+        'is unlimited' => 'نامحدود؟',
+        'without plan' => 'بدون طرح',
+        'visible to user' => 'قابل نمایش برای کاربر'
     ],
 ];

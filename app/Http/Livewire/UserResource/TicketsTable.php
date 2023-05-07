@@ -11,8 +11,6 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 
 class TicketsTable extends UserDetailTable
 {
-    public int $ticket_page = 1;
-
     protected function getTableQuery(): Builder|Relation
     {
         if (!$this->isLoaded) {

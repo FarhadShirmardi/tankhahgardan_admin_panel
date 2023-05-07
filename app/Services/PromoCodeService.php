@@ -31,19 +31,10 @@ class PromoCodeService
             ->where(fn ($query) => $query->where('expire_at', '>', now()->toDateTimeString())->orWhereNull('expire_at'))
             ->where(fn ($query) => $query->where('start_at', '<=', now()->toDateTimeString()))
             ->where(fn ($query) => $query->whereNull('user_id')->orWhere('user_id', $user->id))
-//            ->whereRaw('max_count - reserve_count > 0')
             ->selectSub($usedPromoQuery, 'used_promo_code_count')
             ->selectSub($totalUserQuery, 'total_promo_code_count')
             ->addSelect([
-                'id',
-                'max_count',
-                'reserve_count',
-                'code',
-                'discount_percent',
-                'max_discount',
-                'start_at',
-                'expire_at',
-                'text',
+                'promo_codes.*',
             ])
             ->havingRaw(' used_promo_code_count <= 0 and max_count - reserve_count - total_promo_code_count > 0');
     }
