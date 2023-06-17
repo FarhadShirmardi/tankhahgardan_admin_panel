@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Filament\Navigation\NavigationGroup;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -31,8 +32,11 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
+        if (str(config('app.url'))->before('://')->is('https')) {
+            URL::forceScheme('https');
+        }
         Filament::serving(function () {
             // Using Vite
             Filament::registerViteTheme([

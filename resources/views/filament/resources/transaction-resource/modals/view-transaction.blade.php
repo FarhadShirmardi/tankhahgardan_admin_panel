@@ -16,6 +16,8 @@
     $payableAmount = \App\Helpers\UtilHelpers::getPayableAmount($planAmount, $addedValueAmount, -1 * $discountAmount, -1 * $walletAmount, -1 * $creditAmount);
     $payableAmountLabel = __('names.payable amount');
 
+    $payedDateLabel = __('names.payed date');
+    $payedDate = \Derakht\Jalali\Jalali::parse($record->created_at)->toJalaliDateTimeString();
     $startDateLabel = __('names.start date');
     $startDate = \Derakht\Jalali\Jalali::parse($record->start_date)->toJalaliDateTimeString();
     $endDateLabel = __('names.end date');
@@ -23,6 +25,7 @@
 @endphp
 <div class="flex flex-col gap-4">
     <x-user-premium-invoice-row :label="$planLabel" :value="$planAmount" />
+    <x-user-premium-invoice-row :label="$payedDateLabel" :value="$payedDate" is-price=0 />
     <x-user-premium-invoice-row :label="$startDateLabel" :value="$startDate" is-price=0 />
     <x-user-premium-invoice-row :label="$endDateLabel" :value="$endDate" is-price=0 />
     <x-user-premium-invoice-row :label="$addedValueLabel" :value="$addedValueAmount" />

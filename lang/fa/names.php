@@ -202,4 +202,5 @@ return [
         'without plan' => 'بدون طرح',
         'visible to user' => 'قابل نمایش برای کاربر'
     ],
+    'payed date' => 'تاریخ پرداخت',
 ];
