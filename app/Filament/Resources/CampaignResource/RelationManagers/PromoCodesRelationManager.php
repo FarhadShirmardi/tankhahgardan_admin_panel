@@ -11,6 +11,7 @@ use App\Helpers\UtilHelpers;
 use App\Models\PromoCode;
 use App\Models\User;
 use Closure;
+use Exception;
 use Filament\Forms\ComponentContainer;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
@@ -49,10 +50,19 @@ class PromoCodesRelationManager extends RelationManager
             ->schema(self::getFormArray());
     }
 
+    /**
+     * @throws Exception
+     */
+    protected function getTableQuery(): Builder|Relation
+    {
+        return parent::getTableQuery();
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->columns(self::getTableColumnsArray())
+            ->defaultSort('created_at', 'desc')
             ->headerActions([
                 CreateAction::make()
             ]);

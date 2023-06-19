@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\ProjectResource;
 
+use App\Enums\ProjectUserStateEnum;
 use App\Enums\ProjectUserTypeEnum;
 use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\UserResource;
@@ -68,6 +69,7 @@ class UsersTable extends ProjectDetailTable
             ->addSelect('project_user.id as id')
             ->addSelect('user_id')
             ->addSelect('user_type')
+            ->addSelect('project_user.state as user_state')
             ->selectSub($paymentCountQuery, 'payment_count')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($imprestCountQuery, 'imprest_count')
@@ -89,6 +91,11 @@ class UsersTable extends ProjectDetailTable
                 ->label(__('names.role'))
                 ->multiple()
                 ->options(ProjectUserTypeEnum::columnValues()),
+            Tables\Filters\SelectFilter::make('user_state')
+                ->label(__('names.user state'))
+                ->multiple()
+                ->query(fn (Builder $query, array $data): Builder => $query->when(filled($data['values']), fn ($q) => $q->where('project_user.state', $data['values'])))
+                ->options(ProjectUserStateEnum::columnValues()),
         ];
     }
 
@@ -113,6 +120,18 @@ class UsersTable extends ProjectDetailTable
                 ->tooltip(ProjectsTable::getTeamNames())
                 ->enum(ProjectUserTypeEnum::columnValues())
                 ->color(static fn ($state) => ProjectUserTypeEnum::from($state)->color()),
+            Tables\Columns\IconColumn::make('user_state')
+                ->options([
+                    'heroicon-o-x-circle' => ProjectUserStateEnum::INACTIVE->value,
+                    'heroicon-o-clock' => ProjectUserStateEnum::PENDING->value,
+                    'heroicon-o-check-circle' => ProjectUserStateEnum::ACTIVE->value
+                ])
+                ->colors([
+                    'danger' => ProjectUserStateEnum::INACTIVE->value,
+                    'warning' => ProjectUserStateEnum::PENDING->value,
+                    'success' => ProjectUserStateEnum::ACTIVE->value,
+                ])
+                ->label(__('names.user state')),
             Tables\Columns\TextColumn::make('payments_count')
                 ->sortable()
                 ->label(__('names.payment count'))
@@ -132,6 +151,7 @@ class UsersTable extends ProjectDetailTable
             'footer_columns' => [
                 '',
                 __('names.sum'),
+                '',
                 '',
                 '',
                 $this->projectReport->payment_count,

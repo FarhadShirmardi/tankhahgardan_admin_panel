@@ -92,6 +92,7 @@ class ProjectResource extends Resource
                     ->label(__('names.imprest count'))
                     ->sortable(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('location')
                     ->label(__('names.project location'))

@@ -2,8 +2,11 @@
 
 namespace App\Enums;
 
+use App\Traits\HasColumnValues;
+
 enum ProjectUserStateEnum: int
 {
+    use HasColumnValues;
     case ACTIVE = 1;
     case PENDING = 2;
     case INACTIVE = 40;

@@ -18,7 +18,8 @@ class TicketsTable extends UserDetailTable
         }
 
         return $this->user->tickets()
-            ->orderByDesc('tickets.created_at')
+            ->with(['user', 'lastTicketMessage'])
+            ->withAggregate('lastTicketMessage', 'created_at')
             ->getQuery();
     }
 

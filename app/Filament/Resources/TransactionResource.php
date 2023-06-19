@@ -39,6 +39,7 @@ class TransactionResource extends Resource
         return $table
             ->columns(self::getColumns())
             ->actions(self::getActions())
+            ->defaultSort('created_at', 'desc')
             ->bulkActions([
             ])
             ->filters([

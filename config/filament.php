@@ -248,7 +248,7 @@ return [
             'groups' => [
                 'are_collapsible' => true,
             ],
-            'width' => '13rem',
+            'width' => '11rem',
             'collapsed_width' => null,
         ],
     ],
@@ -262,7 +262,7 @@ return [
     |
     */
 
-    'favicon' => null,
+    'favicon' => '/icons/tankhah_logo.png',
 
     /*
     |--------------------------------------------------------------------------

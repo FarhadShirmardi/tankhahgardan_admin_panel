@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Components\JalaliDatePicker;
 use App\Filament\Components\JalaliDateTimeColumn;
+use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\CampaignResource\Pages;
 use App\Filament\Resources\CampaignResource\RelationManagers\PromoCodesRelationManager;
 use App\Models\Campaign;
@@ -62,6 +63,8 @@ class CampaignResource extends Resource
     {
         return $table
             ->columns([
+                RowIndexColumn::make(),
+
                 TextColumn::make('name')
                     ->label(__('names.campaign.name'))
                     ->searchable()

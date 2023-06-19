@@ -30,6 +30,13 @@ class TicketResource extends Resource
             ->count();
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['user', 'lastTicketMessage'])
+            ->withAggregate('lastTicketMessage', 'created_at');
+    }
+
     public static function getModelLabel(): string
     {
         return __('filament::pages/ticket.title');
@@ -99,7 +106,7 @@ class TicketResource extends Resource
             TextColumn::make('state')
                 ->label(__('names.state'))
                 ->getStateUsing(fn (Ticket $record) => $record->state->description()),
-            JalaliDateTimeColumn::make('lastTicketMessage.created_at')
+            JalaliDateTimeColumn::make('last_ticket_message_created_at')
                 ->label(__('names.last update'))
                 ->sortable()
                 ->dateTime(),
@@ -113,6 +120,7 @@ class TicketResource extends Resource
     {
         return $table
             ->columns(self::getTicketsTableColumns())
+            ->defaultSort('last_ticket_message_created_at', 'desc')
             ->filters(
                 [
                     SelectFilter::make('state')

@@ -36,7 +36,7 @@ class UserResource extends Resource
 
     public static function getGlobalSearchResultTitle(Model $record): string
     {
-        return $record->phone_number . ($record->name ? " (".$record->name.")" : '');
+        return $record->phone_number.($record->name ? " (".$record->name.")" : '');
     }
 
     public static function getModelLabel(): string
@@ -123,7 +123,7 @@ class UserResource extends Resource
                         ->form([
                             TextInput::make('phone_number')->label(__('names.phone number')),
                         ])
-                        ->indicateUsing(fn (array $data) => ! $data['phone_number'] ? null : __('names.phone number').': '.$data['phone_number'])
+                        ->indicateUsing(fn (array $data) => !$data['phone_number'] ? null : __('names.phone number').': '.$data['phone_number'])
                         ->query(function (Builder $query, array $data): Builder {
                             return $query->when(
                                 $data['phone_number'],
@@ -158,6 +158,7 @@ class UserResource extends Resource
                 ],
                 layout: Tables\Filters\Layout::AboveContent
             )
+            ->defaultSort('registered_at', 'desc')
             ->actions([
                 Tables\Actions\ViewAction::make(),
             ])

@@ -54,9 +54,9 @@ class TicketMessagesRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('panel_text')
                     ->label('متن پشتیبان')
                     ->getStateUsing(fn (TicketMessage $record) => $record->panel_user_id != null ? $record->text : ' - '),
-                Tables\Columns\TextColumn::make('panel_text')
+                Tables\Columns\TextColumn::make('project')
                     ->label('پروژه')
-                    ->url(fn (TicketMessage $record) =>  $record->project_user_id != null ? ProjectResource::getUrl('view', ['record' => $record->getProjectUser()?->project_id]) : null)
+                    ->url(fn (TicketMessage $record) => $record->project_user_id != null ? ProjectResource::getUrl('view', ['record' => $record->getProjectUser()?->project_id]) : null)
                     ->getStateUsing(fn (TicketMessage $record) => $record->project_user_id != null ? $record->getProjectUser()?->getProjectTeamText() : ' - '),
                 JalaliDateTimeColumn::make('created_at')
                     ->label('تاریخ و ساعت')
@@ -76,6 +76,8 @@ class TicketMessagesRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
+                    ->label(fn (TicketMessage $record) => is_null($record->panel_user_id) ? __('filament::resources/pages/view-record.form.tab.label') : __('filament::resources/pages/edit-record.form.tab.label'))
+                    ->icon(fn (TicketMessage $record) => is_null($record->panel_user_id) ? 'heroicon-s-eye' : 'heroicon-s-pencil')
                     ->url(function (RelationManager $livewire, Model $record) {
                         return TicketResource::getUrl('messageEdit', [
                             'record' => $livewire->ownerRecord->id,
