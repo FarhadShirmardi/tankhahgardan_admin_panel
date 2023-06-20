@@ -18,6 +18,7 @@ class TicketPolicy
 
     public function view(PanelUser $user, Ticket $ticket): bool
     {
+        return $user->hasPermissionTo(PermissionEnum::VIEW_TICKET->value);
     }
 
     public function create(PanelUser $user): bool

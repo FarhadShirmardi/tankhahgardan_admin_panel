@@ -106,7 +106,7 @@ class UsersTable extends ProjectDetailTable
             Tables\Columns\TextColumn::make('name')
                 ->label(__('names.full name'))
                 ->tooltip(fn (ProjectUser $record) => $record->name)
-                ->words(4)
+                ->words(2)
                 ->copyable(),
             Tables\Columns\TextColumn::make('phone_number')
                 ->label(__('names.phone number'))
@@ -126,6 +126,7 @@ class UsersTable extends ProjectDetailTable
                     'heroicon-o-clock' => ProjectUserStateEnum::PENDING->value,
                     'heroicon-o-check-circle' => ProjectUserStateEnum::ACTIVE->value
                 ])
+                ->tooltip(fn ($record) => ProjectUserStateEnum::from($record->user_state)->description())
                 ->colors([
                     'danger' => ProjectUserStateEnum::INACTIVE->value,
                     'warning' => ProjectUserStateEnum::PENDING->value,

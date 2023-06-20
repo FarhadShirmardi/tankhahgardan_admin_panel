@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ProjectUserTypeEnum;
+use App\Enums\UserStateEnum;
 use App\Enums\UserStatusTypeEnum;
 use App\Services\UserReportService;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -29,6 +30,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $casts = [
+        'state' => UserStateEnum::class,
     ];
 
     /** @return Attribute<string, never> */

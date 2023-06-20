@@ -71,7 +71,7 @@ enum PremiumPlanEnum: int
             'transaction_count_limit' => 100,
             'image_count_limit' => 100,
             'project_count_limit' => 2,
-            'imprest_count_limit' => 3,
+            'imprest_count_limit' => 5,
             'transaction_image_count_limit' => 2,
             'user_count_limit' => 0,
             'pdf_count_limit' => 1,
@@ -105,7 +105,7 @@ enum PremiumPlanEnum: int
             self::getFreePlanLimits(),
             [
                 'transaction_count_limit' => self::UNLIMITED,
-                'image_count_limit' => 1000,
+                'image_count_limit' => 2000,
                 'project_count_limit' => 4,
                 'imprest_count_limit' => self::UNLIMITED,
                 'transaction_image_count_limit' => 4,
@@ -127,7 +127,7 @@ enum PremiumPlanEnum: int
         return array_merge(
             self::getBronzePlanLimits(),
             [
-                'image_count_limit' => 5000,
+                'image_count_limit' => 7000,
                 'project_count_limit' => 10,
                 'transaction_image_count_limit' => 8,
                 'user_count_limit' => 7,

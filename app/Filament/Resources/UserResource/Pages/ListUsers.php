@@ -9,6 +9,8 @@ class ListUsers extends ListRecords
 {
     protected static string $resource = UserResource::class;
 
+    protected int $defaultTableRecordsPerPageSelectOption = 50;
+
     protected function getActions(): array
     {
         return [

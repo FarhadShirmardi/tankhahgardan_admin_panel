@@ -32,6 +32,8 @@ class TransactionResource extends Resource
         return __('filament::pages/transaction.title');
     }
 
+    protected static ?int $navigationSort = 5;
+
     protected static ?string $navigationIcon = 'heroicon-o-calculator';
 
     public static function table(Table $table): Table

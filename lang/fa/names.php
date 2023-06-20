@@ -120,7 +120,7 @@ return [
         'accountant import' => 'دریافت فایل سند حسابداری',
         'monthly budget' => 'بودجه‌بندی ماهانه',
         'transaction copy' => 'کپی تراکنش بین شرکت‌ها',
-        'admin transaction' => 'ثبت سند اصلاحی در پنل مدیریت',
+        'admin transaction' => 'ثبت تراکنش در پنل مدیریت',
         'team limit' => 'ساخت و مدیریت تیم تنخواه‌داری',
         'admin panel' => 'شیر پنل مدیریت',
         'imprest budget' => 'بودجه‌بندی تنخواه',

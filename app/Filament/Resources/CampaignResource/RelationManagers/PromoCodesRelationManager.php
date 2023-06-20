@@ -184,7 +184,7 @@ class PromoCodesRelationManager extends RelationManager
                 ->label(__('names.promo_code.discount percent')),
 
             TextColumn::make('max_discount')
-                ->getStateUsing(fn (PromoCode $record) => is_null($record->max_discount) ? '-' : $record->max_discount)
+                ->getStateUsing(fn (PromoCode $record) => is_null($record->max_discount) ? '-' : formatPrice($record->max_discount))
                 ->label(__('names.promo_code.max discount')),
 
             TextColumn::make('max_count')

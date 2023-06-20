@@ -36,6 +36,8 @@ class ProjectResource extends Resource
         return __('filament::pages/project.title');
     }
 
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $navigationIcon = 'heroicon-o-library';
 
     public static function form(Form $form): Form
@@ -60,10 +62,17 @@ class ProjectResource extends Resource
                     ->getStateUsing(fn (ProjectReport $record) => ActivityTypeEnum::from($record->project_type)->color()),
                 TextColumn::make('name')
                     ->label(__('names.project name'))
+                    ->words(4)
+                    ->limit(15)
+                    ->tooltip(fn (ProjectReport $record) => $record->name)
                     ->copyable(),
                 TextColumn::make('province.name')
+                    ->tooltip(fn (ProjectReport $record) => $record->province->name)
+                    ->words(1)
                     ->label(__('names.province')),
                 TextColumn::make('city.name')
+                    ->tooltip(fn (ProjectReport $record) => $record->city->name)
+                    ->words(1)
                     ->label(__('names.city')),
                 TextColumn::make('type')
                     ->label(__('names.project type'))

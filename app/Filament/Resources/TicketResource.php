@@ -6,6 +6,7 @@ use App\Enums\TicketStateEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\TicketResource\Pages;
+use App\Filament\Resources\TicketResource\RelationManagers\AllTicketsRelationManager;
 use App\Filament\Resources\TicketResource\RelationManagers\TicketMessagesRelationManager;
 use App\Models\Ticket;
 use Derakht\Jalali\Jalali;
@@ -22,6 +23,8 @@ use Illuminate\Database\Eloquent\Builder;
 class TicketResource extends Resource
 {
     protected static ?string $model = Ticket::class;
+
+    protected static ?int $navigationSort = 3;
 
     protected static function getNavigationBadge(): ?string
     {
@@ -143,7 +146,8 @@ class TicketResource extends Resource
     public static function getRelations(): array
     {
         return [
-            TicketMessagesRelationManager::class
+            TicketMessagesRelationManager::class,
+            AllTicketsRelationManager::class
         ];
     }
 

@@ -28,6 +28,8 @@ class CampaignResource extends Resource
         return __('filament::pages/campaign.title_plural');
     }
 
+    protected static ?int $navigationSort = 7;
+
     protected static ?string $navigationIcon = 'carbon-promote';
 
     protected static ?string $recordTitleAttribute = 'name';

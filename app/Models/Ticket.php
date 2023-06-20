@@ -6,6 +6,7 @@ use App\Enums\TicketStateEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Ticket extends Model
@@ -28,6 +29,18 @@ class Ticket extends Model
     public function ticketMessages(): HasMany
     {
         return $this->hasMany(TicketMessage::class)->latest();
+    }
+
+    public function allTickets(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Ticket::class,
+            User::class,
+            'id',
+            'user_id',
+            'user_id',
+            'id'
+        )->latest();
     }
 
     public function lastTicketMessage(): HasOne

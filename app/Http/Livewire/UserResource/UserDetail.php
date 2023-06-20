@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\UserResource;
 
 use App\Enums\UserPremiumStateEnum;
+use App\Enums\UserStateEnum;
 use App\Models\User;
 use App\Models\UserReport;
 use Derakht\Jalali\Jalali;
@@ -16,10 +17,12 @@ class UserDetail extends Component implements Forms\Contracts\HasForms
     use Forms\Concerns\InteractsWithForms;
 
     private UserReport $userReport;
+    private User $user;
 
     public function mount(User $user)
     {
         $this->userReport = UserReport::findOrFail($user->id);
+        $this->user = $user;
     }
 
     protected function getFormSchema(): array
@@ -35,8 +38,8 @@ class UserDetail extends Component implements Forms\Contracts\HasForms
 
                     Forms\Components\Placeholder::make('registered_at')
                         ->label(__('names.registered at'))
-                        ->extraAttributes(['class' => 'ltr-col'])
-                        ->content(fn (UserReport $record): ?string => Jalali::parse($record->registered_at)->toJalaliDateTimeString()),
+                        ->extraAttributes(fn () => $this->user->state == UserStateEnum::ACTIVE ? ['class' => 'ltr-col'] : [])
+                        ->content(fn (UserReport $record): ?string => $this->user->state == UserStateEnum::ACTIVE ? Jalali::parse($record->registered_at)->toJalaliDateTimeString() : __('message.user is not activate')),
 
                     Forms\Components\Placeholder::make('max_time')
                         ->label(__('names.last record time'))
