@@ -81,7 +81,7 @@ class TicketResource extends Resource
                                     ->label(__('names.state'))
                                     ->options(TicketStateEnum::columnValues()),
                             ])
-                            ->columns(2)
+                            ->columns()
                             ->columnSpan(['lg' => 2]),
                     ]),
             ]);

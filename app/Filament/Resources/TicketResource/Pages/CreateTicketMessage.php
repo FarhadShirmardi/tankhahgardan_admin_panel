@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TicketResource\Pages;
 
+use App\Enums\SmsTemplateEnum;
 use App\Enums\TicketStateEnum;
 use App\Filament\Resources\TicketResource;
 use App\Models\Ticket;
@@ -75,24 +76,37 @@ class CreateTicketMessage extends Page
         ]);
         $this->ticket->update(['state' => TicketStateEnum::ANSWERED]);
 
-        collect($this->image)->map(function ($item) use ($ticketMessage) {
-            $http = new Client();
-            $http->post(
-                config('app.app_direct_url')."/ticketMessage/$ticketMessage->id/images",
-                [
-                    'headers' => [
-                        'Accept' => 'application/json',
+        $http = new Client();
+        collect($this->image)->map(fn ($item) => $http->post(
+            config('app.app_direct_url')."/ticketMessage/$ticketMessage->id/images",
+            [
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+                'multipart' => [
+                    [
+                        'name' => 'image',
+                        'filename' => $item,
+                        'contents' => file_get_contents(storage_path().'/app/public/'.$item),
                     ],
-                    'multipart' => [
-                        [
-                            'name' => 'image',
-                            'filename' => $item,
-                            'contents' => file_get_contents(storage_path().'/app/public/'.$item),
-                        ],
-                    ],
-                ]
-            );
-        });
+                ],
+            ]
+        ));
+
+        $user = $this->ticket->user;
+        $http->post(
+            config('app.app_direct_url')."/sendSms",
+            [
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+                'form_params' => [
+                    'receptor' => $user->phone_number,
+                    'template' => SmsTemplateEnum::TICKET_RESPONSE->value,
+                    'token1' => 'کاربر',
+                ],
+            ]
+        );
 
         Notification::make()
             ->success()
