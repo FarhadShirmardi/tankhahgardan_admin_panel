@@ -39,7 +39,7 @@ class ProjectDetail extends Component implements Forms\Contracts\HasForms
                 ->schema([
                     Forms\Components\Placeholder::make('type')
                         ->label(__('names.project type'))
-                        ->content(fn (ProjectReport $record) => ProjectTypeEnum::from($record->type)->description()),
+                        ->content(fn (ProjectReport $record) => ProjectTypeEnum::tryFrom($record->type)?->description() ?? '-'),
 
                     Forms\Components\Placeholder::make('created_at')
                         ->label(__('names.created at'))
@@ -53,11 +53,11 @@ class ProjectDetail extends Component implements Forms\Contracts\HasForms
 
                     Forms\Components\Placeholder::make('province')
                         ->label(__('names.province'))
-                        ->content(fn (ProjectReport $record) => Province::query()->find( $record->province_id)->name),
+                        ->content(fn (ProjectReport $record) => Province::query()->find( $record->province_id)?->name ?? '-'),
 
                     Forms\Components\Placeholder::make('city')
                         ->label(__('names.city'))
-                        ->content(fn (ProjectReport $record) => City::query()->find( $record->city_id)->name),
+                        ->content(fn (ProjectReport $record) => City::query()->find( $record->city_id)?->name ?? '-'),
 
                     Forms\Components\Placeholder::make('unit')
                         ->label(__('names.currency unit'))

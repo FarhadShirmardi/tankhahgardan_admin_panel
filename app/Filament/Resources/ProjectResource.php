@@ -67,11 +67,11 @@ class ProjectResource extends Resource
                     ->tooltip(fn (ProjectReport $record) => $record->name)
                     ->copyable(),
                 TextColumn::make('province.name')
-                    ->tooltip(fn (ProjectReport $record) => $record->province->name)
+                    ->tooltip(fn (ProjectReport $record) => $record->province?->name)
                     ->words(1)
                     ->label(__('names.province')),
                 TextColumn::make('city.name')
-                    ->tooltip(fn (ProjectReport $record) => $record->city->name)
+                    ->tooltip(fn (ProjectReport $record) => $record->city?->name)
                     ->words(1)
                     ->label(__('names.city')),
                 TextColumn::make('type')
