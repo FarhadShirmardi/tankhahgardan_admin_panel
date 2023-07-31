@@ -157,7 +157,7 @@ class UserReportService
             ->addSelect('users.id as id')
             ->selectRaw("CONCAT_WS(' ', IFNULL(users.name, ''), IFNULL(users.family, '')) as name")
             ->addSelect('phone_number')
-            ->addSelect('users.verification_time as registered_at')
+            ->addSelect(\DB::raw('IFNULL(users.verification_time, users.created_at) as registered_at'))
             ->selectSub($paymentCountQuery, 'payment_count')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($imprestCountQuery, 'imprest_count')

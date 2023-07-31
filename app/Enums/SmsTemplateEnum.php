@@ -4,5 +4,5 @@ namespace App\Enums;
 
 enum SmsTemplateEnum: string
 {
-    case TICKET_RESPONSE = 'tankhah-feedback';
+    case TICKET_RESPONSE = 'ticket-response';
 }

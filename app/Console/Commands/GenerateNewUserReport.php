@@ -31,7 +31,7 @@ class GenerateNewUserReport extends Command
                 ->from('panel_user_reports')
                 ->whereColumn('users.id', 'panel_user_reports.id')
             )
-            ->chunk(1000, function ($ids) use ($bar, $columnList) {
+            ->chunk(1, function ($ids) use ($bar, $columnList) {
                 $ids = $ids->pluck('id')->toArray();
                 $selectQuery = DB::query()->fromSub(UserReportService::getUsersQuery($ids)->getQuery(), 'users_query')->select($columnList);
                 DB::connection('mysql_panel')->table('user_reports')->insertUsing($columnList, $selectQuery);
