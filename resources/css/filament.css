@@ -1,0 +1,11 @@
+@import '../../vendor/filament/filament/resources/css/app.css';
+@import "progress.css";
+
+.filament-app-layout {
+    font-family: Number, IRANSans, sans-serif !important;
+}
+
+.ltr-col {
+    direction: ltr;
+    @apply text-end;
+}

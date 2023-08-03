@@ -2,18 +2,30 @@
 
 namespace App\Providers;
 
+// use Illuminate\Support\Facades\Gate;
+use App\Models\PanelUser;
+use App\Models\PremiumPlan;
+use App\Models\Ticket;
+use App\Models\UserReport;
+use App\Policies\PanelUserPolicy;
+use App\Policies\PremiumPlanPolicy;
+use App\Policies\TicketPolicy;
+use App\Policies\UserReportPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
     /**
-     * The policy mappings for the application.
+     * The model to policy mappings for the application.
      *
-     * @var array
+     * @var array<class-string, class-string>
      */
     protected $policies = [
-        // 'App\Model' => 'App\Policies\ModelPolicy',
+        // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+        Ticket::class => TicketPolicy::class,
+        PanelUser::class => PanelUserPolicy::class,
+        UserReport::class => UserReportPolicy::class,
+        PremiumPlan::class => PremiumPlanPolicy::class,
     ];
 
     /**

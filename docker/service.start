@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+echo "servce starting..."
+
+mkdir -p /run/php-fpm
+
+crontab < /usr/share/nginx/html/home/docker/laravel_cron
+
+#su apache -s /bin/bash -c 'php artisan migrate'
+
+npm install
+
+supervisord -c /etc/supervisord.conf -n
+
