@@ -3,7 +3,7 @@ version: '2'
 services:
   nginx-php-fpm:
     image: registry.domusgroup.ir/upstream/php-octane:php81
-    container_name: tankhahgardan_panel_backend
+    container_name: tankhahgardan_panel
     volumes:
       - ./:/usr/share/nginx/html/home
       - $PWD/docker/supervisord.conf:/etc/supervisord.conf
@@ -12,6 +12,10 @@ services:
         #      - $PWD/docker/default.conf:/etc/nginx/conf.d/default.conf
     networks:
       default:
+    healthcheck:
+      test: curl --fail -s http://localhost:8185/_ping || exit 1
+    environment:
+     - TZ=Asia/Tehran
     restart: always
 
 
