@@ -42,7 +42,7 @@ class InvoicesTable extends UserDetailTable
             Tables\Columns\BadgeColumn::make('duration_id')
                 ->label(__('names.plan type'))
                 ->enum(PremiumDurationEnum::columnValues())
-                ->color(static fn ($state) => PremiumDurationEnum::from($state)->color()),
+                ->color(static fn ($state) => PremiumDurationEnum::tryFrom($state)?->color()),
             JalaliDateTimeColumn::make('start_date')
                 ->label(__('names.start date'))
                 ->dateTime()
