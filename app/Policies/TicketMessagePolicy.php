@@ -7,18 +7,16 @@ use App\Models\PanelUser;
 use App\Models\Ticket;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class TicketPolicy
+class TicketMessagePolicy
 {
     use HandlesAuthorization;
 
     public function viewAny(PanelUser $user): bool
     {
-        return $user->hasPermissionTo(PermissionEnum::VIEW_TICKET->value);
     }
 
     public function view(PanelUser $user, Ticket $ticket): bool
     {
-        return $user->hasPermissionTo(PermissionEnum::VIEW_TICKET->value);
     }
 
     public function create(PanelUser $user): bool
@@ -28,6 +26,7 @@ class TicketPolicy
 
     public function update(PanelUser $user, Ticket $ticket): bool
     {
+        return $user->hasPermissionTo(PermissionEnum::RESPONSE_TICKET->value);
     }
 
     public function delete(PanelUser $user, Ticket $ticket): bool
