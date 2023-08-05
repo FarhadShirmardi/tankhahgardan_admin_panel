@@ -11,11 +11,11 @@ class TicketMessagePolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(PanelUser $user): bool
+    public function viewAny(PanelUser $user)
     {
     }
 
-    public function view(PanelUser $user, Ticket $ticket): bool
+    public function view(PanelUser $user, Ticket $ticket)
     {
     }
 
