@@ -19,6 +19,7 @@ use App\Models\UserReport;
 use App\Models\UserStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class UserReportService
 {

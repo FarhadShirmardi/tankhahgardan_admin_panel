@@ -15,8 +15,10 @@ class Kernel extends ConsoleKernel
             ->dailyAt('05:27');
 
         $schedule->command('generate:new-user-report')
+            ->withoutOverlapping()
             ->everyFiveMinutes();
         $schedule->command('generate:new-project-report')
+            ->withoutOverlapping()
             ->everyFiveMinutes();
     }
 

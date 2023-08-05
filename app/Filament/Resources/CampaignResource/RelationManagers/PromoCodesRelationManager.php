@@ -177,7 +177,10 @@ class PromoCodesRelationManager extends RelationManager
 
             TextColumn::make('user.username')
                 ->label(__('names.username'))
+                ->words(2)
+                ->limit(25)
                 ->hidden($hasUser)
+                ->tooltip(fn (PromoCode $record) => $record->user->username)
                 ->url(fn (PromoCode $record) => $record->user_id ? UserResource::getUrl('view', ['record' => $record->user_id]) : null, shouldOpenInNewTab: true),
 
             TextColumn::make('discount_percent')

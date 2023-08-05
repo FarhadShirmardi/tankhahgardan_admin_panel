@@ -55,6 +55,8 @@ class TicketMessagesRelationManager extends RelationManager
                     ->label('متن پشتیبان')
                     ->getStateUsing(fn (TicketMessage $record) => $record->panel_user_id != null ? $record->text : ' - '),
                 Tables\Columns\TextColumn::make('project')
+                    ->words(3)
+                    ->limit(70)
                     ->label('پروژه')
                     ->url(fn (TicketMessage $record) => $record->project_user_id != null ? ProjectResource::getUrl('view', ['record' => $record->getProjectUser()?->project_id]) : null)
                     ->getStateUsing(fn (TicketMessage $record) => $record->project_user_id != null ? $record->getProjectUser()?->getProjectTeamText() : ' - '),

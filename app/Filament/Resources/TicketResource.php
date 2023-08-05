@@ -101,10 +101,12 @@ class TicketResource extends Resource
             TextColumn::make('title')
                 ->label(__('names.title'))
                 ->words(4)
+                ->limit(30)
                 ->tooltip(fn (Ticket $record) => $record->title),
             TextColumn::make('lastTicketMessage.text')
                 ->label(__('names.last message'))
                 ->words(4)
+                ->limit(60)
                 ->tooltip(fn (Ticket $record) => $record->lastTicketMessage?->text),
             TextColumn::make('state')
                 ->label(__('names.state'))

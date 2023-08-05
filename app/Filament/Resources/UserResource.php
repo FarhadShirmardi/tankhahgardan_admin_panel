@@ -38,7 +38,7 @@ class UserResource extends Resource
 
     public static function getGlobalSearchResultTitle(Model $record): string
     {
-        return $record->phone_number.($record->name ? " (".$record->name.")" : '');
+        return $record->phone_number.(filled($record->name) ? " (".$record->name.")" : '');
     }
 
     public static function getModelLabel(): string
