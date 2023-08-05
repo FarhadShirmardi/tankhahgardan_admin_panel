@@ -4,6 +4,7 @@ namespace App\Http\Livewire\UserResource;
 
 use App\Enums\UserPremiumStateEnum;
 use App\Enums\UserStateEnum;
+use App\Jobs\UpdateUserReportJob;
 use App\Models\User;
 use App\Models\UserReport;
 use Derakht\Jalali\Jalali;
@@ -23,6 +24,7 @@ class UserDetail extends Component implements Forms\Contracts\HasForms
     {
         $this->userReport = UserReport::findOrFail($user->id);
         $this->user = $user;
+        dispatch((new UpdateUserReportJob($user)))->onQueue('imprest-excel-file');
     }
 
     protected function getFormSchema(): array
