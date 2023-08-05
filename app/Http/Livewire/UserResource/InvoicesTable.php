@@ -36,9 +36,9 @@ class InvoicesTable extends UserDetailTable
             RowIndexColumn::make(),
             Tables\Columns\ColorColumn::make('premiumPlan.type')
                 ->label(__('names.plan'))
-                ->tooltip(fn (Invoice $record) => $record->premiumPlan->type->title())
+                ->tooltip(fn (Invoice $record) => $record->premiumPlan?->type->title())
                 ->alignCenter()
-                ->getStateUsing(fn (Invoice $record) => $record->premiumPlan->type->color()),
+                ->getStateUsing(fn (Invoice $record) => $record->premiumPlan?->type->color()),
             Tables\Columns\BadgeColumn::make('duration_id')
                 ->label(__('names.plan type'))
                 ->enum(PremiumDurationEnum::columnValues())
