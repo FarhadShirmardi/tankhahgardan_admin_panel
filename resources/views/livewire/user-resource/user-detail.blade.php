@@ -1,3 +1,3 @@
-<div wire:init="updateUser">
+<div>
     {{ $this->form }}
 </div>
