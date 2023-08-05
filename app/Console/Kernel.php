@@ -17,9 +17,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('generate:new-user-report')
             ->withoutOverlapping()
             ->everyFiveMinutes();
-        $schedule->command('generate:new-project-report')
-            ->withoutOverlapping()
-            ->everyFiveMinutes();
+//        $schedule->command('generate:new-project-report')
+//            ->withoutOverlapping()
+//            ->everyFiveMinutes();
     }
 
     protected function commands(): void
