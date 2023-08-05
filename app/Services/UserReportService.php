@@ -19,7 +19,6 @@ use App\Models\UserReport;
 use App\Models\UserStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class UserReportService
 {
@@ -157,14 +156,18 @@ class UserReportService
             ->joinSub($maxTimeQuery, 'MaxTime', 'MaxTime.user_id', '=', 'users.id')
             ->addSelect('users.id as id')
             ->selectRaw("CONCAT_WS(' ', IFNULL(users.name, ''), IFNULL(users.family, '')) as name")
+            ->when(count($userIds) > 1, fn ($q) => $q->selectRaw("0 as image_count")
+                ->selectRaw("0 as image_size")
+            )
+            ->when(count($userIds) == 1, fn ($q) => $q->selectSub($imageCountQuery, 'image_count')
+                ->selectSub($imageSizeQuery, 'image_size')
+            )
             ->addSelect('phone_number')
             ->addSelect(\DB::raw('IFNULL(users.verification_time, users.created_at) as registered_at'))
             ->selectSub($paymentCountQuery, 'payment_count')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($imprestCountQuery, 'imprest_count')
             ->selectSub($fileCountQuery, 'file_count')
-            ->selectSub($imageCountQuery, 'image_count')
-            ->selectSub($imageSizeQuery, 'image_size')
             ->selectSub($deviceCountQuery, 'device_count')
             ->selectSub($ticketCountQuery, 'ticket_count')
             ->selectSub($stepByStep, 'step_by_step')
