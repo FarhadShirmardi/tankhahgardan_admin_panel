@@ -28,6 +28,7 @@ class TicketPolicy
 
     public function update(PanelUser $user, Ticket $ticket): bool
     {
+        return true;
     }
 
     public function delete(PanelUser $user, Ticket $ticket): bool
