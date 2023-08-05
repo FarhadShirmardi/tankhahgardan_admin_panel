@@ -54,6 +54,11 @@ class UserDetail extends Component implements Forms\Contracts\HasForms
         return $this->userReport;
     }
 
+    public function updateUser(): void
+    {
+        $this->user->updateUserReport();
+    }
+
     public function render(): View
     {
         return view('livewire.user-resource.user-detail');
