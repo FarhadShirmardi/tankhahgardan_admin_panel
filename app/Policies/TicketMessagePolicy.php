@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Enums\PermissionEnum;
 use App\Models\PanelUser;
 use App\Models\Ticket;
+use App\Models\TicketMessage;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class TicketMessagePolicy
@@ -26,20 +27,20 @@ class TicketMessagePolicy
         return $user->hasPermissionTo(PermissionEnum::RESPONSE_TICKET->value);
     }
 
-    public function update(PanelUser $user, Ticket $ticket): bool
+    public function update(PanelUser $user, TicketMessage $ticketMessage): bool
     {
         return $user->hasPermissionTo(PermissionEnum::RESPONSE_TICKET->value);
     }
 
-    public function delete(PanelUser $user, Ticket $ticket): bool
+    public function delete(PanelUser $user, TicketMessage $ticketMessage): bool
     {
     }
 
-    public function restore(PanelUser $user, Ticket $ticket): bool
+    public function restore(PanelUser $user, TicketMessage $ticketMessage): bool
     {
     }
 
-    public function forceDelete(PanelUser $user, Ticket $ticket): bool
+    public function forceDelete(PanelUser $user, TicketMessage $ticketMessage): bool
     {
     }
 }
