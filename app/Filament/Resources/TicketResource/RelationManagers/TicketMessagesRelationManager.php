@@ -52,11 +52,13 @@ class TicketMessagesRelationManager extends RelationManager
                     ->label('متن کاربر')
                     ->words(3)
                     ->limit(50)
+                    ->tooltip(fn (TicketMessage $record) => ($record->panel_user_id == null ? $record->text : ' - '))
                     ->getStateUsing(fn (TicketMessage $record) => ($record->panel_user_id == null ? $record->text : ' - ')),
                 Tables\Columns\TextColumn::make('panel_text')
                     ->label('متن پشتیبان')
                     ->words(3)
                     ->limit(50)
+                    ->tooltip(fn (TicketMessage $record) => $record->panel_user_id != null ? $record->text : ' - ')
                     ->getStateUsing(fn (TicketMessage $record) => $record->panel_user_id != null ? $record->text : ' - '),
                 Tables\Columns\TextColumn::make('project')
                     ->words(3)
