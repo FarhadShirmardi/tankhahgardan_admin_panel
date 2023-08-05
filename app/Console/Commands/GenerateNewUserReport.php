@@ -19,19 +19,14 @@ class GenerateNewUserReport extends Command
     public function handle()
     {
         $columnList = Schema::getColumnListing('user_reports');
-        $bar = $this->output->createProgressBar(User::query()->whereNotExists(
-            fn (Builder $query) => $query
-                ->from('panel_user_reports')
-                ->whereColumn('users.id', 'panel_user_reports.id')
-        )->count());
-        User::query()
+        $query = User::query()
+            ->leftJoin('panel_user_reports', 'panel_user_reports.id', 'users.id')
+            ->whereNull('panel_user_reports.id');
+        $bar = $this->output->createProgressBar(($query->clone())->count());
+        $query->clone()
             ->withoutEagerLoads()
-            ->select(['id'])
-            ->whereNotExists(fn (Builder $query) => $query
-                ->from('panel_user_reports')
-                ->whereColumn('users.id', 'panel_user_reports.id')
-            )
-            ->chunk(1, function ($ids) use ($bar, $columnList) {
+            ->select(['users.id'])
+            ->chunk(1000, function ($ids) use ($bar, $columnList) {
                 $ids = $ids->pluck('id')->toArray();
                 $selectQuery = DB::query()->fromSub(UserReportService::getUsersQuery($ids)->getQuery(), 'users_query')->select($columnList);
                 DB::connection('mysql_panel')->table('user_reports')->insertUsing($columnList, $selectQuery);
