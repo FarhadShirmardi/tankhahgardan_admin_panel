@@ -38,9 +38,9 @@ class UserStatusesTable extends UserDetailTable
             RowIndexColumn::make(),
             Tables\Columns\ColorColumn::make('premiumPlan.type')
                 ->label(__('names.plan'))
-                ->tooltip(fn (UserStatus $record) => $record->premiumPlan->type->title())
+                ->tooltip(fn (UserStatus $record) => $record->premiumPlan?->type->title())
                 ->alignCenter()
-                ->getStateUsing(fn (UserStatus $record) => $record->premiumPlan->type->color()),
+                ->getStateUsing(fn (UserStatus $record) => $record->premiumPlan?->type->color()),
             Tables\Columns\BadgeColumn::make('duration_id')
                 ->label(__('names.plan type'))
                 ->enum(PremiumDurationEnum::columnValues())
