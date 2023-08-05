@@ -23,6 +23,7 @@ class GenerateNewUserReport extends Command
             ->leftJoin('panel_user_reports', 'panel_user_reports.id', 'users.id')
             ->whereNull('panel_user_reports.id');
         $bar = $this->output->createProgressBar(($query->clone())->count());
+        $bar->start();
         $query->clone()
             ->withoutEagerLoads()
             ->select(['users.id'])
