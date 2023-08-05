@@ -1,4 +1,4 @@
-<x-filament::page>
+<x-filament::page wire:init="updateUser">
     <livewire:user-resource.user-detail :user="$this->user"/>
     <livewire:user-resource.user-consumption collapsed=1 :user="$this->user"/>
     <livewire:user-resource.projects-table :user="$this->user"/>
