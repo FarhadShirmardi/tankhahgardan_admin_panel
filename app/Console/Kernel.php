@@ -9,10 +9,10 @@ class Kernel extends ConsoleKernel
 {
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('generate:user-report')
-            ->dailyAt('05:17');
-        $schedule->command('generate:project-report')
-            ->dailyAt('05:27');
+//        $schedule->command('generate:user-report')
+//            ->dailyAt('05:17');
+//        $schedule->command('generate:project-report')
+//            ->dailyAt('05:27');
 
         $schedule->command('generate:new-user-report')
             ->withoutOverlapping()
