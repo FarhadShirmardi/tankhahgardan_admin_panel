@@ -23,4 +23,9 @@ class ViewUser extends Page
     {
         $this->user = User::findOrFail($record);
     }
+
+    public function updateUser(): void
+    {
+        $this->user->updateUserReport();
+    }
 }

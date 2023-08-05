@@ -21,7 +21,6 @@ class UserDetail extends Component implements Forms\Contracts\HasForms
 
     public function mount(User $user)
     {
-//        $user->updateUserReport();
         $this->userReport = UserReport::findOrFail($user->id);
         $this->user = $user;
     }
