@@ -64,7 +64,7 @@ class TicketMessagesRelationManager extends RelationManager
                     ->words(3)
                     ->limit(70)
                     ->label('پروژه')
-                    ->url(fn (TicketMessage $record) => $record->project_user_id != null ? ProjectResource::getUrl('view', ['record' => $record->getProjectUser()?->project_id]) : null)
+                    ->url(fn (TicketMessage $record) => ($record->project_user_id != null and $record->getProjectUser()?->project_id != null) ? ProjectResource::getUrl('view', ['record' => $record->getProjectUser()?->project_id]) : null)
                     ->getStateUsing(fn (TicketMessage $record) => $record->project_user_id != null ? $record->getProjectUser()?->getProjectTeamText() : ' - '),
                 JalaliDateTimeColumn::make('created_at')
                     ->label('تاریخ و ساعت')
