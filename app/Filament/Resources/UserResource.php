@@ -107,9 +107,6 @@ class UserResource extends Resource
                 TextColumn::make('image_count')
                     ->label(__('names.image count'))
                     ->sortable(),
-                TextColumn::make('image_size')
-                    ->label(__('names.image size'))
-                    ->sortable(),
             ])
             ->filters(
                 [

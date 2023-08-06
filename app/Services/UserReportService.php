@@ -93,15 +93,6 @@ class UserReportService
             ->selectRaw($maxCreatedAtQuery)
             ->toSql();
 
-        $imageSizeQuery = Image::withoutTrashed()
-            ->whereHasMorph(
-                'hasImage',
-                [Payment::class, Receive::class],
-                fn (Builder $query) => $query->whereIn('project_user_id', $projectUserIdsQuery)
-            )
-            ->selectRaw('IFNULL(sum(size), 0) / 1024 / 1024')
-            ->getQuery();
-
         $projectCount = ProjectUser::withoutTrashed()
             ->whereColumn('user_id', 'users.id')
             ->selectRaw('count(distinct project_user.project_id)')
