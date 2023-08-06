@@ -153,6 +153,7 @@ class UserReportService
             ->joinSub($maxTimeQuery, 'MaxTime', 'MaxTime.user_id', '=', 'users.id')
             ->addSelect('users.id as id')
             ->selectRaw("CONCAT_WS(' ', IFNULL(users.name, ''), IFNULL(users.family, '')) as name")
+            ->selectRaw("0 as image_count")
             ->selectSub($paymentImageCountQuery, 'payment_image_count')
             ->selectSub($receiveImageCountQuery, 'receive_image_count')
             ->addSelect('phone_number')
