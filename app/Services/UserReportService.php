@@ -181,4 +181,10 @@ class UserReportService
             4 => ['<', now()->subMonths()->toDateTimeString(), 4],
         ];
     }
+
+    public static function updateImageCount(): void
+    {
+        UserReport::query()
+            ->update(['image_count' => 'payment_image_count + receive_image_count']);
+    }
 }

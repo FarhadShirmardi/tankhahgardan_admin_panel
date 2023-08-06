@@ -33,5 +33,6 @@ class GenerateNewUserReport extends Command
                 DB::connection('mysql_panel')->table('user_reports')->insertUsing($columnList, $selectQuery);
                 $bar->advance(count($ids));
             });
+        UserReportService::updateImageCount();
     }
 }
