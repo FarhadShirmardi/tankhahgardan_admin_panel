@@ -185,6 +185,6 @@ class UserReportService
     public static function updateImageCount(): void
     {
         UserReport::query()
-            ->update(['image_count' => 'payment_image_count + receive_image_count']);
+            ->update(['image_count' => DB::raw('payment_image_count + receive_image_count')]);
     }
 }
