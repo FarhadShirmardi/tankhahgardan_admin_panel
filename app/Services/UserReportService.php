@@ -177,8 +177,7 @@ class UserReportService
             ->selectSub($ownProjectCount, 'own_project_count')
             ->selectRaw('MaxTime.max_time as max_time')
             ->selectRaw($userTypeQuery)
-            ->selectRaw("IFNULL( (".$userStateQuery->toSql()." ), ".UserPremiumStateEnum::FREE->value.") as user_state")
-            ->ddRawSql();
+            ->selectRaw("IFNULL( (".$userStateQuery->toSql()." ), ".UserPremiumStateEnum::FREE->value.") as user_state");
     }
 
     public static function timesArray(): array
