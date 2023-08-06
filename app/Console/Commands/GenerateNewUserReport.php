@@ -3,11 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
-use App\Models\UserReport;
 use App\Services\UserReportService;
 use DB;
 use Illuminate\Console\Command;
-use Illuminate\Database\Query\Builder;
 use Schema;
 
 class GenerateNewUserReport extends Command

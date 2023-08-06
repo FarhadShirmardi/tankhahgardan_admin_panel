@@ -22,5 +22,6 @@ class ViewUser extends Page
     public function mount(int $record): void
     {
         $this->user = User::findOrFail($record);
+        $this->user->updateUserReport();
     }
 }
