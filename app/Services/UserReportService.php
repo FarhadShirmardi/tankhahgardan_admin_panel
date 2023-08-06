@@ -182,9 +182,10 @@ class UserReportService
         ];
     }
 
-    public static function updateImageCount(): void
+    public static function updateImageCount(int $userId = null): void
     {
         UserReport::query()
+            ->when(!is_null($userId), fn ($query) => $query->where('id', $userId))
             ->update(['image_count' => DB::raw('payment_image_count + receive_image_count')]);
     }
 }

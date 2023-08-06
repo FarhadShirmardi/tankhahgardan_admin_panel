@@ -114,6 +114,7 @@ class User extends Authenticatable
     public function updateUserReport(): void
     {
         $this->userReport()->update(UserReportService::getSingleUser($this->id)->toArray());
+        UserReportService::updateImageCount($this->id);
     }
 
     public function devices(): HasMany
