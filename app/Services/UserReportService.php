@@ -17,6 +17,7 @@ use App\Models\Ticket;
 use App\Models\User;
 use App\Models\UserReport;
 use App\Models\UserStatus;
+use DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -56,13 +57,18 @@ class UserReportService
             ->whereColumn('creator_user_id', 'users.id')
             ->selectRaw($countQuery)
             ->getQuery();
-        $imageCountQuery = Image::query()
+        $paymentImageCountQuery = Image::query()
             ->withoutTrashed()
-            ->whereHasMorph(
-                'hasImage',
-                [Payment::class, Receive::class],
-                fn (Builder $query) => $query->whereIn('project_user_id', $projectUserIdsQuery)
-            )
+            ->join('payments', 'payments.id', 'images.model_id')
+            ->whereIn('payments.project_user_id', $projectUserIdsQuery)
+            ->where('model_type', (new Payment())->getMorphClass())
+            ->selectRaw($countQuery)
+            ->getQuery();
+        $receiveImageCountQuery = Image::query()
+            ->withoutTrashed()
+            ->join('receives', 'receives.id', 'images.model_id')
+            ->whereIn('receives.project_user_id', $projectUserIdsQuery)
+            ->where('model_type', (new Receive())->getMorphClass())
             ->selectRaw($countQuery)
             ->getQuery();
         $deviceCountQuery = Device::query()
@@ -156,14 +162,10 @@ class UserReportService
             ->joinSub($maxTimeQuery, 'MaxTime', 'MaxTime.user_id', '=', 'users.id')
             ->addSelect('users.id as id')
             ->selectRaw("CONCAT_WS(' ', IFNULL(users.name, ''), IFNULL(users.family, '')) as name")
-            ->when(count($userIds) > 1, fn ($q) => $q->selectRaw("0 as image_count")
-                ->selectRaw("0 as image_size")
-            )
-            ->when(count($userIds) == 1, fn ($q) => $q->selectSub($imageCountQuery, 'image_count')
-                ->selectSub($imageSizeQuery, 'image_size')
-            )
+            ->selectSub($paymentImageCountQuery, 'payment_image_count')
+            ->selectSub($receiveImageCountQuery, 'receive_image_count')
             ->addSelect('phone_number')
-            ->addSelect(\DB::raw('IFNULL(users.verification_time, users.created_at) as registered_at'))
+            ->addSelect(DB::raw('IFNULL(users.verification_time, users.created_at) as registered_at'))
             ->selectSub($paymentCountQuery, 'payment_count')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($imprestCountQuery, 'imprest_count')
@@ -175,7 +177,8 @@ class UserReportService
             ->selectSub($ownProjectCount, 'own_project_count')
             ->selectRaw('MaxTime.max_time as max_time')
             ->selectRaw($userTypeQuery)
-            ->selectRaw("IFNULL( (".$userStateQuery->toSql()." ), ".UserPremiumStateEnum::FREE->value.") as user_state");
+            ->selectRaw("IFNULL( (".$userStateQuery->toSql()." ), ".UserPremiumStateEnum::FREE->value.") as user_state")
+            ->ddRawSql();
     }
 
     public static function timesArray(): array

@@ -42,7 +42,7 @@ class DevicesTable extends UserDetailTable
             Tables\Columns\BadgeColumn::make('platform')
                 ->label(__('names.platform'))
                 ->enum(PlatformEnum::columnValues())
-                ->color(static fn ($state) => PlatformEnum::from($state)->color()),
+                ->color(static fn ($state) => PlatformEnum::tryFrom($state)?->color()),
             TextColumn::make('model')
                 ->label(__('names.device model')),
             TextColumn::make('os_version')
