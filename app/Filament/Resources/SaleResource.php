@@ -21,7 +21,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 
-class UserStatusLogResource extends Resource
+class SaleResource extends Resource
 {
     public static function getModelLabel(): string
     {
