@@ -8,6 +8,7 @@ use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\TicketResource\Pages;
 use App\Filament\Resources\TicketResource\RelationManagers\AllTicketsRelationManager;
 use App\Filament\Resources\TicketResource\RelationManagers\TicketMessagesRelationManager;
+use App\Filament\Resources\TicketResource\RelationManagers\UserReportRelationManager;
 use App\Models\Ticket;
 use Derakht\Jalali\Jalali;
 use Exception;
@@ -149,7 +150,8 @@ class TicketResource extends Resource
     {
         return [
             TicketMessagesRelationManager::class,
-            AllTicketsRelationManager::class
+            AllTicketsRelationManager::class,
+            UserReportRelationManager::class
         ];
     }
 
