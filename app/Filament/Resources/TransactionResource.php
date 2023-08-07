@@ -93,9 +93,9 @@ class TransactionResource extends Resource
                 ->dateTime(),
             ColorColumn::make('premiumPlan.type')
                 ->label(__('names.plan'))
-                ->tooltip(fn (UserStatus $record) => $record->premiumPlan?->type->title())
+                ->tooltip(fn (UserStatusLog $record) => $record->premiumPlan?->type->title())
                 ->alignCenter()
-                ->getStateUsing(fn (UserStatus $record) => $record->premiumPlan?->type->color()),
+                ->getStateUsing(fn (UserStatusLog $record) => $record->premiumPlan?->type->color()),
             BadgeColumn::make('duration_id')
                 ->label(__('names.plan type'))
                 ->enum(PremiumDurationEnum::columnValues())

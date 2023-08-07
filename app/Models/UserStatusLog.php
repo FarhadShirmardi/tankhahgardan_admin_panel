@@ -19,4 +19,9 @@ class UserStatusLog extends Model
     {
         return $this->hasOne(Transaction::class, 'id', 'transaction_id');
     }
+
+    public function premiumPlan(): BelongsTo
+    {
+        return $this->belongsTo(PremiumPlan::class);
+    }
 }
