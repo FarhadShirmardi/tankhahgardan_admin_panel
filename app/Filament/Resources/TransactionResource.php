@@ -2,17 +2,21 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\PremiumDurationEnum;
 use App\Enums\UserStatusTypeEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Helpers\UtilHelpers;
 use App\Models\User;
+use App\Models\UserStatus;
 use App\Models\UserStatusLog;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -87,6 +91,15 @@ class TransactionResource extends Resource
             JalaliDateTimeColumn::make('created_at')
                 ->label(__('names.payed date'))
                 ->dateTime(),
+            ColorColumn::make('premiumPlan.type')
+                ->label(__('names.plan'))
+                ->tooltip(fn (UserStatus $record) => $record->premiumPlan?->type->title())
+                ->alignCenter()
+                ->getStateUsing(fn (UserStatus $record) => $record->premiumPlan?->type->color()),
+            BadgeColumn::make('duration_id')
+                ->label(__('names.plan type'))
+                ->enum(PremiumDurationEnum::columnValues())
+                ->color(static fn ($state) => PremiumDurationEnum::tryFrom($state)?->color()),
             TextColumn::make('transaction.trace_no')
                 ->label(__('names.bank transaction number')),
             TextColumn::make('trace_number')
