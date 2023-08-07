@@ -47,7 +47,7 @@ class CallLogsTable extends UserDetailTable
     {
         return [
             Tables\Actions\CreateAction::make()
-                ->label(fn (): string => __('filament-support::actions/create.single.label', ['label' => __('filament::pages/callLog.title')]))
+                ->model(__('filament::pages/callLog.title'))
                 ->action(function (array $data): void {
                     $data['panel_user_id'] = auth()->id();
                     $this->user->callLogs()->create($data);
