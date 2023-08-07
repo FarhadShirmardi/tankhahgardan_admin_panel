@@ -23,8 +23,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class UserStatusLogResource extends Resource
 {
-    protected static ?string $model = UserStatusLog::class;
-
     public static function getModelLabel(): string
     {
         return __('filament::pages/sale.single title');
