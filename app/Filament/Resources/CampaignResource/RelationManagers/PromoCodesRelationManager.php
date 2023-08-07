@@ -8,6 +8,7 @@ use App\Filament\Components\JalaliDateTimePicker;
 use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\UserResource;
 use App\Helpers\UtilHelpers;
+use App\Models\Campaign;
 use App\Models\PromoCode;
 use App\Models\User;
 use Closure;
@@ -74,6 +75,12 @@ class PromoCodesRelationManager extends RelationManager
     public static function getFormArray(bool $hasUser = false): array
     {
         return [
+            Select::make('campaign_id')
+                ->label(__('names.campaign.name'))
+                ->searchable()
+                ->hidden($hasUser)
+                ->options(Campaign::all()->pluck('name', 'id')),
+
             TextInput::make('code')
                 ->required()
                 ->disabled()
