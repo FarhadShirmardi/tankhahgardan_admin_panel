@@ -44,7 +44,8 @@
         <x-user-premium-invoice-row :label="$creditLabel" :value="$creditAmount" />
     @endif
     <hr>
-    <x-user-premium-invoice-row :label="$payableAmountLabel" :value="$payableAmount" is-price=0 />
+    <x-user-premium-invoice-row :label="$payableAmountLabel" :value="$payableAmount" />
 
+    <x-user-premium-invoice-row :label="$traceNoLabel" :value="$traceNo" is-price=0 />
     <x-user-premium-invoice-row :label="$traceNumberLabel" :value="$traceNumber" is-price=0 />
 </div>
