@@ -27,6 +27,8 @@
     $traceNoLabel = __('names.bank transaction number');
     $traceNumber = $record->trace_number;
     $traceNumberLabel = __('names.tankhah transaction number');
+    $bank = $record->transaction->bank_id->name();
+    $bankLabel = __('names.bank');
 @endphp
 <div class="flex flex-col gap-4">
     <x-user-premium-invoice-row :label="$planLabel" :value="$planAmount" />
@@ -48,4 +50,5 @@
 
     <x-user-premium-invoice-row :label="$traceNoLabel" :value="$traceNo" is-price=0 />
     <x-user-premium-invoice-row :label="$traceNumberLabel" :value="$traceNumber" is-price=0 />
+    <x-user-premium-invoice-row :label="$bankLabel" :value="$bank" is-price=0 />
 </div>

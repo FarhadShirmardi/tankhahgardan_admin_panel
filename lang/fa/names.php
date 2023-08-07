@@ -185,6 +185,7 @@ return [
     'currency unit' => 'واحد پول',
     'bank transaction number' => 'شماره تراکنش بانک',
     'tankhah transaction number' => 'شماره تراکنش تنخواه',
+    'bank' => 'بانک',
     'campaign' => [
         'name' => 'نام کمپین',
         'count' => 'تعداد',
