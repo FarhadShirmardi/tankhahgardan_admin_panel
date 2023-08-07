@@ -43,6 +43,11 @@ class Ticket extends Model
         )->latest();
     }
 
+    public function userReport(): HasOne
+    {
+        return $this->hasOne(UserReport::class, 'id', 'user_id');
+    }
+
     public function lastTicketMessage(): HasOne
     {
         return $this->hasOne(TicketMessage::class)->latestOfMany();

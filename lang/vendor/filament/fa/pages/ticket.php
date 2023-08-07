@@ -7,4 +7,6 @@ return [
     'title_plural' => 'تیکت‌ها',
 
     'all ticket title' => 'تمام تیکت‌های این کاربر',
+
+    'user report title' => 'اطلاعات کاربر',
 ];
