@@ -77,9 +77,6 @@ class TicketResource extends Resource
                                     ->label(__('names.username'))
                                     ->content(fn (Ticket $record): ?string => $record->user->full_name),
 
-                                Forms\Components\Actions\Action::make('Go to Other Page')
-                                    ->url('/other-page'),
-
                                 Forms\Components\Select::make('state')
                                     ->label(__('names.state'))
                                     ->options(TicketStateEnum::columnValues()),
