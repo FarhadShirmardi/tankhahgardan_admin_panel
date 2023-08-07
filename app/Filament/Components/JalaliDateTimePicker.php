@@ -11,6 +11,7 @@ class JalaliDateTimePicker extends BaseJalaliDatePicker
         return parent::make($name)
             ->displayFormat('j F Y H:i:s')
             ->firstDayOfWeek(6)
+            ->hasTime()
             ->closeOnDateSelection();
     }
 }
