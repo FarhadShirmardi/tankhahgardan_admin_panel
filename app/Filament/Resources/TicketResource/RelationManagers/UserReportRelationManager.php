@@ -35,5 +35,10 @@ class UserReportRelationManager extends RelationManager
             ])
             ->bulkActions([
             ]);
-    }    
+    }
+
+    protected function isTablePaginationEnabled(): bool
+    {
+        return false;
+    }
 }
