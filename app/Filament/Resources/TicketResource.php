@@ -77,7 +77,7 @@ class TicketResource extends Resource
                                     ->label(__('names.username'))
                                     ->content(fn (Ticket $record): ?string => $record->user->full_name),
 
-                                Forms\Components\Actions\Action::make()
+                                Forms\Components\Actions\Action::make('user_link')
                                     ->label('test')
                                     ->url(fn (Ticket $record) => UserResource::getUrl('view', ['record' => $record->user_id])),
 
