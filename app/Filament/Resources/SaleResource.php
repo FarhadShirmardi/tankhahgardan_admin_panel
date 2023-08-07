@@ -86,7 +86,8 @@ class SaleResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with('user');
+        return UserStatusLog::query()
+            ->with('user');
     }
 
     public static function getPages(): array
