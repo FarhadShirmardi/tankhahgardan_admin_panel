@@ -11,6 +11,7 @@ class PromoCode extends Model
     protected $connection = 'mysql';
 
     protected $fillable = [
+        'campaign_id',
         'code',
         'text',
         'discount_percent',
