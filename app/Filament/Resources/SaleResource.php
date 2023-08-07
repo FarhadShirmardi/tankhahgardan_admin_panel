@@ -92,7 +92,7 @@ class SaleResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTransactions::route('/'),
+            'index' => Pages\ListSales::route('/'),
         ];
     }
 }
