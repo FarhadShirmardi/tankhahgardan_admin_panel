@@ -100,10 +100,6 @@ class TransactionResource extends Resource
                 ->label(__('names.plan type'))
                 ->enum(PremiumDurationEnum::columnValues())
                 ->color(static fn ($state) => PremiumDurationEnum::tryFrom($state)?->color()),
-            TextColumn::make('transaction.trace_no')
-                ->label(__('names.bank transaction number')),
-            TextColumn::make('trace_number')
-                ->label(__('names.tankhah transaction number')),
             TextColumn::make('payable_amount')
                 ->formatStateUsing(fn ($record) => formatPrice(UtilHelpers::getPayableAmount($record->total_amount, $record->added_value_amount, $record->discount_amount, $record->wallet_amount, $record->credit_amount)))
                 ->label(__('names.payable amount')),

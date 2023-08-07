@@ -22,6 +22,11 @@
     $startDate = \Derakht\Jalali\Jalali::parse($record->start_date)->toJalaliDateTimeString();
     $endDateLabel = __('names.end date');
     $endDate = \Derakht\Jalali\Jalali::parse($record->end_date)->toJalaliDateTimeString();
+
+    $traceNo = $record->transaction?->trace_no;
+    $traceNoLabel = __('names.bank transaction number');
+    $traceNumber = $record->trace_number;
+    $traceNumberLabel = __('names.tankhah transaction number');
 @endphp
 <div class="flex flex-col gap-4">
     <x-user-premium-invoice-row :label="$planLabel" :value="$planAmount" />
@@ -40,4 +45,6 @@
     @endif
     <hr>
     <x-user-premium-invoice-row :label="$payableAmountLabel" :value="$payableAmount" />
+
+    <x-user-premium-invoice-row :label="$traceNumberLabel" :value="$traceNumber" />
 </div>
