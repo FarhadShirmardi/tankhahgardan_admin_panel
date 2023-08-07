@@ -23,6 +23,7 @@ class CallLogsTable extends UserDetailTable
         }
 
         return $this->user->callLogs()
+            ->with('panelUser')
             ->latest('date')
             ->getQuery();
     }
@@ -31,9 +32,8 @@ class CallLogsTable extends UserDetailTable
     {
         return [
             RowIndexColumn::make(),
-            TextColumn::make('username')
-                ->formatStateUsing(fn (CallLog $record) => $record->panelUser->username)
-                ->tooltip(fn (CallLog $record) => reformatPhoneNumber($record->panelUser->phone_number))
+            TextColumn::make('panelUser')
+                ->formatStateUsing(fn (CallLog $record) => $record->panelUser->name)
                 ->label(__('names.full name')),
             JalaliDateTimeColumn::make('date')
                 ->label(__('names.date_time'))
@@ -52,7 +52,7 @@ class CallLogsTable extends UserDetailTable
                     $this->user->callLogs()->create($data);
                 })
                 ->form([
-                    Textarea::make('code')
+                    Textarea::make('text')
                         ->required()
                         ->label(__('names.description')),
 
