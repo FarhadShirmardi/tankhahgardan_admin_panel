@@ -72,13 +72,13 @@ class PromoCodesRelationManager extends RelationManager
     /**
      * @return array
      */
-    public static function getFormArray(bool $hasUser = false): array
+    public static function getFormArray(bool $hasUser = false, bool $hasCampaign = false): array
     {
         return [
             Select::make('campaign_id')
                 ->label(__('names.campaign.name'))
                 ->searchable()
-                ->hidden($hasUser)
+                ->hidden($hasCampaign)
                 ->options(Campaign::all()->pluck('name', 'id')),
 
             TextInput::make('code')

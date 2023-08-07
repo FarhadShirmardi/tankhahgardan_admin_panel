@@ -44,7 +44,7 @@ class PromoCodeTable extends UserDetailTable
     {
         return [
             Tables\Actions\CreateAction::make()
-                ->form(PromoCodesRelationManager::getFormArray(hasUser: true))
+                ->form(PromoCodesRelationManager::getFormArray(hasUser: true, hasCampaign: true))
                 ->mutateFormDataUsing(function (array $data): array {
                     $data['user_id'] = $this->user->id;
                     $data['max_count'] = 1;
