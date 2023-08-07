@@ -31,6 +31,7 @@ class UserReportRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
+                    ->openUrlInNewTab()
                     ->url(fn (UserReport $record) => UserResource::getUrl('view', ['record' => $record->id])),
             ])
             ->bulkActions([
