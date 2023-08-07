@@ -39,6 +39,8 @@ class CallLogsTable extends UserDetailTable
                 ->label(__('names.date_time'))
                 ->dateTime(),
             TextColumn::make('text')
+                ->words(3)
+                ->tooltip(fn (CallLog $record) => $record->text)
                 ->label(__('names.description')),
         ];
     }
