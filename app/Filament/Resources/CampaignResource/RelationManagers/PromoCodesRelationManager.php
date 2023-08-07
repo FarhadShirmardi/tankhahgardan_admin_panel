@@ -72,7 +72,7 @@ class PromoCodesRelationManager extends RelationManager
     /**
      * @return array
      */
-    public static function getFormArray(bool $hasUser = false, bool $hasCampaign = false): array
+    public static function getFormArray(bool $hasUser = false, bool $hasCampaign = true): array
     {
         return [
             Select::make('campaign_id')
