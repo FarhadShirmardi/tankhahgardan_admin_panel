@@ -203,4 +203,5 @@ return [
         'visible to user' => 'قابل نمایش برای کاربر'
     ],
     'payed date' => 'تاریخ پرداخت',
+    'date_time' => 'تاریخ و زمان',
 ];

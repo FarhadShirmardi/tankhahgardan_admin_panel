@@ -141,4 +141,9 @@ class User extends Authenticatable
             get: fn () => $this->wallet - $this->reserve_wallet - $usedWalletQuery
         );
     }
+
+    public function callLogs(): HasMany
+    {
+        return $this->hasMany(CallLog::class);
+    }
 }
