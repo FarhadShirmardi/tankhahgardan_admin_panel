@@ -2,7 +2,7 @@
 
 namespace App\Filament\Components;
 
-use Ariaieboy\FilamentJalaliDatetimepicker\Forms\Components\JalaliDatePicker as BaseJalaliDatePicker;
+use Ariaieboy\FilamentJalaliDatetimepicker\Forms\Components\JalaliDateTimePicker as BaseJalaliDatePicker;
 
 class JalaliDateTimePicker extends BaseJalaliDatePicker
 {
