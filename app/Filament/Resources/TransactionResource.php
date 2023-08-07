@@ -82,6 +82,7 @@ class TransactionResource extends Resource
                 ->formatStateUsing(fn ($record) => $record->user->username)
                 ->hidden(!$showUsername)
                 ->tooltip(fn ($record) => reformatPhoneNumber($record->user->phone_number))
+                ->url(fn ($record) => $record->user_id ? UserResource::getUrl('view', ['record' => $record->user_id]) : null, shouldOpenInNewTab: true)
                 ->label(__('names.full name')),
             JalaliDateTimeColumn::make('created_at')
                 ->label(__('names.payed date'))
