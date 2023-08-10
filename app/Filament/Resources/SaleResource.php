@@ -44,9 +44,9 @@ class SaleResource extends Resource
                 JalaliDateTimeColumn::make('created_at')
                     ->label(__('names.date_time'))
                     ->dateTime(),
-                TextColumn::make('payable_amount')
-                    ->formatStateUsing(fn ($record) => formatPrice(UtilHelpers::getPayableAmount($record->total_amount, $record->added_value_amount, $record->discount_amount, $record->wallet_amount, $record->credit_amount)))
-                    ->label(__('names.payable amount')),
+                TextColumn::make('total_sum')
+                    ->formatStateUsing(fn ($record) => formatPrice($record->total_sum))
+                    ->label(__('names.total amount')),
             ])
             ->actions([])
             ->defaultSort('created_at', 'desc')
