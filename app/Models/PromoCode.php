@@ -21,6 +21,8 @@ class PromoCode extends Model
         'start_at',
         'expire_at',
         'duration_id',
+        'is_hidden',
+        'is_unlimited'
     ];
 
     protected $casts = [

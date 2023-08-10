@@ -9,8 +9,8 @@ use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Helpers\UtilHelpers;
 use App\Models\User;
-use App\Models\UserStatus;
 use App\Models\UserStatusLog;
+use Exception;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
@@ -21,6 +21,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
+use function view;
 
 class TransactionResource extends Resource
 {
@@ -40,6 +41,9 @@ class TransactionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-calculator';
 
+    /**
+     * @throws Exception
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -74,7 +78,7 @@ class TransactionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSales::route('/'),
+            'index' => Pages\ListTransactions::route('/'),
         ];
     }
 
@@ -118,12 +122,15 @@ class TransactionResource extends Resource
         ];
     }
 
+    /**
+     * @throws Exception
+     */
     public static function getActions(): array
     {
         return [
             ViewAction::make('view_details')
                 ->modalHeading(__('filament::resources/pages/view-record.title', ['label' => __('filament::pages/transaction.single title')]))
-                ->modalContent(fn ($record) => \view('filament.resources.transaction-resource.modals.view-transaction', ['record' => $record]))
+                ->modalContent(fn ($record) => view('filament.resources.transaction-resource.modals.view-transaction', ['record' => $record]))
         ];
     }
 }
