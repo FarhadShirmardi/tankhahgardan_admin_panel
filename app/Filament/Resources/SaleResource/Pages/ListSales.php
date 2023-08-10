@@ -47,7 +47,7 @@ class ListSales extends ListRecords
 
                     return $query;
                 })
-        ]
+        ];
     }
 
     protected function isTablePaginationEnabled(): bool
