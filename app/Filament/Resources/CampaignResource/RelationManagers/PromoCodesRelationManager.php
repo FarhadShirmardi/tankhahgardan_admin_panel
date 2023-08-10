@@ -79,6 +79,7 @@ class PromoCodesRelationManager extends RelationManager
                 ->label(__('names.campaign.name'))
                 ->searchable()
                 ->hidden($hasCampaign)
+                ->required()
                 ->options(Campaign::all()->pluck('name', 'id')),
 
             TextInput::make('code')

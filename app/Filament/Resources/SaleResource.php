@@ -3,23 +3,22 @@
 namespace App\Filament\Resources;
 
 use App\Enums\PremiumDurationEnum;
+use App\Enums\SaleReportTypeEnum;
 use App\Enums\UserStatusTypeEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Helpers\UtilHelpers;
-use App\Models\User;
 use App\Models\UserStatusLog;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
-use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class SaleResource extends Resource
 {
@@ -42,52 +41,41 @@ class SaleResource extends Resource
         return $table
             ->columns([
                 RowIndexColumn::make(),
-                TextColumn::make('username')
-                    ->formatStateUsing(fn ($record) => $record->user->username)
-                    ->tooltip(fn ($record) => reformatPhoneNumber($record->user->phone_number))
-                    ->url(fn ($record) => $record->user_id ? UserResource::getUrl('view', ['record' => $record->user_id]) : null, shouldOpenInNewTab: true)
-                    ->label(__('names.full name')),
                 JalaliDateTimeColumn::make('created_at')
-                    ->label(__('names.payed date'))
+                    ->label(__('names.date_time'))
                     ->dateTime(),
-                ColorColumn::make('premiumPlan.type')
-                    ->label(__('names.plan'))
-                    ->tooltip(fn (UserStatusLog $record) => $record->premiumPlan?->type->title())
-                    ->alignCenter()
-                    ->getStateUsing(fn (UserStatusLog $record) => $record->premiumPlan?->type->color()),
-                BadgeColumn::make('duration_id')
-                    ->label(__('names.plan type'))
-                    ->enum(PremiumDurationEnum::columnValues())
-                    ->color(static fn ($state) => PremiumDurationEnum::tryFrom($state)?->color()),
                 TextColumn::make('payable_amount')
                     ->formatStateUsing(fn ($record) => formatPrice(UtilHelpers::getPayableAmount($record->total_amount, $record->added_value_amount, $record->discount_amount, $record->wallet_amount, $record->credit_amount)))
                     ->label(__('names.payable amount')),
-                IconColumn::make('status')
-                    ->options([
-                        'heroicon-o-x-circle',
-                        'heroicon-o-clock' => UserStatusTypeEnum::PENDING->value,
-                        'heroicon-o-check-circle' => UserStatusTypeEnum::SUCCEED->value
-                    ])
-                    ->colors([
-                        'danger' => UserStatusTypeEnum::FAILED->value,
-                        'warning' => UserStatusTypeEnum::PENDING->value,
-                        'success' => UserStatusTypeEnum::SUCCEED->value,
-                    ])
-                    ->label(__('names.state')),
             ])
             ->actions([])
             ->defaultSort('created_at', 'desc')
             ->bulkActions([
             ])
             ->filters([
+                SelectFilter::make('type')
+                    ->options(SaleReportTypeEnum::columnValues())
+                    ->query(function (Builder $query, array $data) {
+                        if (!empty($data['value'])) {
+                            return match($data['value']) {
+                                SaleReportTypeEnum::BY_DAY->value => $query->groupBy('created_at')
+                            };
+                        }
 
+                        return $query;
+                    })
             ]);
     }
 
     public static function getEloquentQuery(): Builder
     {
         return UserStatusLog::query()
-            ->with('user');
+            ->with('user')
+            ->where(fn (Builder $query))
+            ->select([
+                'created_at',
+                DB::raw("SUM(total_amount + added_value_amount - wallet_amount - credit_amount - discount_amount) as total_sum")
+            ]);
     }
 
     public static function getPages(): array

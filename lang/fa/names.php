@@ -77,6 +77,12 @@ return [
         'one_month' => 'یک ماه',
         'disabled' => 'غیرفعال',
     ],
+    'sale_report_type' => [
+        'by_day' => 'بر اساس روز',
+        'by_week' => 'بر اساس هفته',
+        'by_month' => 'بر اساس ماه',
+        'by_year' => 'بر اساس سال',
+    ],
     'user state' => 'وضعیت کاربر',
     'registered at' => 'تاریخ و ساعت ثبت‌نام',
     'registered from' => 'ثبت‌نام از',
