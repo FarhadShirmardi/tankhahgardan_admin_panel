@@ -68,18 +68,6 @@ class SaleResource extends Resource
             ]);
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        return UserStatusLog::query()
-            ->with('user')
-            ->where(fn (Builder $query) => $query->where('duration_id', '!=', PremiumDurationEnum::HALF_MONTH->value)->orWhere('price_id', '!=', PremiumDurationEnum::HALF_MONTH->value))
-            ->select([
-                'id',
-                DB::raw('date(created_at) as date'),
-                DB::raw("SUM(total_amount + added_value_amount - wallet_amount - credit_amount - discount_amount) as total_sum")
-            ]);
-    }
-
     public static function getPages(): array
     {
         return [
