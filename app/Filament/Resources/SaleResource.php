@@ -55,6 +55,7 @@ class SaleResource extends Resource
             ->filters([
                 SelectFilter::make('type')
                     ->options(SaleReportTypeEnum::columnValues())
+                    ->default(SaleReportTypeEnum::BY_DAY->value)
                     ->query(function (Builder $query, array $data) {
                         if (!empty($data['value'])) {
                             return match($data['value']) {
