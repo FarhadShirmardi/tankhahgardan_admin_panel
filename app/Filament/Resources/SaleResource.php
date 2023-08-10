@@ -22,6 +22,10 @@ use Illuminate\Support\Facades\DB;
 
 class SaleResource extends Resource
 {
+    protected static ?string $model = UserStatusLog::class;
+
+    protected static ?string $slug = 'sales';
+
     public static function getModelLabel(): string
     {
         return __('filament::pages/sale.single title');
