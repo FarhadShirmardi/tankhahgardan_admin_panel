@@ -73,6 +73,7 @@ class SaleResource extends Resource
             ->with('user')
             ->where(fn (Builder $query) => $query->where('duration_id', '!=', PremiumDurationEnum::HALF_MONTH->value)->orWhere('price_id', '!=', PremiumDurationEnum::HALF_MONTH->value))
             ->select([
+                'id',
                 'created_at',
                 DB::raw("SUM(total_amount + added_value_amount - wallet_amount - credit_amount - discount_amount) as total_sum")
             ]);
