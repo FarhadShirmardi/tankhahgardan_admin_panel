@@ -59,7 +59,7 @@ class SaleResource extends Resource
                     ->query(function (Builder $query, array $data) {
                         if (!empty($data['value'])) {
                             return match((int) $data['value']) {
-                                SaleReportTypeEnum::BY_DAY->value => $query->groupBy('created_at')
+                                SaleReportTypeEnum::BY_DAY->value => $query->groupBy('date')
                             };
                         }
 
