@@ -14,4 +14,9 @@ class ListSales extends ListRecords
         return [
         ];
     }
+
+    protected function isTablePaginationEnabled(): bool
+    {
+        return false;
+    }
 }
