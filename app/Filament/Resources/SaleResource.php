@@ -41,7 +41,7 @@ class SaleResource extends Resource
         return $table
             ->columns([
                 RowIndexColumn::make(),
-                JalaliDateTimeColumn::make('created_at')
+                JalaliDateTimeColumn::make('date')
                     ->label(__('names.date_time'))
                     ->dateTime(),
                 TextColumn::make('total_sum')
@@ -74,7 +74,7 @@ class SaleResource extends Resource
             ->where(fn (Builder $query) => $query->where('duration_id', '!=', PremiumDurationEnum::HALF_MONTH->value)->orWhere('price_id', '!=', PremiumDurationEnum::HALF_MONTH->value))
             ->select([
                 'id',
-                'created_at',
+                'date(created_at) as date',
                 DB::raw("SUM(total_amount + added_value_amount - wallet_amount - credit_amount - discount_amount) as total_sum")
             ]);
     }
