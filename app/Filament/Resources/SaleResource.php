@@ -24,7 +24,7 @@ class SaleResource extends Resource
 {
     protected static ?string $model = UserStatusLog::class;
 
-    protected static ?string $slug = 'sales';
+    protected static ?string $slug = 'sales-report';
 
     public static function getModelLabel(): string
     {
