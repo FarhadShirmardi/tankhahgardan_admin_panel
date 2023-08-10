@@ -62,25 +62,13 @@ class SaleResource extends Resource
                     ->default(SaleReportTypeEnum::BY_DAY->value)
                     ->query(function (Builder $query, array $data) {
                         if (!empty($data['value'])) {
-                            return match((int) $data['value']) {
+                            return match ((int) $data['value']) {
                                 SaleReportTypeEnum::BY_DAY->value => $query->groupBy('date')
                             };
                         }
 
                         return $query;
                     })
-            ]);
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->with('user')
-            ->where(fn (Builder $query) => $query->where('duration_id', '!=', PremiumDurationEnum::HALF_MONTH->value)->orWhere('price_id', '!=', PremiumDurationEnum::HALF_MONTH->value))
-            ->select([
-                'id',
-                DB::raw('date(created_at) as date'),
-                DB::raw("SUM(total_amount + added_value_amount - wallet_amount - credit_amount - discount_amount) as total_sum")
             ]);
     }
 

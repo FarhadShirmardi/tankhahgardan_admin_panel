@@ -19,6 +19,17 @@ class ListSales extends ListRecords
         ];
     }
 
+    protected function getTableQuery(): Builder
+    {
+        return parent::getTableQuery()->with('user')
+            ->where(fn (Builder $query) => $query->where('duration_id', '!=', PremiumDurationEnum::HALF_MONTH->value)->orWhere('price_id', '!=', PremiumDurationEnum::HALF_MONTH->value))
+            ->select([
+                'id',
+                DB::raw('date(created_at) as date'),
+                DB::raw("SUM(total_amount + added_value_amount - wallet_amount - credit_amount - discount_amount) as total_sum")
+            ]);
+    }
+
     protected function isTablePaginationEnabled(): bool
     {
         return false;
