@@ -13,10 +13,10 @@ use App\Models\DateMapping;
 use App\Models\UserStatusLog;
 use DB;
 use Derakht\Jalali\Jalali;
+use Exception;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
@@ -106,32 +106,32 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
                 ->visible(function () {
                     try {
                         return $this->getTypeFilterValue() == SaleReportTypeEnum::BY_DAY->value;
-                    } catch (\Exception) {
+                    } catch (Exception) {
                         return true;
                     }
                 })
                 ->date(),
             TextColumn::make('year')
                 ->label(__('names.year'))
-                ->getStateUsing(function (DateMapping $record) {
+                ->getStateUsing(function ($record) {
                     return $record->year;
                 })
                 ->visible(function () {
                     try {
                         return $this->getTypeFilterValue() == SaleReportTypeEnum::BY_YEAR->value;
-                    } catch (\Exception) {
+                    } catch (Exception) {
                         return true;
                     }
                 }),
             TextColumn::make('month_year')
                 ->label(__('names.month and year'))
-                ->getStateUsing(function (DateMapping $record) {
+                ->getStateUsing(function ($record) {
                     return UtilHelpers::getMonthName((int) $record->month).' '.$record->year;
                 })
                 ->visible(function () {
                     try {
                         return $this->getTypeFilterValue() == SaleReportTypeEnum::BY_MONTH->value;
-                    } catch (\Exception) {
+                    } catch (Exception) {
                         return true;
                     }
                 }),
@@ -166,7 +166,7 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
                 SaleReportTypeEnum::BY_YEAR->value => $query->groupBy('year'),
                 default => $query->groupBy('user_status_logs.id')
             };
-        } catch (\Exception) {
+        } catch (Exception) {
 
         }
 
@@ -191,6 +191,9 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
         });
     }
 
+    /**
+     * @throws Exception
+     */
     protected function getTableFilters(): array
     {
         return [
@@ -212,9 +215,9 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
         ];
     }
 
-    protected function getTableRecordsPerPage(): int
+    protected function getTableRecordsPerPageSelectOptions(): array
     {
-        return 100;
+        return [25, 50, -1];
     }
 
     public function render(): View
