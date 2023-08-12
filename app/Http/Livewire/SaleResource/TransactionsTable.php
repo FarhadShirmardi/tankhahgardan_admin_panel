@@ -150,7 +150,8 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
             $query = match ((int) $this->getTypeFilterValue()) {
                 SaleReportTypeEnum::BY_DAY->value => $query->groupBy('date'),
                 SaleReportTypeEnum::BY_MONTH->value => $query->groupBy('jalali_date'),
-                SaleReportTypeEnum::BY_YEAR->value => $query->groupBy('year')
+                SaleReportTypeEnum::BY_YEAR->value => $query->groupBy('year'),
+                default => $query
             };
         } catch (\Exception) {
 
