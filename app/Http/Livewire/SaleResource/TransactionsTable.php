@@ -190,7 +190,7 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
                 ->attribute('status')
                 ->multiple()
                 ->options(UserStatusTypeEnum::columnValues())
-                ->default(UserStatusTypeEnum::SUCCEED->value),
+                ->default([UserStatusTypeEnum::SUCCEED->value]),
         ];
     }
 
