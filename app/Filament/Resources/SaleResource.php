@@ -56,7 +56,9 @@ class SaleResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->bulkActions([
             ])
-            ->filters([]);
+            ->filters([
+
+            ]);
     }
 
     public static function getPages(): array
