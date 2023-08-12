@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources\SaleResource\Widgets;
 
+use App\Enums\PremiumDurationEnum;
+use App\Enums\UserStatusTypeEnum;
 use App\Models\UserStatusLog;
 use DB;
 use Derakht\Jalali\Jalali;
 use Filament\Widgets\BarChartWidget;
 use Filament\Widgets\LineChartWidget;
+use Illuminate\Database\Eloquent\Builder;
 
 class SalesSumChart extends BarChartWidget
 {
@@ -33,6 +36,8 @@ class SalesSumChart extends BarChartWidget
             ->groupBy('date')
             ->orderBy('created_at')
             ->where('created_at', '>', now()->subDays(7)->startOfDay())
+            ->where(fn (Builder $query) => $query->where('duration_id', '!=', PremiumDurationEnum::HALF_MONTH->value)->orWhere('price_id', '!=', PremiumDurationEnum::HALF_MONTH->value))
+            ->where('status', UserStatusTypeEnum::SUCCEED)
             ->get([
                 DB::raw('date(created_at) as date'),
                 DB::raw("SUM(total_amount + added_value_amount - wallet_amount - credit_amount - discount_amount) as total_sum")
