@@ -138,15 +138,17 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
 
         $data = $this->getTableFiltersForm()->getRawState();
 
-        foreach ($this->getCachedTableFilters() as $filter) {
+        $cachedTableFilters = collect($this->getCachedTableFilters())->reject(fn ($item) => $item->getName() == 'type')->toArray();
+
+        foreach ($cachedTableFilters as $filter) {
             $filter->applyToBaseQuery(
                 $query,
                 $data[$filter->getName()] ?? [],
             );
         }
 
-        return $query->where(function (Builder $query) use ($data) {
-            foreach ($this->getCachedTableFilters() as $filter) {
+        return $query->where(function (Builder $query) use ($data, $cachedTableFilters) {
+            foreach ($cachedTableFilters as $filter) {
                 $filter->apply(
                     $query,
                     $data[$filter->getName()] ?? [],
