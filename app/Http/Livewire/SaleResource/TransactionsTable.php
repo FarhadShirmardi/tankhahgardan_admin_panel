@@ -67,7 +67,7 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
                     try {
                         $typeFilterValue = $this->getTypeFilterValue();
 
-                        return $typeFilterValue != SaleReportTypeEnum::BY_MONTH->value;
+                        return $typeFilterValue == SaleReportTypeEnum::BY_DAY->value;
                     } catch (\Exception) {
                         return false;
                     }
@@ -102,7 +102,19 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
                     }
                 })
                 ->date(),
-            TextColumn::make('month_name')
+            TextColumn::make('year')
+                ->label(__('names.year'))
+                ->getStateUsing(function (UserStatusLog $record) {
+                    return $record->year;
+                })
+                ->visible(function () {
+                    try {
+                        return $this->getTypeFilterValue() == SaleReportTypeEnum::BY_YEAR->value;
+                    } catch (\Exception) {
+                        return true;
+                    }
+                }),
+            TextColumn::make('month_year')
                 ->label(__('names.month and year'))
                 ->getStateUsing(function (UserStatusLog $record) {
                     return UtilHelpers::getMonthName((int) $record->month).' '.$record->year;
