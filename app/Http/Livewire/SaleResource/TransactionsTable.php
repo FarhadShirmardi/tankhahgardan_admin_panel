@@ -187,10 +187,10 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
                 ->default(SaleReportTypeEnum::BY_DAY->value),
             SelectFilter::make('user_status_state')
                 ->label(__('names.user status state.label'))
-                ->attribute('status')
                 ->multiple()
                 ->options(UserStatusTypeEnum::columnValues())
-                ->default([UserStatusTypeEnum::SUCCEED->value]),
+                ->default([UserStatusTypeEnum::SUCCEED->value])
+                ->query(fn (Builder $query, array $state) => $query->when(filled($state['values']), fn ($q) => $q->whereIn('status', $state['values']))),
         ];
     }
 
