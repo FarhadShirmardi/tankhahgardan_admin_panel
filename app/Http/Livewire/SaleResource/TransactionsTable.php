@@ -109,7 +109,7 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
                 ->date(),
             TextColumn::make('year')
                 ->label(__('names.year'))
-                ->getStateUsing(function (UserStatusLog $record) {
+                ->getStateUsing(function (DateMapping $record) {
                     return $record->year;
                 })
                 ->visible(function () {
