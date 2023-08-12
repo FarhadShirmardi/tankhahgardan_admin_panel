@@ -217,7 +217,7 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
 
     protected function getTableRecordsPerPageSelectOptions(): array
     {
-        return [25, 50, -1];
+        return [50, 100, -1];
     }
 
     public function render(): View
