@@ -23,7 +23,7 @@
     $endDateLabel = __('names.end date');
     $endDate = \Derakht\Jalali\Jalali::parse($record->end_date)->toJalaliDateTimeString();
 
-    $traceNo = $record->transaction?->trace_no;
+    $traceNo = $record->transaction?->trace_no ?? '-';
     $traceNoLabel = __('names.bank transaction number');
     $traceNumber = $record->trace_number;
     $traceNumberLabel = __('names.tankhah transaction number');
