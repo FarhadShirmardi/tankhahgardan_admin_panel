@@ -175,6 +175,7 @@ return [
     'infinity' => 'بی نهایت',
     'rial' => 'ریال',
     'total amount' => 'مبلغ کل',
+    'total count' => 'تعداد کل',
     'total amount column' => 'مبلغ کل(ریال)',
     'added value amount' => 'مالیات بر ارزش افزوده',
     'promo code' => 'کد تخفیف',
@@ -217,5 +218,6 @@ return [
         'all' => 'همه تراکنش‌ها',
         'success' => 'تراکنش موفق',
         'failed' => 'تراکنش ناموفق',
-    ]
+    ],
+    'month and year' => 'ماه و سال',
 ];

@@ -40,27 +40,6 @@ class SaleResource extends Resource
 
     protected static ?string $navigationIcon = 'healthicons-o-money-bag';
 
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                RowIndexColumn::make(),
-                JalaliDateTimeColumn::make('date')
-                    ->label(__('names.date_time'))
-                    ->dateTime(),
-                TextColumn::make('total_sum')
-                    ->formatStateUsing(fn ($record) => formatPrice($record->total_sum))
-                    ->label(__('names.total amount')),
-            ])
-            ->actions([])
-            ->defaultSort('created_at', 'desc')
-            ->bulkActions([
-            ])
-            ->filters([
-
-            ]);
-    }
-
     public static function getPages(): array
     {
         return [

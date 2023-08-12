@@ -7,6 +7,7 @@ use App\Enums\SaleReportTypeEnum;
 use App\Enums\UserStatusTypeEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\RowIndexColumn;
+use App\Helpers\UtilHelpers;
 use App\Models\UserStatusLog;
 use DB;
 use Filament\Tables;
@@ -15,6 +16,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\JoinClause;
 use Livewire\Component;
 
 class TransactionsTable extends Component implements Tables\Contracts\HasTable
@@ -55,11 +57,19 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
         }
 
         return UserStatusLog::query()
+            ->join('date_mappings', fn (JoinClause $join) => $join
+                ->whereRaw('date_mappings.start_date <= date(user_status_logs.created_at)')
+                ->whereRaw('date_mappings.end_date >= date(user_status_logs.created_at)')
+            )
             ->with('user')
             ->where(fn (Builder $query) => $query->where('duration_id', '!=', PremiumDurationEnum::HALF_MONTH->value)->orWhere('price_id', '!=', PremiumDurationEnum::HALF_MONTH->value))
             ->select([
                 'id',
+                'jalali_date',
                 DB::raw('date(created_at) as date'),
+                DB::raw("count(*) as total_count"),
+                DB::raw("substr(jalali_date, 1, 4) as year"),
+                DB::raw("substr(jalali_date, 6, 2) as month"),
                 DB::raw("SUM(total_amount + added_value_amount - wallet_amount - credit_amount - discount_amount) as total_sum")
             ]);
     }
@@ -70,7 +80,29 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
             RowIndexColumn::make(),
             JalaliDateTimeColumn::make('date')
                 ->label(__('names.date_time'))
+                ->visible(function () {
+                    try {
+                        return $this->getCachedTableFilters()['type']->getState()['value'] == SaleReportTypeEnum::BY_DAY->value;
+                    } catch (\Exception) {
+                        return true;
+                    }
+                })
                 ->date(),
+            TextColumn::make('month_name')
+                ->label(__('names.month and year'))
+                ->getStateUsing(function (UserStatusLog $record) {
+                    return UtilHelpers::getMonthName((int) $record->month) . ' ' . $record->year;
+                })
+                ->visible(function () {
+                    try {
+                        return $this->getCachedTableFilters()['type']->getState()['value'] == SaleReportTypeEnum::BY_MONTH->value;
+                    } catch (\Exception) {
+                        return true;
+                    }
+                }),
+            TextColumn::make('total_count')
+                ->formatStateUsing(fn ($record) => formatPrice($record->total_count))
+                ->label(__('names.total count')),
             TextColumn::make('total_sum')
                 ->formatStateUsing(fn ($record) => formatPrice($record->total_sum))
                 ->label(__('names.total amount')),
@@ -85,8 +117,9 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
                 $typeFilter = $this->getCachedTableFilters()['type'];
 
 
-                $query = match ($typeFilter->getState()['value']) {
-                    SaleReportTypeEnum::BY_DAY->value => $query->groupBy('date')
+                $query = match ((int) $typeFilter->getState()['value']) {
+                    SaleReportTypeEnum::BY_DAY->value => $query->groupBy('date'),
+                    SaleReportTypeEnum::BY_MONTH->value => $query->groupBy('jalali_date')
                 };
             } catch (\Exception) {
 
