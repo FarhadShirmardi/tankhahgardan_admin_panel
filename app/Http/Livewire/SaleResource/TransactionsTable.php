@@ -4,6 +4,7 @@ namespace App\Http\Livewire\SaleResource;
 
 use App\Enums\PremiumDurationEnum;
 use App\Enums\SaleReportTypeEnum;
+use App\Enums\UserStatusTypeEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\RowIndexColumn;
 use App\Models\UserStatusLog;
@@ -11,6 +12,7 @@ use DB;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Component;
@@ -91,24 +93,43 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
             }
         }
 
-        return $query;
+        $data = $this->getTableFiltersForm()->getRawState();
+
+        foreach ($this->getCachedTableFilters() as $filter) {
+            $filter->applyToBaseQuery(
+                $query,
+                $data[$filter->getName()] ?? [],
+            );
+        }
+
+        return $query->where(function (Builder $query) use ($data) {
+            foreach ($this->getCachedTableFilters() as $filter) {
+                $filter->apply(
+                    $query,
+                    $data[$filter->getName()] ?? [],
+                );
+            }
+        });
     }
 
     protected function getTableFilters(): array
     {
         return [
             SelectFilter::make('type')
+                ->label(__('names.sale report type'))
                 ->options(SaleReportTypeEnum::columnValues())
-                ->default(SaleReportTypeEnum::BY_DAY->value)
-//                ->query(function (Builder $query, array $data) {
-//                    if (!empty($data['value']) and $this->isLoaded) {
-//                        return match ((int) $data['value']) {
-//                            SaleReportTypeEnum::BY_DAY->value => $query->groupByRaw('date')
-//                        };
-//                    }
-//
-//                    return $query;
-//                })
+                ->default(SaleReportTypeEnum::BY_DAY->value),
+            TernaryFilter::make('user_status_state')
+                ->label(__('names.user status state.label'))
+                ->default()
+                ->placeholder(__('names.user status state.all'))
+                ->trueLabel(__('names.user status state.success'))
+                ->falseLabel(__('names.user status state.failed'))
+                ->queries(
+                    true: fn (Builder $query) => $query->where('user_status_logs.status', UserStatusTypeEnum::SUCCEED),
+                    false: fn (Builder $query) => $query->where('user_status_logs.status', UserStatusTypeEnum::FAILED),
+                    blank: fn (Builder $query) => $query,
+                )
         ];
     }
 

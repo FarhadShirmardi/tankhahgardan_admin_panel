@@ -211,4 +211,11 @@ return [
     ],
     'payed date' => 'تاریخ پرداخت',
     'date_time' => 'تاریخ و زمان',
+    'sale report type' => 'فیلتر زمان',
+    'user status state' => [
+        'label' => 'وضعیت تراکنش',
+        'all' => 'همه تراکنش‌ها',
+        'success' => 'تراکنش موفق',
+        'failed' => 'تراکنش ناموفق',
+    ]
 ];

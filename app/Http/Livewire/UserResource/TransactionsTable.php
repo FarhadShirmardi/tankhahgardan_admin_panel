@@ -16,7 +16,7 @@ class TransactionsTable extends UserDetailTable
         }
 
         return $this->user->userStatusLogs()
-            ->latest('end_date')
+            ->latest()
             ->getQuery();
     }
 
