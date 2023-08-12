@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\SaleResource;
 
 use App\Enums\PremiumDurationEnum;
+use App\Enums\PremiumPlanEnum;
 use App\Enums\SaleReportTypeEnum;
 use App\Enums\UserStatusTypeEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
@@ -86,7 +87,10 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
                 'id',
                 'jalali_date',
                 DB::raw('date(created_at) as date'),
-                DB::raw("count(*) as total_count"),
+                DB::raw("COUNT(*) as total_count"),
+                DB::raw("SUM(IF(duration_id = '".PremiumDurationEnum::MONTH->value."' or price_id = '".PremiumDurationEnum::MONTH->value."', 1, 0)) as monthly_count"),
+                DB::raw("SUM(IF(duration_id = '".PremiumDurationEnum::YEAR->value."' or price_id = '".PremiumDurationEnum::YEAR->value."', 1, 0)) as yearly_count"),
+                DB::raw("SUM(IF(duration_id = '".PremiumDurationEnum::SPECIAL->value."' or price_id = '".PremiumDurationEnum::SPECIAL->value."', 1, 0)) as special_count"),
                 DB::raw("substr(jalali_date, 1, 4) as year"),
                 DB::raw("substr(jalali_date, 6, 2) as month"),
                 DB::raw("SUM(total_amount + added_value_amount - wallet_amount - credit_amount - discount_amount) as total_sum")
@@ -134,6 +138,15 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
             TextColumn::make('total_count')
                 ->formatStateUsing(fn ($record) => formatPrice($record->total_count))
                 ->label(__('names.total count')),
+            TextColumn::make('monthly_count')
+                ->formatStateUsing(fn ($record) => formatPrice($record->monthly_count))
+                ->label(__('names.monthly count')),
+            TextColumn::make('yearly_count')
+                ->formatStateUsing(fn ($record) => formatPrice($record->yearly_count))
+                ->label(__('names.yearly count')),
+            TextColumn::make('special_count')
+                ->formatStateUsing(fn ($record) => formatPrice($record->special_count))
+                ->label(__('names.special count')),
             TextColumn::make('total_sum')
                 ->formatStateUsing(fn ($record) => formatPrice($record->total_sum))
                 ->label(__('names.total amount')),
@@ -185,6 +198,11 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
                 ->label(__('names.sale report type'))
                 ->options(SaleReportTypeEnum::columnValues())
                 ->default(SaleReportTypeEnum::BY_DAY->value),
+            SelectFilter::make('premium_plan')
+                ->attribute('premium_plan_id')
+                ->label(__('names.sale report plan'))
+                ->multiple()
+                ->options(PremiumPlanEnum::columnValues()),
             SelectFilter::make('user_status_state')
                 ->label(__('names.user status state.label'))
                 ->multiple()

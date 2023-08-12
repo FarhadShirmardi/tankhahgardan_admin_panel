@@ -213,6 +213,7 @@ return [
     'payed date' => 'تاریخ پرداخت',
     'date_time' => 'تاریخ و زمان',
     'sale report type' => 'فیلتر زمان',
+    'sale report plan' => 'نوع طرح',
     'user status state' => [
         'label' => 'وضعیت تراکنش',
         'all' => 'همه تراکنش‌ها',
@@ -222,4 +223,7 @@ return [
     ],
     'year' => 'سال',
     'month and year' => 'ماه و سال',
+    'monthly count' => 'تعداد ماهانه',
+    'yearly count' => 'تعداد سالانه',
+    'special count' => 'تعداد ويژه'
 ];
