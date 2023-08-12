@@ -58,8 +58,8 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
 
         return UserStatusLog::query()
             ->join('date_mappings', fn (JoinClause $join) => $join
-                ->whereRaw('date_mappings.start_date <= date(user_status_logs.created_at)')
-                ->whereRaw('date_mappings.end_date >= date(user_status_logs.created_at)')
+                ->whereColumn('user_status_logs.created_at', '>=', 'date_mappings.start_date')
+                ->whereColumn('user_status_logs.created_at', '<=', 'date_mappings.end_date')
             )
             ->with('user')
             ->where(fn (Builder $query) => $query->where('duration_id', '!=', PremiumDurationEnum::HALF_MONTH->value)->orWhere('price_id', '!=', PremiumDurationEnum::HALF_MONTH->value))
@@ -91,7 +91,7 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
             TextColumn::make('month_name')
                 ->label(__('names.month and year'))
                 ->getStateUsing(function (UserStatusLog $record) {
-                    return UtilHelpers::getMonthName((int) $record->month) . ' ' . $record->year;
+                    return UtilHelpers::getMonthName((int) $record->month).' '.$record->year;
                 })
                 ->visible(function () {
                     try {
