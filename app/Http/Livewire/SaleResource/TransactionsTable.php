@@ -121,7 +121,7 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
                 }),
             TextColumn::make('month_year')
                 ->label(__('names.month and year'))
-                ->getStateUsing(function (UserStatusLog $record) {
+                ->getStateUsing(function (DateMapping $record) {
                     return UtilHelpers::getMonthName((int) $record->month).' '.$record->year;
                 })
                 ->visible(function () {
