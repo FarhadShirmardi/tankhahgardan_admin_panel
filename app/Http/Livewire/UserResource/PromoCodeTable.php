@@ -51,6 +51,9 @@ class PromoCodeTable extends UserDetailTable
 
                     return $data;
                 })
+                ->after(function (array $data) {
+                    PromoCodesRelationManager::sendPromoCodeSms($data);
+                })
         ];
     }
 

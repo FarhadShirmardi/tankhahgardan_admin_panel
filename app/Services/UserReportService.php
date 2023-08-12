@@ -158,6 +158,7 @@ class UserReportService
             ->selectSub($receiveImageCountQuery, 'receive_image_count')
             ->addSelect('phone_number')
             ->addSelect(DB::raw('IFNULL(users.verification_time, users.created_at) as registered_at'))
+            ->addSelect(DB::raw('IF(users.verification_time is null, false, true) as verified'))
             ->selectSub($paymentCountQuery, 'payment_count')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($imprestCountQuery, 'imprest_count')

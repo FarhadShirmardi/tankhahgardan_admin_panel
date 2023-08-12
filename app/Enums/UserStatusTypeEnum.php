@@ -20,4 +20,14 @@ enum UserStatusTypeEnum: int
             self::PENDING => __('names.user status state.pending'),
         };
     }
+
+    public function isFailed(): bool
+    {
+        return $this == self::FAILED;
+    }
+
+    public function isPending(): bool
+    {
+        return $this == self::PENDING;
+    }
 }

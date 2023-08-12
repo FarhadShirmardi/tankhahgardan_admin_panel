@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CampaignResource\RelationManagers;
 
 use App\Enums\PremiumDurationEnum;
+use App\Enums\SmsTemplateEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\JalaliDateTimePicker;
 use App\Filament\Components\RowIndexColumn;
@@ -12,6 +13,7 @@ use App\Models\Campaign;
 use App\Models\PromoCode;
 use App\Models\User;
 use Closure;
+use Derakht\Jalali\Jalali;
 use Exception;
 use Filament\Forms\ComponentContainer;
 use Filament\Forms\Components\Checkbox;
@@ -24,6 +26,7 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use GuzzleHttp\Client;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -67,6 +70,28 @@ class PromoCodesRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
             ]);
+    }
+
+    public static function sendPromoCodeSms(array $data): void
+    {
+        if (!is_null($data['user_id']) and !$data['is_hidden']) {
+            $http = new Client();
+            $http->post(
+                config('app.app_direct_url')."/sendSms",
+                [
+                    'headers' => [
+                        'Accept' => 'application/json',
+                    ],
+                    'form_params' => [
+                        'receptor' => User::query()->find($data['user_id'])->phone_number,
+                        'template' => SmsTemplateEnum::PROMO_CODE->value,
+                        'token1' => persianString($data['discount_percent']),
+                        'token2' => $data['discount_percent'],
+                        'token3' => is_null($data['expire_at']) ? persianString(Jalali::parse($data['expire_at'])->toJalaliDateString()) : '-',
+                    ],
+                ]
+            );
+        }
     }
 
     /**
@@ -152,6 +177,7 @@ class PromoCodesRelationManager extends RelationManager
                 ->default(now()->toDateTimeString()),
 
             JalaliDateTimePicker::make('expire_at')
+                ->default(now()->addDays(7)->endOfDay())
                 ->label(__('names.expire date')),
 
             Checkbox::make('is_hidden')

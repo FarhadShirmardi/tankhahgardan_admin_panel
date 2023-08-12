@@ -46,6 +46,9 @@ class UserResource extends Resource
             TextColumn::make('user_state')
                 ->label(__('names.user state'))
                 ->enum(UserPremiumStateEnum::columnValues()),
+            Tables\Columns\IconColumn::make('verified')
+                ->label('')
+                ->boolean(),
             JalaliDateTimeColumn::make('registered_at')
                 ->label(__('names.registered at'))
                 ->dateTime()
