@@ -39,7 +39,7 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
 
     protected function getDefaultTableSortColumn(): ?string
     {
-        return 'created_at';
+        return 'jalali_date';
     }
 
     protected function getDefaultTableSortDirection(): ?string
