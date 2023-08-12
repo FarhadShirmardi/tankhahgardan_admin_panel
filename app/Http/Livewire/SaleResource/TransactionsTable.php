@@ -30,6 +30,11 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
         $this->isLoaded = true;
     }
 
+    function getTypeFilterValue(): int|string
+    {
+        return $this->getCachedTableFilters()['type']->getState()['value'];
+    }
+
     protected function getDefaultTableSortColumn(): ?string
     {
         return 'created_at';
@@ -57,7 +62,16 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
         }
 
         return UserStatusLog::query()
-            ->join('date_mappings', fn (JoinClause $join) => $join
+            ->leftJoin('date_mappings', fn (JoinClause $join) => $join
+                ->when(function () {
+                    try {
+                        $typeFilterValue = $this->getTypeFilterValue();
+
+                        return $typeFilterValue != SaleReportTypeEnum::BY_MONTH->value;
+                    } catch (\Exception) {
+                        return false;
+                    }
+                }, fn ($query) => $query->whereRaw('false'))
                 ->whereColumn('user_status_logs.created_at', '>=', 'date_mappings.start_date')
                 ->whereColumn('user_status_logs.created_at', '<=', 'date_mappings.end_date')
             )
@@ -82,7 +96,7 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
                 ->label(__('names.date_time'))
                 ->visible(function () {
                     try {
-                        return $this->getCachedTableFilters()['type']->getState()['value'] == SaleReportTypeEnum::BY_DAY->value;
+                        return $this->getTypeFilterValue() == SaleReportTypeEnum::BY_DAY->value;
                     } catch (\Exception) {
                         return true;
                     }
@@ -95,7 +109,7 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
                 })
                 ->visible(function () {
                     try {
-                        return $this->getCachedTableFilters()['type']->getState()['value'] == SaleReportTypeEnum::BY_MONTH->value;
+                        return $this->getTypeFilterValue() == SaleReportTypeEnum::BY_MONTH->value;
                     } catch (\Exception) {
                         return true;
                     }
@@ -113,11 +127,7 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
     {
         if ($this->isLoaded) {
             try {
-                /** @var Tables\Filters\SelectFilter $typeFilter */
-                $typeFilter = $this->getCachedTableFilters()['type'];
-
-
-                $query = match ((int) $typeFilter->getState()['value']) {
+                $query = match ((int) $this->getTypeFilterValue()) {
                     SaleReportTypeEnum::BY_DAY->value => $query->groupBy('date'),
                     SaleReportTypeEnum::BY_MONTH->value => $query->groupBy('jalali_date')
                 };
