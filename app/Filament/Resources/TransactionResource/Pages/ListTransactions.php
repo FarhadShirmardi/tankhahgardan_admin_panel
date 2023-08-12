@@ -16,4 +16,9 @@ class ListTransactions extends ListRecords
         return [
         ];
     }
+
+    protected function getDefaultTableRecordsPerPageSelectOption(): int
+    {
+        return 50;
+    }
 }
