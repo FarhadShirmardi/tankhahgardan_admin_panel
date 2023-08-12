@@ -185,17 +185,12 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
                 ->label(__('names.sale report type'))
                 ->options(SaleReportTypeEnum::columnValues())
                 ->default(SaleReportTypeEnum::BY_DAY->value),
-            TernaryFilter::make('user_status_state')
+            SelectFilter::make('user_status_state')
                 ->label(__('names.user status state.label'))
-                ->default()
-                ->placeholder(__('names.user status state.all'))
-                ->trueLabel(__('names.user status state.success'))
-                ->falseLabel(__('names.user status state.failed'))
-                ->queries(
-                    true: fn (Builder $query) => $query->where('user_status_logs.status', UserStatusTypeEnum::SUCCEED),
-                    false: fn (Builder $query) => $query->where('user_status_logs.status', UserStatusTypeEnum::FAILED),
-                    blank: fn (Builder $query) => $query,
-                )
+                ->attribute('status')
+                ->multiple()
+                ->options(UserStatusTypeEnum::columnValues())
+                ->default(UserStatusTypeEnum::SUCCEED->value),
         ];
     }
 
@@ -213,5 +208,15 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
     {
         return str($date->jYear)->padLeft(4, '0').
             '-'.str($date->jMonth)->padLeft(2, '0');
+    }
+
+    protected function getTableFiltersLayout(): ?string
+    {
+        return Tables\Filters\Layout::AboveContent;
+    }
+
+    protected function shouldPersistTableFiltersInSession(): bool
+    {
+        return true;
     }
 }
