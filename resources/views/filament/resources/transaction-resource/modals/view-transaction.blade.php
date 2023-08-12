@@ -27,7 +27,7 @@
     $traceNoLabel = __('names.bank transaction number');
     $traceNumber = $record->trace_number;
     $traceNumberLabel = __('names.tankhah transaction number');
-    $bank = $record->transaction->bank_id->name();
+    $bank = $record->transaction?->bank_id->name();
     $bankLabel = __('names.bank');
 @endphp
 <div class="flex flex-col gap-4">
