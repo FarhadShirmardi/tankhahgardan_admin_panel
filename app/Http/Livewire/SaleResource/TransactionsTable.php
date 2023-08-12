@@ -8,8 +8,10 @@ use App\Enums\UserStatusTypeEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\RowIndexColumn;
 use App\Helpers\UtilHelpers;
+use App\Models\DateMapping;
 use App\Models\UserStatusLog;
 use DB;
+use Derakht\Jalali\Jalali;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -58,24 +60,27 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
     protected function getTableQuery()
     {
         if (!$this->isLoaded) {
-            return UserStatusLog::query()->whereRaw('false');
+            return DateMapping::query()->whereRaw('false');
         }
 
-        return UserStatusLog::query()
-            ->leftJoin('date_mappings', fn (JoinClause $join) => $join
-                ->when(function () {
-                    try {
-                        $typeFilterValue = $this->getTypeFilterValue();
+        $minMaxQuery = UserStatusLog::query()
+            ->select([
+                DB::raw("min(date(created_at)) as min_date"),
+                DB::raw("max(date(created_at)) as max_date")
+            ])
+            ->first();
 
-                        return $typeFilterValue == SaleReportTypeEnum::BY_DAY->value;
-                    } catch (\Exception) {
-                        return false;
-                    }
-                }, fn ($query) => $query->whereRaw('false'))
-                ->whereColumn('user_status_logs.created_at', '>=', 'date_mappings.start_date')
+        $minDate = Jalali::parse($minMaxQuery->min_date);
+        $minDate->updateJalali();
+        $maxDate = Jalali::parse($minMaxQuery->max_date);
+        $maxDate->updateJalali();
+
+        return DateMapping::query()
+            ->whereRaw('jalali_date >= ?', [$this->getFormattedDateText($minDate)])
+            ->whereRaw('jalali_date <= ?', [$this->getFormattedDateText($maxDate)])
+            ->join('user_status_logs', fn (JoinClause $join) => $join->whereColumn('user_status_logs.created_at', '>=', 'date_mappings.start_date')
                 ->whereColumn('user_status_logs.created_at', '<=', 'date_mappings.end_date')
             )
-            ->with('user')
             ->where(fn (Builder $query) => $query->where('duration_id', '!=', PremiumDurationEnum::HALF_MONTH->value)->orWhere('price_id', '!=', PremiumDurationEnum::HALF_MONTH->value))
             ->select([
                 'id',
@@ -137,16 +142,18 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
 
     protected function applyFiltersToTableQuery(Builder $query): Builder
     {
-        if ($this->isLoaded) {
-            try {
-                $query = match ((int) $this->getTypeFilterValue()) {
-                    SaleReportTypeEnum::BY_DAY->value => $query->groupBy('date'),
-                    SaleReportTypeEnum::BY_MONTH->value => $query->groupBy('jalali_date'),
-                    SaleReportTypeEnum::BY_YEAR->value => $query->groupBy('year')
-                };
-            } catch (\Exception) {
+        if (!$this->isLoaded) {
+            return $query;
+        }
 
-            }
+        try {
+            $query = match ((int) $this->getTypeFilterValue()) {
+                SaleReportTypeEnum::BY_DAY->value => $query->groupBy('date'),
+                SaleReportTypeEnum::BY_MONTH->value => $query->groupBy('jalali_date'),
+                SaleReportTypeEnum::BY_YEAR->value => $query->groupBy('year')
+            };
+        } catch (\Exception) {
+
         }
 
         $data = $this->getTableFiltersForm()->getRawState();
@@ -199,5 +206,11 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
     public function render(): View
     {
         return view('livewire.sale-resource.transactions-table');
+    }
+
+    private function getFormattedDateText(Jalali $date): string
+    {
+        return str($date->jYear)->padLeft(4, '0').
+            '-'.str($date->jMonth)->padLeft(2, '0');
     }
 }
