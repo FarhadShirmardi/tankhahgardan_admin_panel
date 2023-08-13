@@ -48,6 +48,7 @@ class SalesSumChart extends ApexChartWidget
                     'rotateAlways' => true,
                     'rotate' => -60,
                     'offsetY' => 60,
+                    'offsetX' => -15,
                     'style' => [
                         'colors' => '#9ca3af',
                         'fontWeight' => 600,
