@@ -13,6 +13,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Resources\Table;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class TicketMessagesRelationManager extends RelationManager
 {
@@ -50,22 +51,20 @@ class TicketMessagesRelationManager extends RelationManager
                 RowIndexColumn::make(),
                 Tables\Columns\TextColumn::make('user_text')
                     ->label('متن کاربر')
-                    ->words(3)
-                    ->limit(50)
                     ->tooltip(fn (TicketMessage $record) => ($record->panel_user_id == null ? $record->text : ' - '))
-                    ->getStateUsing(fn (TicketMessage $record) => ($record->panel_user_id == null ? $record->text : ' - ')),
+                    ->getStateUsing(fn (TicketMessage $record) => Str::limit(($record->panel_user_id == null ? $record->text : ' - '), 50)),
                 Tables\Columns\TextColumn::make('panel_text')
                     ->label('متن پشتیبان')
                     ->words(3)
                     ->limit(50)
                     ->tooltip(fn (TicketMessage $record) => $record->panel_user_id != null ? $record->text : ' - ')
-                    ->getStateUsing(fn (TicketMessage $record) => $record->panel_user_id != null ? $record->text : ' - '),
+                    ->getStateUsing(fn (TicketMessage $record) => Str::limit(($record->panel_user_id != null ? $record->text : ' - '), 50)),
                 Tables\Columns\TextColumn::make('project')
                     ->words(3)
                     ->limit(50)
                     ->label('پروژه')
                     ->url(fn (TicketMessage $record) => ($record->project_user_id != null and $record->getProjectUser()?->project_id != null) ? ProjectResource::getUrl('view', ['record' => $record->getProjectUser()?->project_id]) : null)
-                    ->getStateUsing(fn (TicketMessage $record) => $record->project_user_id != null ? $record->getProjectUser()?->getProjectTeamText() : ' - '),
+                    ->getStateUsing(fn (TicketMessage $record) => $record->project_user_id != null ? Str::words($record->getProjectUser()?->getProjectTeamText(), 2) : ' - '),
                 Tables\Columns\IconColumn::make('has_image')
                     ->label('دارای عکس؟')
                     ->boolean()
