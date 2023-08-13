@@ -41,7 +41,7 @@ class UserRegistrationChart extends BarChartWidget
             ->groupByRaw('date')
             ->orderBy('date')
             ->where('state', UserStateEnum::ACTIVE)
-            ->where('created_at', '>', now()->subDays(7))
+            ->where('created_at', '>', now()->subDays(6))
             ->get([
                 \DB::raw("count(*) count"),
                 \DB::raw("date(verification_time) date"),

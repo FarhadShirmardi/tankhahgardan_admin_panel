@@ -35,7 +35,7 @@ class SalesSumChart extends BarChartWidget
         $data = UserStatusLog::query()
             ->groupBy('date')
             ->orderBy('created_at')
-            ->where('created_at', '>', now()->subDays(7)->startOfDay())
+            ->where('created_at', '>', now()->subDays(6)->startOfDay())
             ->where(fn (Builder $query) => $query->where('duration_id', '!=', PremiumDurationEnum::HALF_MONTH->value)->orWhere('price_id', '!=', PremiumDurationEnum::HALF_MONTH->value))
             ->where('status', UserStatusTypeEnum::SUCCEED)
             ->get([
