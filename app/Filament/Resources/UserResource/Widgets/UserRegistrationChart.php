@@ -53,24 +53,6 @@ class UserRegistrationChart extends LineChartWidget
                 [
                     'label' => 'تعداد',
                     'data' => $counts->pluck('count')->toArray(),
-                    'backgroundColor' => [
-                        '#FF6384',
-                        '#FF9F40',
-                        '#FFCD56',
-                        '#4BC0C0',
-                        '#36A2EB',
-                        '#9966FF',
-                        '#C9CBCE'
-                    ],
-                    'borderColor' => [
-                        '#FF6384',
-                        '#FF9F40',
-                        '#FFCD56',
-                        '#4BC0C0',
-                        '#36A2EB',
-                        '#9966FF',
-                        '#C9CBCE'
-                    ],
                 ],
             ],
             'labels' => $counts->map(fn ($item) => Jalali::parse($item->date)->toJalaliDateString())->toArray(),
