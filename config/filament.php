@@ -140,7 +140,8 @@ return [
         'path' => app_path('Filament/Widgets'),
         'register' => [
             \App\Filament\Resources\UserResource\Widgets\UserActivityChart::class,
-            \App\Filament\Resources\SaleResource\Widgets\SalesSumChart::class
+            \App\Filament\Resources\SaleResource\Widgets\SalesSumChart::class,
+            \App\Filament\Resources\UserResource\Widgets\UserRegistrationChart::class
         ],
     ],
 
