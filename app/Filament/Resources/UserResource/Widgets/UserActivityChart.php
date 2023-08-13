@@ -9,9 +9,15 @@ use Filament\Widgets\BarChartWidget;
 
 class UserActivityChart extends BarChartWidget
 {
+    protected static ?int $sort = 1;
     private static function totalUserCount(): int
     {
         return User::query()->count();
+    }
+
+    protected function getMaxHeight(): ?string
+    {
+        return '300';
     }
 
     protected function getOptions(): ?array
