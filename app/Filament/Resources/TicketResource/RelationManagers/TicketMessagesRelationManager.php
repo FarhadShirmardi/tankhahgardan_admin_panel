@@ -66,9 +66,10 @@ class TicketMessagesRelationManager extends RelationManager
                     ->label('پروژه')
                     ->url(fn (TicketMessage $record) => ($record->project_user_id != null and $record->getProjectUser()?->project_id != null) ? ProjectResource::getUrl('view', ['record' => $record->getProjectUser()?->project_id]) : null)
                     ->getStateUsing(fn (TicketMessage $record) => $record->project_user_id != null ? $record->getProjectUser()?->getProjectTeamText() : ' - '),
-                Tables\Columns\TextColumn::make('has_image')
+                Tables\Columns\IconColumn::make('has_image')
                     ->label('دارای عکس؟')
-                    ->exists('images'),
+                    ->boolean()
+                    ->getStateUsing(fn (TicketMessage $record) => $record->images()->count() != 0),
                 JalaliDateTimeColumn::make('created_at')
                     ->label('تاریخ و ساعت')
                     ->sortable()
