@@ -46,7 +46,7 @@ class SalesSumChart extends BarChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'نمودار فروش بر حسب روز',
+                    'label' => 'میزان فروش',
                     'data' => $data->pluck('total_sum')->toArray(),
                     'backgroundColor' => [
                         '#FF6384',
