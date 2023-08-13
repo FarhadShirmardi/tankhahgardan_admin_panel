@@ -1,37 +1,45 @@
 <?php
 
-namespace App\Filament\Resources\SaleResource\Widgets;
+namespace App\Http\Livewire\UserExtensionResource;
 
+use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\UserResource;
 use App\Models\UserStatus;
 use Closure;
 use DB;
+use Derakht\Jalali\Jalali;
+use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Widgets\TableWidget;
-use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\View\View;
+use Livewire\Component;
 
-class SaleExtensionTable extends TableWidget
+class ExtensionTable extends Component implements Tables\Contracts\HasTable
 {
-    protected static ?int $sort = 4;
+    use Tables\Concerns\InteractsWithTable;
 
-    protected function getTableHeading(): string|Htmlable|Closure|null
+    public bool $isLoaded = false;
+
+    public function loadData(): void
     {
-        return null;
+        $this->isLoaded = true;
     }
 
-    protected function getTableRecordsPerPageSelectOptions(): array
+    protected function getTableEmptyStateIcon(): ?string
     {
-        return [-1, 5];
+        return $this->isLoaded ? null : 'heroicon-o-download';
     }
 
-    protected function getDefaultTableRecordsPerPageSelectOption(): int
+    protected function getTableEmptyStateHeading(): ?string
     {
-        return 5;
+        return $this->isLoaded ? null : __('message.loading_data');
     }
 
-    protected function getTableQuery(): Builder
+    protected function getTableQuery()
     {
+        if (!$this->isLoaded) {
+            return UserStatus::query()->whereRaw('false');
+        }
+
         return UserStatus::query()
             ->join('panel_user_reports', 'panel_user_reports.id', 'user_statuses.user_id')
             ->where('end_date', '>', now()->subDays(5)->startOfDay())
@@ -50,16 +58,17 @@ class SaleExtensionTable extends TableWidget
     protected function getTableColumns(): array
     {
         return [
+            RowIndexColumn::make(),
             TextColumn::make('name')
                 ->label(__('names.full name'))
-                ->tooltip(fn ($record) => $record->phone_number)
+                ->getStateUsing(fn ($record) => filled($record->name) ? $record->name : '-')
                 ->words(4),
             TextColumn::make('phone_number')
                 ->label(__('names.phone number'))
                 ->getStateUsing(fn ($record) => reformatPhoneNumber($record->phone_number)),
             TextColumn::make('date_diff')
                 ->label(__('names.days remain'))
-                ->tooltip(fn ($record) => $record->date_diff),
+                ->tooltip(fn ($record) => Jalali::parse($record->end_date)->toJalaliDateTimeString()),
         ];
     }
 
@@ -79,5 +88,15 @@ class SaleExtensionTable extends TableWidget
             }
             return '';
         };
+    }
+
+    protected function getTableRecordsPerPageSelectOptions(): array
+    {
+        return [50, 100, -1];
+    }
+
+    public function render(): View
+    {
+        return view('livewire.user-extension-resource.extension-table');
     }
 }

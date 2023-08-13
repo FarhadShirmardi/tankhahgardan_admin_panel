@@ -7,7 +7,7 @@ use App\Enums\SaleReportTypeEnum;
 use App\Enums\UserStatusTypeEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\RowIndexColumn;
-use App\Filament\Resources\TransactionResource\Pages;
+use App\Filament\Resources\SaleResource\Pages;
 use App\Helpers\UtilHelpers;
 use App\Models\UserStatusLog;
 use Filament\Resources\Resource;
