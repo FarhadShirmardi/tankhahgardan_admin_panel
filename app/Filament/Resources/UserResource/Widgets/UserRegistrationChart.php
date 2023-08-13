@@ -9,8 +9,9 @@ use App\Models\User;
 use App\Models\UserReport;
 use Derakht\Jalali\Jalali;
 use Filament\Widgets\BarChartWidget;
+use Filament\Widgets\LineChartWidget;
 
-class UserRegistrationChart extends BarChartWidget
+class UserRegistrationChart extends LineChartWidget
 {
     protected static ?int $sort = 3;
 
@@ -50,7 +51,7 @@ class UserRegistrationChart extends BarChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'نمودار تعداد بر حسب وضعیت',
+                    'label' => 'تعداد',
                     'data' => $counts->pluck('count')->toArray(),
                     'backgroundColor' => [
                         '#FF6384',
