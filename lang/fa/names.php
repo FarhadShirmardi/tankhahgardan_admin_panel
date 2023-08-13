@@ -225,5 +225,6 @@ return [
     'month and year' => 'ماه و سال',
     'monthly count' => 'تعداد ماهانه',
     'yearly count' => 'تعداد سالانه',
-    'special count' => 'تعداد ويژه'
+    'special count' => 'تعداد ويژه',
+    'days remain' => 'روزهای مانده'
 ];
