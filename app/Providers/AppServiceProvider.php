@@ -9,6 +9,7 @@ use App\Models\Receive;
 use App\Models\TicketMessage;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Filament\Navigation\NavigationGroup;
 use Filament\Tables\Columns\Column;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -45,6 +46,15 @@ class AppServiceProvider extends ServiceProvider
 
             Filament::registerStyles([
                 asset('css/fonts.css'),
+            ]);
+
+            Filament::registerNavigationGroups([
+                NavigationGroup::make('Finance')
+                    ->label(__('names.finance reports'))
+                    ->icon('heroicon-s-shopping-cart'),
+                NavigationGroup::make('setting')
+                    ->label(__('names.panel settings'))
+                    ->icon('heroicon-s-cog'),
             ]);
         });
 

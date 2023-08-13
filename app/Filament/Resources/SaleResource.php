@@ -26,6 +26,11 @@ class SaleResource extends Resource
 
     protected static ?string $slug = 'sales-report';
 
+    protected static function getNavigationGroup(): ?string
+    {
+        return __('names.finance reports');
+    }
+
     public static function getModelLabel(): string
     {
         return __('filament::pages/sale.single title');

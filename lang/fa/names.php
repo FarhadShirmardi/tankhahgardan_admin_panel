@@ -160,6 +160,7 @@ return [
     'plan' => 'طرح',
     'create new plan' => 'ایجاد طرح',
     'panel settings' => 'تنظیمات پنل',
+    'finance reports' => 'گزارش‌های مالی',
     'cancel plan' => 'اتمام',
     'cancel plan title' => 'اتمام طرح',
     'delete invoice' => 'لغو',

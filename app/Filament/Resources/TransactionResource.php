@@ -27,6 +27,11 @@ class TransactionResource extends Resource
 {
     protected static ?string $model = UserStatusLog::class;
 
+    protected static function getNavigationGroup(): ?string
+    {
+        return __('names.finance reports');
+    }
+
     public static function getModelLabel(): string
     {
         return __('filament::pages/transaction.title');

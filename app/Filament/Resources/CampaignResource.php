@@ -18,6 +18,11 @@ class CampaignResource extends Resource
 {
     protected static ?string $model = Campaign::class;
 
+    protected static function getNavigationGroup(): ?string
+    {
+        return __('names.finance reports');
+    }
+
     public static function getModelLabel(): string
     {
         return __('filament::pages/campaign.title');

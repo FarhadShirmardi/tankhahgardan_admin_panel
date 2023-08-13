@@ -12,6 +12,11 @@ class UserExtensionResource extends Resource
 
     protected static ?string $slug = 'user-extension-report';
 
+    protected static function getNavigationGroup(): ?string
+    {
+        return __('names.finance reports');
+    }
+
     public static function getModelLabel(): string
     {
         return __('filament::pages/user-extension.single title');

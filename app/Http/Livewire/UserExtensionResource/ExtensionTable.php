@@ -59,6 +59,10 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
     {
         return [
             RowIndexColumn::make(),
+            Tables\Columns\ColorColumn::make('color')
+                ->label('')
+                ->tooltip(fn ($record) => $record->has_extended? 'تمدید کرده است' : ($record->date_diff < 0 ? 'تمدید نکرده است' : ''))
+                ->getStateUsing(fn ($record) => $record->has_extended? '#33d48f' : ($record->date_diff < 0 ? '#F1F3F4' : '')),
             TextColumn::make('name')
                 ->label(__('names.full name'))
                 ->getStateUsing(fn ($record) => filled($record->name) ? $record->name : '-')
@@ -75,19 +79,6 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
     protected function getTableRecordUrlUsing(): ?Closure
     {
         return fn ($record) => UserResource::getUrl('view', ['record' => $record->id]);
-    }
-
-    protected function getTableRecordClassesUsing(): ?Closure
-    {
-        return function (UserStatus $record) {
-            if ($record->has_extended) {
-                return 'bg-success-500/10';
-            }
-            if ($record->date_diff < 0) {
-                return 'bg-gray-200';
-            }
-            return '';
-        };
     }
 
     protected function getTableRecordsPerPageSelectOptions(): array
