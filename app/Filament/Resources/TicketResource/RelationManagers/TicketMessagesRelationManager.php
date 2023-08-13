@@ -60,7 +60,7 @@ class TicketMessagesRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('project')
                     ->label('پروژه')
                     ->url(fn (TicketMessage $record) => ($record->project_user_id != null and $record->getProjectUser()?->project_id != null) ? ProjectResource::getUrl('view', ['record' => $record->getProjectUser()?->project_id]) : null)
-                    ->getStateUsing(fn (TicketMessage $record) => $record->project_user_id != null ? Str::words($record->getProjectUser()?->getProjectTeamText(), 2) : ' - '),
+                    ->getStateUsing(fn (TicketMessage $record) => $record->project_user_id != null ? Str::limit(Str::words($record->getProjectUser()?->getProjectTeamText(), 2), 15) : ' - '),
                 Tables\Columns\IconColumn::make('has_image')
                     ->label('دارای عکس؟')
                     ->boolean()
