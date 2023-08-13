@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\UserExtensionResource;
 
+use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\UserResource;
 use App\Models\UserStatus;
@@ -70,6 +71,9 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
             TextColumn::make('phone_number')
                 ->label(__('names.phone number'))
                 ->getStateUsing(fn ($record) => reformatPhoneNumber($record->phone_number)),
+            JalaliDateTimeColumn::make('max_time')
+                ->label(__('names.last record time'))
+                ->dateTime(),
             TextColumn::make('date_diff')
                 ->label(__('names.days remain'))
                 ->tooltip(fn ($record) => Jalali::parse($record->end_date)->toJalaliDateTimeString()),
