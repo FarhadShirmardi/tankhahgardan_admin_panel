@@ -8,7 +8,6 @@ use App\Models\UserStatusLog;
 use DB;
 use Derakht\Jalali\Jalali;
 use Filament\Widgets\BarChartWidget;
-use Filament\Widgets\LineChartWidget;
 use Illuminate\Database\Eloquent\Builder;
 
 class SalesSumChart extends BarChartWidget
