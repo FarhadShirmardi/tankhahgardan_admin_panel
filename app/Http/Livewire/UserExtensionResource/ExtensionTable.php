@@ -2,14 +2,18 @@
 
 namespace App\Http\Livewire\UserExtensionResource;
 
+use App\Enums\PremiumDurationEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\UserResource;
 use App\Models\UserStatus;
+use App\Models\UserStatusLog;
 use Closure;
 use DB;
 use Derakht\Jalali\Jalali;
 use Filament\Tables;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -74,6 +78,15 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
             JalaliDateTimeColumn::make('max_time')
                 ->label(__('names.last record time'))
                 ->dateTime(),
+            ColorColumn::make('premiumPlan.type')
+                ->label(__('names.plan'))
+                ->tooltip(fn (UserStatus $record) => $record->premiumPlan?->type->title())
+                ->alignCenter()
+                ->getStateUsing(fn (UserStatus $record) => $record->premiumPlan?->type->color()),
+            BadgeColumn::make('duration_id')
+                ->label(__('names.plan type'))
+                ->enum(PremiumDurationEnum::columnValues())
+                ->color(static fn ($state) => PremiumDurationEnum::tryFrom($state)?->color()),
             TextColumn::make('date_diff')
                 ->label(__('names.days remain'))
                 ->tooltip(fn ($record) => Jalali::parse($record->end_date)->toJalaliDateTimeString()),
