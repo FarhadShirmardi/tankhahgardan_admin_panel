@@ -73,6 +73,7 @@ enum PremiumDurationEnum: int
         $halfMonth = self::HALF_MONTH;
         $oneMonth = self::MONTH;
         $oneYear = self::YEAR;
+        $special = self::SPECIAL;
         $items = collect([
             (new PremiumDurationData($halfMonth, true, 0, 0)),
             (new PremiumDurationData($oneMonth, false, $basePrice, $basePrice)),
@@ -80,6 +81,7 @@ enum PremiumDurationEnum: int
                 $basePrice * 12 * (1 - $yearlyDiscountPercent),
                 0
             ))),
+            (new PremiumDurationData($special, false, 0,0)),
         ]);
         if (! $firstBuyFlag) {
             $items = $items->where('is_gift', false);
