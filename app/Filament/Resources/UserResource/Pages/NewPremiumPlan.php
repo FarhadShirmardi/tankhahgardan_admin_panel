@@ -185,7 +185,7 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
                     Forms\Components\TextInput::make('total_amount')
                         ->label(__('names.total amount'))
                         ->hint(fn (Closure $get) => $get('total_amount') ? convertNumberToText($get('total_amount')).' '.__('names.rial') : null)
-                        ->disabled(fn (Closure $get) => $get('premium_plan_id') != -1)
+                        ->disabled(fn (Closure $get) => $get('premium_plan_id') != -1 and $get('duration_id') != -1)
                         ->required()
                         ->numeric()
                         ->reactive(),
