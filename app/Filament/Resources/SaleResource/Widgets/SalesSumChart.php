@@ -7,18 +7,30 @@ use App\Enums\UserStatusTypeEnum;
 use App\Models\UserStatusLog;
 use DB;
 use Derakht\Jalali\Jalali;
+use Filament\Widgets\BarChartWidget;
 use Illuminate\Database\Eloquent\Builder;
-use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 
-class SalesSumChart extends ApexChartWidget
+class SalesSumChart extends BarChartWidget
 {
     protected static ?int $sort = 2;
 
-    protected static string $chartId = 'salesSumChart';
+    protected function getOptions(): ?array
+    {
+        return [
+            'plugins' => [
+                'title' => [
+                    'display' => true,
+                    'text' => 'نمودار فروش ۷ روز اخیر',
+                ],
 
-    protected static ?string $heading = 'نمودار فروش ۷ روز اخیر';
+                'legend' => [
+                    'display' => false,
+                ],
+            ],
+        ];
+    }
 
-    protected function getOptions(): array
+    protected function getData(): array
     {
         $data = UserStatusLog::query()
             ->groupBy('date')
@@ -32,44 +44,31 @@ class SalesSumChart extends ApexChartWidget
             ]);
 
         return [
-            'chart' => [
-                'type' => 'bar',
-                'height' => 250,
-            ],
-            'series' => [
+            'datasets' => [
                 [
-                    'name' => 'میزان فروش',
-                    'data' => $data->pluck('total_sum'),
-                ],
-            ],
-            'xaxis' => [
-                'categories' => $data->map(fn ($item) => Jalali::parse($item->date)->toJalaliDateString()),
-                'labels' => [
-                    'rotateAlways' => true,
-                    'rotate' => -60,
-                    'offsetY' => 60,
-                    'offsetX' => -15,
-                    'style' => [
-                        'colors' => '#9ca3af',
-                        'fontWeight' => 600,
+                    'label' => 'نمودار فروش بر حسب روز',
+                    'data' => $data->pluck('total_sum')->toArray(),
+                    'backgroundColor' => [
+                        '#FF6384',
+                        '#FF9F40',
+                        '#FFCD56',
+                        '#4BC0C0',
+                        '#36A2EB',
+                        '#9966FF',
+                        '#C9CBCE'
+                    ],
+                    'borderColor' => [
+                        '#FF6384',
+                        '#FF9F40',
+                        '#FFCD56',
+                        '#4BC0C0',
+                        '#36A2EB',
+                        '#9966FF',
+                        '#C9CBCE'
                     ],
                 ],
             ],
-            'yaxis' => [
-                'labels' => [
-                    'style' => [
-                        'colors' => '#9ca3af',
-                        'fontWeight' => 600,
-                    ],
-                ],
-            ],
-            'colors' => ['#6366f1'],
-            'plotOptions' => [
-                'bar' => [
-                    'borderRadius' => 10,
-                    'columnWidth' => '65%',
-                ],
-            ],
+            'labels' => $data->map(fn ($item) => Jalali::parse($item->date)->toJalaliDateString())->toArray(),
         ];
     }
 }
