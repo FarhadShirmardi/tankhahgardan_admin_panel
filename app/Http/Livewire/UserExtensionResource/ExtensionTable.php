@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\UserExtensionResource;
 
 use App\Enums\PremiumDurationEnum;
+use App\Enums\PremiumPlanEnum;
 use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\UserResource;
@@ -15,6 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -90,6 +92,17 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
             TextColumn::make('date_diff')
                 ->label(__('names.days remain'))
                 ->tooltip(fn ($record) => Jalali::parse($record->end_date)->toJalaliDateTimeString()),
+        ];
+    }
+
+    protected function getTableFilters(): array
+    {
+        return [
+            SelectFilter::make('premium_plan')
+                ->attribute('premium_plan_id')
+                ->label(__('names.sale report plan'))
+                ->multiple()
+                ->options(PremiumPlanEnum::columnValues()),
         ];
     }
 
