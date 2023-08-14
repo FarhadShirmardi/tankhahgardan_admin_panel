@@ -43,11 +43,6 @@ class SaleResource extends Resource
         return __('filament::pages/sale.title');
     }
 
-    public static function hasRecordTitle(): bool
-    {
-        return false;
-    }
-
     protected static ?int $navigationSort = 6;
 
     protected static ?string $navigationIcon = 'healthicons-o-money-bag';
