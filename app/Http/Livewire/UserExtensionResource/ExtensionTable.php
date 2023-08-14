@@ -52,8 +52,6 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
 
         return UserStatus::query()
             ->join('panel_user_reports', 'panel_user_reports.id', 'user_statuses.user_id')
-            ->where('end_date', '>', now()->subDays(5)->startOfDay())
-            ->where('end_date', '<', now()->addDays(6)->endOfDay())
             ->orderBy('date_diff')
             ->select([
                 DB::raw("exists(select * from user_statuses ou where ou.user_id = user_statuses.user_id and ou.end_date > user_statuses.end_date) as has_extended"),
