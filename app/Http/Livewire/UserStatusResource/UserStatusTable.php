@@ -5,6 +5,7 @@ namespace App\Http\Livewire\UserStatusResource;
 use App\Enums\PremiumDurationEnum;
 use App\Enums\PremiumPlanEnum;
 use App\Enums\ProjectUserTypeEnum;
+use App\Enums\SaleReportTypeEnum;
 use App\Filament\Components\JalaliDatePicker;
 use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\RowIndexColumn;
@@ -60,6 +61,44 @@ class UserStatusTable extends Component implements Tables\Contracts\HasTable
     protected function getDefaultTableSortDirection(): ?string
     {
         return 'asc';
+    }
+
+    function getMaxTimeFilter(): array
+    {
+        return $this->getCachedTableFilters()['max_time']->getState();
+    }
+
+    protected function applyFiltersToTableQuery(Builder $query): Builder
+    {
+        if (!$this->isLoaded) {
+            return $query;
+        }
+
+        $maxTimeFilter = $this->getMaxTimeFilter();
+
+        $query = $query
+            ->when($maxTimeFilter['date_from'], fn (Builder $query, $value) => $query->having('max_time', '>', $value))
+            ->when($maxTimeFilter['date_until'], fn (Builder $query, $value) => $query->having('max_time', '<', $value));
+
+        $data = $this->getTableFiltersForm()->getRawState();
+
+        $cachedTableFilters = collect($this->getCachedTableFilters())->reject(fn ($item) => $item->getName() == 'type')->toArray();
+
+        foreach ($cachedTableFilters as $filter) {
+            $filter->applyToBaseQuery(
+                $query,
+                $data[$filter->getName()] ?? [],
+            );
+        }
+
+        return $query->where(function (Builder $query) use ($data, $cachedTableFilters) {
+            foreach ($cachedTableFilters as $filter) {
+                $filter->apply(
+                    $query,
+                    $data[$filter->getName()] ?? [],
+                );
+            }
+        });
     }
 
     protected function getTableQuery()
