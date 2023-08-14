@@ -75,14 +75,12 @@ class UserStatusTable extends Component implements Tables\Contracts\HasTable
             ->selectRaw('max(max_time)');
 
         return UserStatus::query()
-            ->join('premium_plans', 'premium_plan_id', 'premium_plans.id')
             ->where('end_date', '>', now()->toDateTimeString())
             ->join('panel_user_reports', 'panel_user_reports.id', 'user_statuses.user_id')
             ->selectSub($maxTimeQuery, 'max_time')
             ->addSelect([
                 DB::raw("exists(select * from user_statuses ou where ou.user_id = user_statuses.user_id and ou.end_date > user_statuses.end_date) as has_extended"),
                 DB::raw("datediff(end_date, now()) as date_diff"),
-                'premium_plans.type as premium_plan_type',
                 'panel_user_reports.id',
                 'panel_user_reports.name',
                 'panel_user_reports.phone_number',
@@ -130,10 +128,11 @@ class UserStatusTable extends Component implements Tables\Contracts\HasTable
     {
         return [
             SelectFilter::make('premium_plan')
+                ->attribute('premium_plan_id')
                 ->label(__('names.sale report plan'))
                 ->multiple()
-                ->default([PremiumPlanEnum::SILVER->value, PremiumPlanEnum::GOLD->value])
-                ->options(PremiumPlanEnum::columnValues()),
+                ->options(PremiumPlanEnum::columnValues())
+                ->default([PremiumPlanEnum::SILVER->value, PremiumPlanEnum::GOLD->value]),
             SelectFilter::make('premium_duration')
                 ->attribute('duration_id')
                 ->label(__('names.premium_duration.title'))
