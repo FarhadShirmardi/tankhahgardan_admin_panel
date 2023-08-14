@@ -249,7 +249,7 @@ return [
             'groups' => [
                 'are_collapsible' => true,
             ],
-            'width' => '11rem',
+            'width' => '11.5rem',
             'collapsed_width' => null,
         ],
     ],
