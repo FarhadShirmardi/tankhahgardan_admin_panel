@@ -106,6 +106,11 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
         ];
     }
 
+    protected function getTableFiltersLayout(): ?string
+    {
+        return Tables\Filters\Layout::AboveContentCollapsible;
+    }
+
     protected function getTableRecordUrlUsing(): ?Closure
     {
         return fn ($record) => UserResource::getUrl('view', ['record' => $record->id]);
