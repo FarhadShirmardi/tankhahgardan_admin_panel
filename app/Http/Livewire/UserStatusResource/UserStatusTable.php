@@ -182,10 +182,23 @@ class UserStatusTable extends Component implements Tables\Contracts\HasTable
                     JalaliDatePicker::make('date_from')
                         ->default(now()->subDays(12)->startOfDay())
                         ->label(__('names.max time from')),
-                    JalaliDatePicker::make('date_until')
+                    JalaliDatePicker::make('date_from')
                         ->default(now()->subDays(5)->endOfDay())
                         ->label(__('names.max time until')),
                 ])
+                ->indicateUsing(function (array $data): array {
+                    $indicators = [];
+
+                    if ($data['date_from'] ?? null) {
+                        $indicators['date_from'] = 'آخرین ثبت از ' . Jalali::parse($data['from'])->toJalaliDateString();
+                    }
+
+                    if ($data['date_from'] ?? null) {
+                        $indicators['date_from'] = 'Created until ' . Jalali::parse($data['until'])->toJalaliDateString();
+                    }
+
+                    return $indicators;
+                })
                 ->query(function (Builder $query, array $data): Builder {
                     return $query
                         ->when(
