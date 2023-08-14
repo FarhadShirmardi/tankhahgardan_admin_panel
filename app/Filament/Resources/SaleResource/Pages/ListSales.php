@@ -10,9 +10,4 @@ class ListSales extends Page
     protected static string $resource = SaleResource::class;
 
     protected static string $view = 'filament.resources.sale-resource.pages.report';
-
-    protected function getTitle(): string
-    {
-        return __('filament::pages/sale.title');
-    }
 }
