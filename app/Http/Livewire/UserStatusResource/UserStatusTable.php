@@ -138,7 +138,7 @@ class UserStatusTable extends Component implements Tables\Contracts\HasTable
                 ->label(__('names.premium_duration.title'))
                 ->multiple()
                 ->options(PremiumDurationEnum::columnValues()),
-            Tables\Filters\Filter::make('date_diff')
+            Tables\Filters\Filter::make('max_time')
                 ->form([
                     JalaliDatePicker::make('date_from')
                         ->default(now()->subDays(12)->startOfDay())
