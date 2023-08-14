@@ -126,26 +126,6 @@ class UserStatusTable extends Component implements Tables\Contracts\HasTable
                 ->label(__('names.premium_duration.title'))
                 ->multiple()
                 ->options(PremiumDurationEnum::columnValues()),
-            Tables\Filters\Filter::make('date_diff')
-                ->form([
-                    JalaliDatePicker::make('date_from')
-                        ->default(now()->subDays(5)->startOfDay())
-                        ->label(__('names.date from')),
-                    JalaliDatePicker::make('date_until')
-                        ->default(now()->addDays(6)->endOfDay())
-                        ->label(__('names.date until')),
-                ])
-                ->query(function (Builder $query, array $data): Builder {
-                    return $query
-                        ->when(
-                            $data['date_from'],
-                            fn (Builder $query, $date): Builder => $query->where('end_date', '>', $date),
-                        )
-                        ->when(
-                            $data['date_until'],
-                            fn (Builder $query, $date): Builder => $query->where('end_date', '<', $date),
-                        );
-                }),
         ];
     }
 
