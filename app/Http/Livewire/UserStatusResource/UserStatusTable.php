@@ -181,10 +181,10 @@ class UserStatusTable extends Component implements Tables\Contracts\HasTable
                 ->form([
                     JalaliDatePicker::make('date_from')
                         ->default(now()->subDays(12)->startOfDay())
-                        ->label(__('names.date from')),
+                        ->label(__('names.max time from')),
                     JalaliDatePicker::make('date_until')
                         ->default(now()->subDays(5)->endOfDay())
-                        ->label(__('names.date until')),
+                        ->label(__('names.max time until')),
                 ])
                 ->query(function (Builder $query, array $data): Builder {
                     return $query

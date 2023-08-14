@@ -89,6 +89,8 @@ return [
     'registered until' => 'ثبت‌نام تا',
     'date from' => 'از تاریخ',
     'date until' => 'تا تاریخ',
+    'max time from' => 'آخرین ثبت از',
+    'max time until' => 'آخرین ثبت تا',
     'last record time' => 'آخرین ثبت',
     'last record time state' => 'وضعیت آخرین ثبت',
     'total project count' => 'تعداد کل شرکت‌ها',
