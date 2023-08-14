@@ -1,8 +1,8 @@
 @php
     /* @var \App\Models\UserStatusLog $record */
     $premiumPlan = $record->premium_plan_id ? \App\Models\PremiumPlan::query()->find($record->premium_plan_id) : null;
-    $duration = \App\Enums\PremiumDurationEnum::from($record->duration_id);
-    $planLabel = $premiumPlan ? ($premiumPlan->type->title().' - '.$duration->getTitle()) : 'مبلغ طرح';
+    $duration = \App\Enums\PremiumDurationEnum::tryFrom($record->duration_id);
+    $planLabel = $premiumPlan ? ($premiumPlan->type->title().' - '.$duration?->getTitle()) : 'مبلغ طرح';
     $planAmount = $record->total_amount;
     $addedValueLabel = \App\Constants\PremiumConstants::ADDED_VALUE_PERCENT * 100 .' '.__('names.percent').' '.__('names.added value amount');
     $addedValueAmount = $record->added_value_amount;
