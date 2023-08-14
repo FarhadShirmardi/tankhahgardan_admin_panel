@@ -82,7 +82,7 @@ class UserStatusTable extends Component implements Tables\Contracts\HasTable
 
         $data = $this->getTableFiltersForm()->getRawState();
 
-        $cachedTableFilters = collect($this->getCachedTableFilters())->reject(fn ($item) => $item->getName() == 'type')->toArray();
+        $cachedTableFilters = collect($this->getCachedTableFilters())->reject(fn ($item) => $item->getName() == 'max_time')->toArray();
 
         foreach ($cachedTableFilters as $filter) {
             $filter->applyToBaseQuery(
