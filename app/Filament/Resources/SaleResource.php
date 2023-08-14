@@ -17,7 +17,9 @@ use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class SaleResource extends Resource
@@ -39,6 +41,11 @@ class SaleResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('filament::pages/sale.title');
+    }
+
+    public static function hasRecordTitle(): bool
+    {
+        return false;
     }
 
     protected static ?int $navigationSort = 6;
