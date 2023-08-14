@@ -151,11 +151,11 @@ class UserStatusTable extends Component implements Tables\Contracts\HasTable
                     return $query
                         ->when(
                             $data['date_from'],
-                            fn (Builder $query, $date): Builder => $query->where('max_time', '>', $date),
+                            fn (Builder $query, $date): Builder => $query->having('max_time', '>', $date),
                         )
                         ->when(
                             $data['date_until'],
-                            fn (Builder $query, $date): Builder => $query->where('max_time', '<', $date),
+                            fn (Builder $query, $date): Builder => $query->having('max_time', '<', $date),
                         );
                 }),
         ];
