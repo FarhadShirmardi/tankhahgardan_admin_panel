@@ -27,6 +27,12 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
 {
     use Tables\Concerns\InteractsWithTable;
 
+    protected $queryString = [
+        'tableFilters',
+        'tableSortColumn' => ['except' => ''],
+        'tableSortDirection' => ['except' => ''],
+    ];
+
     public bool $isLoaded = false;
 
     public function loadData(): void
