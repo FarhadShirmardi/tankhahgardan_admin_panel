@@ -4,6 +4,7 @@ namespace App\Http\Livewire\UserExtensionResource;
 
 use App\Enums\PremiumDurationEnum;
 use App\Enums\PremiumPlanEnum;
+use App\Filament\Components\JalaliDatePicker;
 use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\UserResource;
@@ -19,6 +20,7 @@ use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Component;
 
 class ExtensionTable extends Component implements Tables\Contracts\HasTable
@@ -112,6 +114,26 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
                 ->label(__('names.premium_duration.title'))
                 ->multiple()
                 ->options(PremiumDurationEnum::columnValues()),
+            Tables\Filters\Filter::make('date_diff')
+                ->form([
+                    JalaliDatePicker::make('date_from')
+                        ->default(now()->subDays(5)->startOfDay())
+                        ->label(__('names.date from')),
+                    JalaliDatePicker::make('date_until')
+                        ->default(now()->addDays(6)->endOfDay())
+                        ->label(__('names.date until')),
+                ])
+                ->query(function (Builder $query, array $data): Builder {
+                    return $query
+                        ->when(
+                            $data['date_from'],
+                            fn (Builder $query, $date): Builder => $query->where('end_date', '>', $date),
+                        )
+                        ->when(
+                            $data['date_until'],
+                            fn (Builder $query, $date): Builder => $query->where('end_date', '<', $date),
+                        );
+                }),
         ];
     }
 
