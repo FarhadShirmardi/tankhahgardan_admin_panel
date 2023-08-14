@@ -26,6 +26,12 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
 {
     use Tables\Concerns\InteractsWithTable;
 
+    protected $queryString = [
+        'tableFilters',
+        'tableSortColumn' => ['except' => ''],
+        'tableSortDirection' => ['except' => ''],
+    ];
+
     public bool $isLoaded = false;
 
     public function loadData(): void
@@ -234,10 +240,5 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
     protected function getTableFiltersLayout(): ?string
     {
         return Tables\Filters\Layout::AboveContent;
-    }
-
-    protected function shouldPersistTableFiltersInSession(): bool
-    {
-        return true;
     }
 }
