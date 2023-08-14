@@ -12,6 +12,7 @@ use App\Models\UserStatusLog;
 use Closure;
 use DB;
 use Derakht\Jalali\Jalali;
+use Exception;
 use Filament\Tables;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\ColorColumn;
@@ -95,6 +96,9 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
         ];
     }
 
+    /**
+     * @throws Exception
+     */
     protected function getTableFilters(): array
     {
         return [
@@ -103,6 +107,11 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
                 ->label(__('names.sale report plan'))
                 ->multiple()
                 ->options(PremiumPlanEnum::columnValues()),
+            SelectFilter::make('premium_duration')
+                ->attribute('duration_id')
+                ->label(__('names.premium_duration.title'))
+                ->multiple()
+                ->options(PremiumDurationEnum::columnValues()),
         ];
     }
 
