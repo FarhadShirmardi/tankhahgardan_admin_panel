@@ -2,6 +2,6 @@
 
 return [
 
-    'title' => 'گزارش تمدید طرح',
-    'single title' => 'گزارش تمدید طرح'
+    'title' => 'تمدید طرح',
+    'single title' => 'تمدید طرح'
 ];
