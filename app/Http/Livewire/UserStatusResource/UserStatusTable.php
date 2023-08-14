@@ -65,6 +65,7 @@ class UserStatusTable extends Component implements Tables\Contracts\HasTable
             ->selectRaw('max(max_time)');
 
         return UserStatus::query()
+            ->where('end_date', '>', now()->toDateTimeString())
             ->join('panel_user_reports', 'panel_user_reports.id', 'user_statuses.user_id')
             ->selectSub($maxTimeQuery, 'max_time')
             ->addSelect([
