@@ -80,6 +80,7 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
                 ->getStateUsing(fn ($record) => reformatPhoneNumber($record->phone_number)),
             JalaliDateTimeColumn::make('max_time')
                 ->label(__('names.last record time'))
+                ->sortable()
                 ->dateTime(),
             ColorColumn::make('premiumPlan.type')
                 ->label(__('names.plan'))
@@ -92,6 +93,7 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
                 ->color(static fn ($state) => PremiumDurationEnum::tryFrom($state)?->color()),
             TextColumn::make('date_diff')
                 ->label(__('names.days remain'))
+                ->sortable()
                 ->tooltip(fn ($record) => Jalali::parse($record->end_date)->toJalaliDateTimeString()),
         ];
     }
