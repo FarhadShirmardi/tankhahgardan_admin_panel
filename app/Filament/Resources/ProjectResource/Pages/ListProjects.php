@@ -9,6 +9,8 @@ class ListProjects extends ListRecords
 {
     protected static string $resource = ProjectResource::class;
 
+    protected int $defaultTableRecordsPerPageSelectOption = 50;
+
     protected function getActions(): array
     {
         return [
