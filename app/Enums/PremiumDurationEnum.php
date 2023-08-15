@@ -77,10 +77,9 @@ enum PremiumDurationEnum: int
         $items = collect([
             (new PremiumDurationData($halfMonth, true, 0, 0)),
             (new PremiumDurationData($oneMonth, false, $basePrice, $basePrice)),
-            (new PremiumDurationData($oneYear, false, $basePrice * 12, roundDown(
-                $basePrice * 12 * (1 - $yearlyDiscountPercent),
-                0
-            ))),
+            (new PremiumDurationData($oneYear, false, $basePrice * 12, ceil(
+                    $basePrice * 12 * (1 - $yearlyDiscountPercent) / 10000
+                ) * 10000)),
             (new PremiumDurationData($special, false, 0,0)),
         ]);
         if (! $firstBuyFlag) {
