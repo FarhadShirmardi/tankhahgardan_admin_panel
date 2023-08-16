@@ -86,7 +86,7 @@ class PromoCodesRelationManager extends RelationManager
                         'receptor' => User::query()->find($data['user_id'])->phone_number,
                         'template' => SmsTemplateEnum::PROMO_CODE->value,
                         'token1' => persianString($data['discount_percent']),
-                        'token2' => $data['discount_percent'],
+                        'token2' => $data['code'],
                         'token3' => is_null($data['expire_at']) ? '-' : persianString(Jalali::parse($data['expire_at'])->toJalaliDateString()),
                     ],
                 ]
