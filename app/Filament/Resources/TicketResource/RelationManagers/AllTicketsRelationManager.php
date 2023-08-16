@@ -7,6 +7,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Resources\Table;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 class AllTicketsRelationManager extends RelationManager
@@ -35,7 +36,12 @@ class AllTicketsRelationManager extends RelationManager
             ->headerActions([
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->url(function (RelationManager $livewire, Model $record) {
+                        return TicketResource::getUrl('edit', [
+                            'record' => $record->id,
+                        ]);
+                    }),
             ])
             ->bulkActions([
             ]);
