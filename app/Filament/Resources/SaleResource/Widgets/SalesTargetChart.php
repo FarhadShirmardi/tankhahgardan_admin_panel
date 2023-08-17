@@ -72,11 +72,13 @@ class SalesTargetChart extends BarChartWidget
             'datasets' => [
                 [
                     'type' => 'line',
+                    'label' => 'هدف این ماه',
                     'data' => $data->pluck('target')->toArray(),
                     'borderColor' => Colors::getBorder(),
                 ],
                 [
                     'type' => 'bar',
+                    'label' => 'میزان فروش',
                     'data' => $data->pluck('total_sum')->map(fn ($value) => round($value / 10000000, 2))->toArray(),
                     'backgroundColor' => Colors::getBackground(),
                     'borderColor' => ['#B38A8A'],
