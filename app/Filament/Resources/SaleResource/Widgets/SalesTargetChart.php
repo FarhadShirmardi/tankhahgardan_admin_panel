@@ -62,8 +62,8 @@ class SalesTargetChart extends BarChartWidget
                 'date_mappings.jalali_date',
                 'panel_sale_targets.amount as target',
                 DB::raw('date(user_status_logs.created_at) as date'),
-                DB::raw("substr(jalali_date, 1, 4) as year"),
-                DB::raw("substr(jalali_date, 6, 2) as month"),
+                DB::raw("substr(date_mappings.jalali_date, 1, 4) as year"),
+                DB::raw("substr(date_mappings.jalali_date, 6, 2) as month"),
                 DB::raw("SUM(total_amount + added_value_amount - wallet_amount - credit_amount - discount_amount) as total_sum")
             ]);
 
