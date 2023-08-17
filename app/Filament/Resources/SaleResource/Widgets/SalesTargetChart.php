@@ -57,7 +57,7 @@ class SalesTargetChart extends BarChartWidget
             ->whereRaw('jalali_date <= ?', [$this->getFormattedDateText($maxDate)])
             ->where(fn (Builder $query) => $query->where('duration_id', '!=', PremiumDurationEnum::HALF_MONTH->value)->orWhere('price_id', '!=', PremiumDurationEnum::HALF_MONTH->value))
             ->where('status', UserStatusTypeEnum::SUCCEED)
-            ->select([
+            ->get([
                 'user_status_logs.id',
                 'date_mappings.jalali_date',
                 'panel_sale_targets.amount as target',
