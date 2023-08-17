@@ -53,8 +53,8 @@ class SalesTargetChart extends BarChartWidget
                 ->whereColumn('user_status_logs.created_at', '<=', 'date_mappings.end_date')
             )
             ->groupByRaw('CONCAT_WS(year, month)')
-            ->whereRaw('jalali_date >= ?', [$this->getFormattedDateText($minDate)])
-            ->whereRaw('jalali_date <= ?', [$this->getFormattedDateText($maxDate)])
+            ->whereRaw('date_mappings.jalali_date >= ?', [$this->getFormattedDateText($minDate)])
+            ->whereRaw('date_mappings.jalali_date <= ?', [$this->getFormattedDateText($maxDate)])
             ->where(fn (Builder $query) => $query->where('duration_id', '!=', PremiumDurationEnum::HALF_MONTH->value)->orWhere('price_id', '!=', PremiumDurationEnum::HALF_MONTH->value))
             ->where('status', UserStatusTypeEnum::SUCCEED)
             ->get([
