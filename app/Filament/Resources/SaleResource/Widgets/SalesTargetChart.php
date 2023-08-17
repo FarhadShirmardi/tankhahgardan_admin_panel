@@ -78,7 +78,7 @@ class SalesTargetChart extends BarChartWidget
                     'type' => 'bar',
                     'data' => $data->pluck('total_sum')->map(fn ($value) => round($value / 10000000, 2))->toArray(),
                     'backgroundColor' => Colors::getBackground(),
-                    'borderColor' => Colors::getBorder(),
+                    'borderColor' => ['#B38A8A'],
                 ],
             ],
             'labels' => $data->map(fn ($item) => Jalali::parse($item->date)->toJalaliDateString())->toArray(),

@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Arr;
+
 class Colors
 {
     /**
@@ -9,7 +11,7 @@ class Colors
      */
     public static function getBackground(): array
     {
-        return [
+        return Arr::random([
             '#FF6384',
             '#FF9F40',
             '#FFCD56',
@@ -17,7 +19,7 @@ class Colors
             '#36A2EB',
             '#9966FF',
             '#C9CBCE'
-        ];
+        ]);
     }
 
     /**
