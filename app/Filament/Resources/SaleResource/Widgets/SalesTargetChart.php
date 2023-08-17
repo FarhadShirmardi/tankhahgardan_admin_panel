@@ -5,6 +5,7 @@ namespace App\Filament\Resources\SaleResource\Widgets;
 use App\Enums\PremiumDurationEnum;
 use App\Enums\UserStatusTypeEnum;
 use App\Helpers\Colors;
+use App\Helpers\UtilHelpers;
 use App\Models\DateMapping;
 use App\Models\UserStatusLog;
 use DB;
@@ -72,7 +73,7 @@ class SalesTargetChart extends BarChartWidget
                 [
                     'type' => 'line',
                     'data' => $data->pluck('target')->toArray(),
-                    'borderColor' => \Arr::random(Colors::getBorder()),
+                    'borderColor' => Colors::getBorder(),
                 ],
                 [
                     'type' => 'bar',
@@ -81,7 +82,7 @@ class SalesTargetChart extends BarChartWidget
                     'borderColor' => ['#B38A8A'],
                 ],
             ],
-            'labels' => $data->map(fn ($item) => Jalali::parse($item->date)->toJalaliDateString())->toArray(),
+            'labels' => $data->map(fn ($item) => UtilHelpers::getMonthName($item->month).' '.$item->year)->toArray(),
         ];
     }
 
