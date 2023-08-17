@@ -80,7 +80,7 @@ class SalesTargetChart extends BarChartWidget
                     'type' => 'bar',
                     'label' => 'میزان فروش',
                     'data' => $data->pluck('total_sum')->map(fn ($value) => round($value / 10000000, 2))->toArray(),
-                    'backgroundColor' => $data->map(fn ($item) => Colors::getColorByPercentage(round($item->total_sum / 10000000, 2) / $item->target))->toArray(),
+                    'backgroundColor' => $data->map(fn ($item) => Colors::getColorByPercentage(round($item->total_sum / 10000000, 2) / $item->target) * 100)->toArray(),
                 ],
             ],
             'labels' => $data->map(fn ($item) => UtilHelpers::getMonthName($item->month).' '.$item->year)->toArray(),
