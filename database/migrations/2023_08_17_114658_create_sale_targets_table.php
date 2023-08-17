@@ -9,8 +9,7 @@ return new class extends Migration {
     {
         Schema::create('sale_targets', function (Blueprint $table) {
             $table->id();
-            $table->integer('year');
-            $table->integer('month');
+            $table->string('jalali_date');
             $table->integer('amount');
             $table->timestamps();
         });
