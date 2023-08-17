@@ -9,7 +9,7 @@ use Filament\Widgets\BarChartWidget;
 
 class UserActivityChart extends BarChartWidget
 {
-    protected static ?int $sort = 1;
+    protected static ?int $sort = 3;
     private static function totalUserCount(): int
     {
         return User::query()->count();

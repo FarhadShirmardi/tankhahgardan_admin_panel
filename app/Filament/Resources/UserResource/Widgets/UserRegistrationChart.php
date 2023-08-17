@@ -13,7 +13,7 @@ use Filament\Widgets\LineChartWidget;
 
 class UserRegistrationChart extends LineChartWidget
 {
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 4;
 
     protected function getMaxHeight(): ?string
     {

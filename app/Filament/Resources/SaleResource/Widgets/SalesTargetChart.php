@@ -15,7 +15,7 @@ use Illuminate\Database\Query\JoinClause;
 
 class SalesTargetChart extends BarChartWidget
 {
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 1;
 
     protected function getOptions(): ?array
     {
