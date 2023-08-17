@@ -45,7 +45,7 @@ class Colors
         } elseif ($percentage <= 90) {
             return '#4f62d1';  // Royal blue color for 50% to 90%
         } else {
-            return '#2D2D2D';  // Green color for 90% to 100%
+            return '#33d48f';  // Green color for 90% to 100%
         }
     }
 }
