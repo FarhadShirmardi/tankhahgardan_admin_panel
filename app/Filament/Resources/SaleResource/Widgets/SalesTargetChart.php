@@ -48,10 +48,7 @@ class SalesTargetChart extends BarChartWidget
         $maxDate->updateJalali();
 
         $data = DateMapping::query()
-            ->join('panel_sale_targets', function (JoinClause $join) {
-                $join->where('panel_sale_targets.year', 'date_mappings.year')
-                    ->where('panel_sale_targets.month', 'date_mappings.month');
-            })
+            ->join('panel_sale_targets', 'panel_sale_targets.jalali_date', 'date_mappings.jalali_date')
             ->join('user_status_logs', fn (JoinClause $join) => $join->whereColumn('user_status_logs.created_at', '>=', 'date_mappings.start_date')
                 ->whereColumn('user_status_logs.created_at', '<=', 'date_mappings.end_date')
             )
@@ -62,7 +59,7 @@ class SalesTargetChart extends BarChartWidget
             ->where('status', UserStatusTypeEnum::SUCCEED)
             ->select([
                 'user_status_logs.id',
-                'jalali_date',
+                'date_mappings.jalali_date',
                 'panel_sale_targets.amount as target',
                 DB::raw('date(user_status_logs.created_at) as date'),
                 DB::raw("substr(jalali_date, 1, 4) as year"),
