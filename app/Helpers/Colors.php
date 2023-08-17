@@ -11,7 +11,7 @@ class Colors
      */
     public static function getBackground(): array
     {
-        return Arr::random([
+        return collect([
             '#FF6384',
             '#FF9F40',
             '#FFCD56',
@@ -19,7 +19,7 @@ class Colors
             '#36A2EB',
             '#9966FF',
             '#C9CBCE'
-        ]);
+        ])->shuffle()->toArray();
     }
 
     /**
