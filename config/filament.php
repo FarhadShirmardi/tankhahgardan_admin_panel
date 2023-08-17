@@ -142,6 +142,7 @@ return [
             \App\Filament\Resources\UserResource\Widgets\UserActivityChart::class,
             \App\Filament\Resources\UserResource\Widgets\UserRegistrationChart::class,
             \App\Filament\Resources\SaleResource\Widgets\SalesSumChart::class,
+            \App\Filament\Resources\SaleResource\Widgets\SalesTargetChart::class,
         ],
     ],
 

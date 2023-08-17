@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SaleResource\Widgets;
 
 use App\Enums\PremiumDurationEnum;
 use App\Enums\UserStatusTypeEnum;
+use App\Helpers\Colors;
 use App\Models\UserStatusLog;
 use DB;
 use Derakht\Jalali\Jalali;
@@ -48,24 +49,8 @@ class SalesSumChart extends BarChartWidget
                 [
                     'label' => 'میزان فروش',
                     'data' => $data->pluck('total_sum')->toArray(),
-                    'backgroundColor' => [
-                        '#FF6384',
-                        '#FF9F40',
-                        '#FFCD56',
-                        '#4BC0C0',
-                        '#36A2EB',
-                        '#9966FF',
-                        '#C9CBCE'
-                    ],
-                    'borderColor' => [
-                        '#FF6384',
-                        '#FF9F40',
-                        '#FFCD56',
-                        '#4BC0C0',
-                        '#36A2EB',
-                        '#9966FF',
-                        '#C9CBCE'
-                    ],
+                    'backgroundColor' => Colors::getBackground(),
+                    'borderColor' => Colors::getBorder(),
                 ],
             ],
             'labels' => $data->map(fn ($item) => Jalali::parse($item->date)->toJalaliDateString())->toArray(),

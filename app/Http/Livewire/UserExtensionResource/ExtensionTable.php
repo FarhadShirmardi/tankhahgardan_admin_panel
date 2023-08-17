@@ -123,7 +123,7 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
             Tables\Filters\Filter::make('date_diff')
                 ->form([
                     JalaliDatePicker::make('date_from')
-                        ->default(now()->subDays(5)->startOfDay())
+                        ->default(now()->subDays(10)->startOfDay())
                         ->label(__('names.date from')),
                     JalaliDatePicker::make('date_until')
                         ->default(now()->addDays(6)->endOfDay())
