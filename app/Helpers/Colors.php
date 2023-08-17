@@ -39,13 +39,13 @@ class Colors
     public static function getColorByPercentage($percentage): ?string
     {
         if ($percentage < 10) {
-            return '#2D2D2D';  // Dark gray color for under 10%
+            return '#F1F3F4';  // Dark gray color for under 10%
         } elseif ($percentage <= 50) {
-            return '#FFD700';  // Gold color for 10% to 50%
+            return '#f05b4a';  // Gold color for 10% to 50%
         } elseif ($percentage <= 90) {
-            return '#4169E1';  // Royal blue color for 50% to 90%
+            return '#4f62d1';  // Royal blue color for 50% to 90%
         } else {
-            return '#00FF00';  // Green color for 90% to 100%
+            return '#2D2D2D';  // Green color for 90% to 100%
         }
     }
 }
