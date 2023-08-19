@@ -4,6 +4,7 @@ namespace App\Http\Livewire\UserResource;
 
 use App\Enums\ProjectUserStateEnum;
 use App\Enums\ProjectUserTypeEnum;
+use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\RowIndexColumn;
 use App\Filament\Resources\ProjectResource;
 use App\Models\Image;
@@ -79,12 +80,14 @@ class ProjectsTable extends UserDetailTable
         return $this->user->projectUsers()
             ->with('teams')
             ->join('projects', 'projects.id', 'project_user.project_id')
+            ->join('panel_project_reports', 'panel_project_reports.id', 'projects.id')
             ->addSelect('projects.name as name')
             ->addSelect('projects.created_at as created_at')
             ->addSelect('project_user.id as id')
             ->addSelect('project_id')
             ->addSelect('user_type')
             ->addSelect('project_user.state as user_state')
+            ->addSelect('panel_project_reports.max_time as max_time')
             ->selectSub($paymentCountQuery, 'payment_count')
             ->selectSub($receiveCountQuery, 'receive_count')
             ->selectSub($imprestCountQuery, 'imprest_count')
@@ -130,6 +133,10 @@ class ProjectsTable extends UserDetailTable
                 ->tooltip(self::getTeamNames())
                 ->enum(ProjectUserTypeEnum::columnValues())
                 ->color(static fn ($state) => ProjectUserTypeEnum::from($state)->color()),
+            JalaliDateTimeColumn::make('max_time')
+                ->label(__('names.project last record time'))
+                ->dateTime()
+                ->sortable(),
             Tables\Columns\IconColumn::make('user_state')
                 ->options([
                     'heroicon-o-x-circle' => ProjectUserStateEnum::INACTIVE->value,

@@ -92,6 +92,7 @@ return [
     'max time from' => 'آخرین ثبت از',
     'max time until' => 'آخرین ثبت تا',
     'last record time' => 'آخرین ثبت',
+    'project last record time' => 'آخرین ثبت پروژه',
     'last record time state' => 'وضعیت آخرین ثبت',
     'total project count' => 'تعداد کل شرکت‌ها',
     'owned project count' => 'تعداد شرکت مالک',
