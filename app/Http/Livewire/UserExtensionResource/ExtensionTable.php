@@ -67,7 +67,7 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
             ->join('panel_user_reports', 'panel_user_reports.id', 'user_statuses.user_id')
             ->orderBy('date_diff')
             ->selectSub($maxTimeQuery, 'max_time')
-            ->select([
+            ->addSelect([
                 DB::raw("exists(select * from user_statuses ou where ou.user_id = user_statuses.user_id and ou.end_date > user_statuses.end_date) as has_extended"),
                 DB::raw("datediff(end_date, now()) as date_diff"),
                 'panel_user_reports.id',
