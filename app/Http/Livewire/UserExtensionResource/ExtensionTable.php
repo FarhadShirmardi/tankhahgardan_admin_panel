@@ -70,7 +70,9 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
             ->select([
                 DB::raw("exists(select * from user_statuses ou where ou.user_id = user_statuses.user_id and ou.end_date > user_statuses.end_date) as has_extended"),
                 DB::raw("datediff(end_date, now()) as date_diff"),
-                DB::raw("panel_user_reports.*"),
+                'panel_user_reports.id',
+                'panel_user_reports.name',
+                'panel_user_reports.phone_number',
                 'end_date',
                 'premium_plan_id',
                 'duration_id'
