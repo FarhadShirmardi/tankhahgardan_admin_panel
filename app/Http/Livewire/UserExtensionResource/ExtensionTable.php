@@ -124,7 +124,8 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
                 ->attribute('premium_plan_id')
                 ->label(__('names.sale report plan'))
                 ->multiple()
-                ->options(PremiumPlanEnum::columnValues()),
+                ->options(PremiumPlanEnum::columnValues())
+                ->default([PremiumPlanEnum::SILVER->value, PremiumPlanEnum::GOLD->value, PremiumPlanEnum::SPECIAL->value]),
             SelectFilter::make('premium_duration')
                 ->attribute('duration_id')
                 ->label(__('names.premium_duration.title'))
