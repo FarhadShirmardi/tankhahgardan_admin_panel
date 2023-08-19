@@ -180,10 +180,10 @@ class UserStatusTable extends Component implements Tables\Contracts\HasTable
             Tables\Filters\Filter::make('max_time')
                 ->form([
                     JalaliDatePicker::make('date_from')
-                        ->default(now()->subDays(12)->startOfDay())
+                        ->default(now()->subDays(14)->startOfDay())
                         ->label(__('names.max time from')),
                     JalaliDatePicker::make('date_until')
-                        ->default(now()->subDays(5)->endOfDay())
+                        ->default(now()->subDays(7)->endOfDay())
                         ->label(__('names.max time until')),
                 ])
                 ->indicateUsing(function (array $data): array {

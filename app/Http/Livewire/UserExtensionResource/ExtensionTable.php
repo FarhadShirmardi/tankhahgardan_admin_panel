@@ -4,6 +4,7 @@ namespace App\Http\Livewire\UserExtensionResource;
 
 use App\Enums\PremiumDurationEnum;
 use App\Enums\PremiumPlanEnum;
+use App\Enums\ProjectUserTypeEnum;
 use App\Filament\Components\JalaliDatePicker;
 use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\RowIndexColumn;
@@ -56,9 +57,16 @@ class ExtensionTable extends Component implements Tables\Contracts\HasTable
             return UserStatus::query()->whereRaw('false');
         }
 
+        $maxTimeQuery = DB::connection('mysql')->table('panel_project_reports')
+            ->join('project_user', 'project_user.project_id', 'panel_project_reports.id')
+            ->where('project_user.user_type', ProjectUserTypeEnum::OWNER->value)
+            ->whereColumn('project_user.user_id', 'user_statuses.user_id')
+            ->selectRaw('max(max_time)');
+
         return UserStatus::query()
             ->join('panel_user_reports', 'panel_user_reports.id', 'user_statuses.user_id')
             ->orderBy('date_diff')
+            ->selectSub($maxTimeQuery, 'max_time')
             ->select([
                 DB::raw("exists(select * from user_statuses ou where ou.user_id = user_statuses.user_id and ou.end_date > user_statuses.end_date) as has_extended"),
                 DB::raw("datediff(end_date, now()) as date_diff"),
