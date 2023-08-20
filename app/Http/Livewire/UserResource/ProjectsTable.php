@@ -174,6 +174,7 @@ class ProjectsTable extends UserDetailTable
                 __('names.sum'),
                 '',
                 '',
+                '',
                 $this->userReport->payment_count,
                 $this->userReport->receive_count,
                 $this->userReport->imprest_count,
