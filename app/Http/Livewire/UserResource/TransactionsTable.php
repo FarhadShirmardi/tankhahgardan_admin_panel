@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\UserResource;
 
 use App\Filament\Resources\TransactionResource;
+use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -25,6 +26,9 @@ class TransactionsTable extends UserDetailTable
         return TransactionResource::getColumns(showUsername: false);
     }
 
+    /**
+     * @throws Exception
+     */
     protected function getTableActions(): array
     {
         return TransactionResource::getActions();

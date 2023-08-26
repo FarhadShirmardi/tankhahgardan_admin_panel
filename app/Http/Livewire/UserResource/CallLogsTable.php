@@ -5,10 +5,10 @@ namespace App\Http\Livewire\UserResource;
 use App\Filament\Components\JalaliDateTimeColumn;
 use App\Filament\Components\JalaliDateTimePicker;
 use App\Filament\Components\RowIndexColumn;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables;
 use App\Models\CallLog;
+use Exception;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -45,11 +45,42 @@ class CallLogsTable extends UserDetailTable
         ];
     }
 
+    /**
+     * @throws Exception
+     */
+    protected function getTableActions(): array
+    {
+        return [
+            Tables\Actions\EditAction::make()
+                ->visible(fn (CallLog $record) => $record->panel_user_id == auth()->id())
+                ->action(function (CallLog $record, array $data): void {
+                    $record->update($data);
+                })
+                ->form([
+                    Textarea::make('text')
+                        ->required()
+                        ->label(__('names.description')),
+
+                    JalaliDateTimePicker::make('date')
+                        ->label(__('names.date_time'))
+                        ->required()
+                        ->default(now()->toDateTimeString()),
+                ]),
+            Tables\Actions\DeleteAction::make()
+                ->recordTitle(__('filament::pages/callLog.title'))
+                ->visible(fn (CallLog $record) => $record->panel_user_id == auth()->id())
+                ->action(function (CallLog $record): void {
+                    $record->delete();
+                })
+        ];
+    }
+
     protected function getTableHeaderActions(): array
     {
         return [
             Tables\Actions\CreateAction::make()
                 ->label(fn (): string => __('filament-support::actions/create.single.label', ['label' => __('filament::pages/callLog.title')]))
+                ->modalHeading(fn (): string => __('filament-support::actions/create.single.modal.heading', ['label' => __('filament::pages/callLog.title')]))
                 ->action(function (array $data): void {
                     $data['panel_user_id'] = auth()->id();
                     $this->user->callLogs()->create($data);
@@ -72,9 +103,9 @@ class CallLogsTable extends UserDetailTable
         return 'call_logs_page';
     }
 
-    protected function getTableRecordsPerPage(): int
+    protected function getDefaultTableRecordsPerPageSelectOption(): int
     {
-        return 5;
+        return 10;
     }
 
     public function render(): View

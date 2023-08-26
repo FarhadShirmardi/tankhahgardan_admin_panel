@@ -85,8 +85,8 @@ class TransactionsTable extends Component implements Tables\Contracts\HasTable
         return DateMapping::query()
             ->whereRaw('jalali_date >= ?', [$this->getFormattedDateText($minDate)])
             ->whereRaw('jalali_date <= ?', [$this->getFormattedDateText($maxDate)])
-            ->join('user_status_logs', fn (JoinClause $join) => $join->whereColumn('user_status_logs.created_at', '>=', 'date_mappings.start_date')
-                ->whereColumn('user_status_logs.created_at', '<=', 'date_mappings.end_date')
+            ->join('user_status_logs', fn (JoinClause $join) => $join->whereRaw('date(user_status_logs.created_at) >= date_mappings.start_date')
+                ->whereRaw('date(user_status_logs.created_at) <= date_mappings.end_date')
             )
             ->where(fn (Builder $query) => $query->where('duration_id', '!=', PremiumDurationEnum::HALF_MONTH->value)->orWhere('price_id', '!=', PremiumDurationEnum::HALF_MONTH->value))
             ->select([

@@ -146,4 +146,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(CallLog::class);
     }
+
+    public function premiumBanks(): HasMany
+    {
+        return $this->hasMany(UserPremiumBank::class);
+    }
 }

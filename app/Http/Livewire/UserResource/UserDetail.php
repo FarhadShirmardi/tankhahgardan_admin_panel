@@ -2,6 +2,8 @@
 
 namespace App\Http\Livewire\UserResource;
 
+use App\Enums\BankEnum;
+use App\Enums\PremiumDurationEnum;
 use App\Enums\UserPremiumStateEnum;
 use App\Enums\UserStateEnum;
 use App\Models\User;
@@ -29,7 +31,7 @@ class UserDetail extends Component implements Forms\Contracts\HasForms
     {
         return [
             Forms\Components\Card::make()
-                ->columns(3)
+                ->columns(4)
                 ->inlineLabel()
                 ->schema([
                     Forms\Components\Placeholder::make('user_state')

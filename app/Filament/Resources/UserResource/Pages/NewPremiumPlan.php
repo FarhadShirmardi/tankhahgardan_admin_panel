@@ -273,7 +273,7 @@ class NewPremiumPlan extends Page implements Forms\Contracts\HasForms
                 'premium_plan_id' => $plan->id,
                 'start_date' => $data['start_date'],
                 'end_date' => $data['end_date'],
-                'type' => PurchaseTypeEnum::NEW,
+                'type' => $this->user->current_user_status != null ? PurchaseTypeEnum::EXTEND : PurchaseTypeEnum::NEW,
                 'total_amount' => $totalAmount,
                 'added_value_amount' => $this->getAddedValueAmount(),
                 'discount_amount' => $this->getDiscountAmount($totalAmount),

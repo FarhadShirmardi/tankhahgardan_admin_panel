@@ -50,8 +50,8 @@ class SalesTargetChart extends BarChartWidget
 
         $data = DateMapping::query()
             ->join('panel_sale_targets', 'panel_sale_targets.jalali_date', 'date_mappings.jalali_date')
-            ->join('user_status_logs', fn (JoinClause $join) => $join->whereColumn('user_status_logs.created_at', '>=', 'date_mappings.start_date')
-                ->whereColumn('user_status_logs.created_at', '<=', 'date_mappings.end_date')
+            ->join('user_status_logs', fn (JoinClause $join) => $join->whereRaw('date(user_status_logs.created_at) >= date_mappings.start_date')
+                ->whereRaw('date(user_status_logs.created_at) <= date_mappings.end_date')
             )
             ->groupByRaw('CONCAT_WS(year, month)')
             ->whereRaw('date_mappings.jalali_date >= ?', [$this->getFormattedDateText($minDate)])
